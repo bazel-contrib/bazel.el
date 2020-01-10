@@ -15,7 +15,18 @@
 SHELL := /bin/bash
 EMACS := emacs
 
-check: *.el
-	$(EMACS) --quick --batch --directory=. --load=./bazel-mode-test.el --funcall=ert-run-tests-batch-and-exit
+SRCS := $(wildcard *.el)
+TESTS := $(wildcard *-test.el)
 
-.PHONY: check
+all: $(SRCS:.el=.elc)
+
+check: bazel-mode-test.elc all
+	$(EMACS) --quick --batch --directory=. --load=$< --funcall=ert-run-tests-batch-and-exit
+
+clean:
+	rm -f *.elc
+
+%.elc: %.el
+	$(EMACS) --quick --batch --directory=. --funcall=batch-byte-compile $<
+
+.PHONY: all check clean
