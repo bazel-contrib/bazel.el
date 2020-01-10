@@ -20,13 +20,16 @@ TESTS := $(wildcard *-test.el)
 
 all: $(SRCS:.el=.elc)
 
-check: bazel-mode-test.elc all
-	$(EMACS) --quick --batch --directory=. --load=$< --funcall=ert-run-tests-batch-and-exit
+check: $(TESTS:.el=.stamp)
 
 clean:
-	rm -f *.elc
+	rm -f *.elc *.stamp
 
 %.elc: %.el
 	$(EMACS) --quick --batch --directory=. --funcall=batch-byte-compile $<
+
+%.stamp: %.elc $(SRCS:.el=.elc)
+	$(EMACS) --quick --batch --directory=. --load=$< --funcall=ert-run-tests-batch-and-exit
+	touch $@
 
 .PHONY: all check clean
