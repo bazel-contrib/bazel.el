@@ -2149,14 +2149,20 @@ DIRECTORY can be a directory or file name."
   (and (file-directory-p directory)
        (bazel--locate-build-file directory)))
 
+;; This definition isn’t very restrictive, but catches the common case of an
+;; accidentally-empty repository name.  That would refer to the main repository,
+;; which might be incorrect depending on context.
+(cl-deftype bazel--repository-name ()
+  '(and string (not (satisfies string-empty-p))))
+
 (defun bazel--external-repository (repository-name this-repository-root)
   "Return the repository root of an external repository.
 REPOSITORY-NAME should be either a string naming an external
 repository, or nil to refer to the current repository.
-THIS-REPOSITORY-ROOT should be the name or file name of the
-current repository root directory, as returned by
-‘bazel--repository-root’.  The return value is a directory name."
-  (cl-check-type repository-name (or null string))
+THIS-REPOSITORY-ROOT should be the name of the current repository
+root directory, as returned by ‘bazel--repository-root’.  The
+return value is a directory name."
+  (cl-check-type repository-name (or null bazel--repository-name))
   (cl-check-type this-repository-root string)
   (file-name-as-directory
    (if repository-name
@@ -2642,9 +2648,9 @@ for the lexical syntax of labels."
 (defun bazel--default-target (repository package)
   "Return the default target name for REPOSITORY and PACKAGE.
 For a package “foo/bar”, “bar” is the default target.  For a
-repository “foo”, “foo” in the root package is the default
-target."
-  (cl-check-type repository (or null string))
+repository “foo”, “foo” in the root package is the default target.
+REPOSITORY can be nil to refer to the current repository."
+  (cl-check-type repository (or null bazel--repository-name))
   (cl-check-type package string)
   (if (and (stringp repository) (string-empty-p package))
       repository
@@ -2656,10 +2662,10 @@ target."
 
 (defun bazel--canonical (repository package target)
   "Return a canonical label.
-REPOSITORY is either nil (referring to the current repository) or
-an external repository name.  PACKAGE and TARGET should both be
-strings.  Return either @REPOSITORY//PACKAGE:TARGET or
-//PACKAGE:TARGET."
+REPOSITORY is either nil (referring to the current repository), the
+empty string (referring to the main repository), or an external
+repository name.  PACKAGE and TARGET should both be strings.  Return
+either @REPOSITORY//PACKAGE:TARGET or //PACKAGE:TARGET."
   (declare (side-effect-free t))
   (cl-check-type repository (or null string))
   (cl-check-type package string)
