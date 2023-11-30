@@ -1840,11 +1840,6 @@ the containing workspace.  This function is suitable for
   "Return the primary root directory of the Bazel workspace PROJECT."
   (bazel-workspace-root project))
 
-(with-suppressed-warnings ((obsolete project-roots))
-  (cl-defmethod project-roots ((project bazel-workspace))
-    "Return the primary root directory of the Bazel workspace PROJECT."
-    (list (bazel-workspace-root project))))
-
 (cl-defmethod project-external-roots ((project bazel-workspace))
   "Return the external workspace roots of the Bazel workspace PROJECT."
   (bazel--external-workspace-roots (bazel-workspace-root project)))
