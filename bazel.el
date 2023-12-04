@@ -524,7 +524,11 @@ See Info node ‘(emacs) Minibuffer History’,
 and see Info node ‘(elisp) Minibuffer History’.")
 
 (define-skeleton bazel-insert-dependency
-  "Insert a “bazel_dep” statement at point."
+  "Insert a “bazel_dep” statement at point.
+See URL ‘https://bazel.build/rules/lib/globals/module#bazel_dep’ for a
+description of “bazel_dep”.  Interactively, prompt for a module name
+from the Bazel Central Registry; see URL
+‘https://bazel.build/external/registry#bazel-central-registry’."
   ;; We store the BCR table in ‘v1’.  Note that ‘skeleton-insert’ evaluates the
   ;; interactor only when it’s first required (i.e., upon first encountering
   ;; ‘str’, unless passed to the skeleton function as argument), so we can
