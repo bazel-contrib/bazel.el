@@ -439,6 +439,9 @@ This is the parent mode for the more specific modes
                        eos)
                    #'bazel-workspace-mode))
 
+(defvar-keymap bazel-module-mode-map
+  "C-c C-d" #'bazel-insert-dependency)
+
 ;;;###autoload
 (define-derived-mode bazel-module-mode bazel-mode "MODULE.bazel"
   "Major mode for editing Bazel module files."
