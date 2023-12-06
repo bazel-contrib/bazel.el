@@ -1868,9 +1868,7 @@ Return nil if no .bazelignore file exists."
           (patterns ()))
       ;; It’s not a critical error if the .bazelignore file doesn’t exist or we
       ;; can’t read it.
-      (when (condition-case nil
-                (insert-file-contents bazelignore-file)
-              (file-error nil))
+      (when (ignore-error file-error (insert-file-contents bazelignore-file))
         ;; Replicate behavior of
         ;; https://github.com/bazelbuild/bazel/blob/09c621e4cf5b968f4c6cdf905ab142d5961f9ddc/src/main/java/com/google/devtools/build/lib/skyframe/IgnoredPackagePrefixesFunction.java#L122-L127.
         (while (not (eobp))
@@ -2198,16 +2196,15 @@ root directory as returned by ‘bazel--repository-root’."
         (search-spaces-regexp nil))
     (mapcar
      (if (file-name-quoted-p main-root) #'file-name-quote #'identity)
-     (condition-case nil
-         (directory-files
-          (bazel--external-repository-dir main-root)
-          :full
-          ;; https://bazel.build/rules/lib/globals/workspace#parameters_3 states
-          ;; that workspace names may only contain letters, numbers,
-          ;; underscores, hyphens, and dots.
-          (rx bos (any "A-Z" "a-z") (* (any ?- ?. ?_ "A-Z" "a-z")) eos))
-       ;; If there’s no external repository directory, don’t signal an error.
-       (file-missing nil)))))
+     ;; If there’s no external repository directory, don’t signal an error.
+     (ignore-error file-missing
+       (directory-files
+        (bazel--external-repository-dir main-root)
+        :full
+        ;; https://bazel.build/rules/lib/globals/workspace#parameters_3 states
+        ;; that workspace names may only contain letters, numbers, underscores,
+        ;; hyphens, and dots.
+        (rx bos (any "A-Z" "a-z") (* (any ?- ?. ?_ "A-Z" "a-z")) eos))))))
 
 (defun bazel--target-completion-table (pattern only-tests)
   "Return a completion table for Bazel targets and target patterns.
@@ -2410,32 +2407,31 @@ function for ‘bazel--target-completion-table’."
       ;; The file name completion functions return directory names for
       ;; directories, so we turn them back into directory filenames, otherwise
       ;; the target syntax ‘@foo’ wouldn’t work.
-      (condition-case nil
-          (pcase action
-            ('nil
-             (when-let ((name (file-name-completion string root predicate)))
-               (let ((result (directory-file-name name)))
-                 ;; Fulfill the contract of ‘try-completion’.
-                 (if (string-equal result string) t result))))
-            ('t
-             (pcase (cl-loop for cand in (file-name-all-completions string root)
-                             if (funcall predicate cand)
-                             collect (directory-file-name cand))
-               (`(,(and candidate (pred (string-equal string))))
-                ;; A single exact match; offer root package as well.
-                (list candidate (concat candidate "//")))
-               (candidates candidates)))
-            ('lambda
-              ;; The target ‘@foo’ is a shorthand for ‘@foo//:foo’.  We don’t
-              ;; check for the existence of the ‘foo’ target here.
-              (and (not (string-empty-p string))
-                   (not (directory-name-p string))
-                   (file-accessible-directory-p
-                    (expand-file-name string root))
-                   (funcall predicate (file-name-as-directory string))))
-            (`(boundaries . ,suffix)
-             `(boundaries 0 . ,(string-match-p (rx (any ?/ ?:)) suffix))))
-        (file-error nil)))))
+      (ignore-error file-error
+        (pcase action
+          ('nil
+           (when-let ((name (file-name-completion string root predicate)))
+             (let ((result (directory-file-name name)))
+               ;; Fulfill the contract of ‘try-completion’.
+               (if (string-equal result string) t result))))
+          ('t
+           (pcase (cl-loop for cand in (file-name-all-completions string root)
+                           if (funcall predicate cand)
+                           collect (directory-file-name cand))
+             (`(,(and candidate (pred (string-equal string))))
+              ;; A single exact match; offer root package as well.
+              (list candidate (concat candidate "//")))
+             (candidates candidates)))
+          ('lambda
+            ;; The target ‘@foo’ is a shorthand for ‘@foo//:foo’.  We don’t
+            ;; check for the existence of the ‘foo’ target here.
+            (and (not (string-empty-p string))
+                 (not (directory-name-p string))
+                 (file-accessible-directory-p
+                  (expand-file-name string root))
+                 (funcall predicate (file-name-as-directory string))))
+          (`(boundaries . ,suffix)
+           `(boundaries 0 . ,(string-match-p (rx (any ?/ ?:)) suffix))))))))
 
 (defun bazel--target-package-completion-table (root repository package pattern)
   "Return a completion table for package patterns.
@@ -2486,30 +2482,29 @@ This is a helper function for
                  completion-regexp-list)))
       (bazel--make-conjunction predicate candidate
         (bazel--target-completion-directory-p candidate))
-      (condition-case nil
-          ;; ‘file-name-completion’ and ‘file-name-all-completions’ always
-          ;; return directories as directory names.  Since a directory name
-          ;; isn’t a valid package name, and we don’t want to give the user the
-          ;; impression that they can’t enter a colon, strip the trailing slash.
-          (pcase action
-            ('nil
-             (when-let ((res (file-name-completion string directory predicate)))
-               (bazel--remove-slash res)))
-            ('t
-             (cl-loop for cand in (file-name-all-completions string directory)
-                      when (funcall predicate cand)
-                      collect (bazel--remove-slash cand)))
-            ('lambda
-              ;; We complete target patterns, not packages!  In particular, a
-              ;; valid target pattern can’t end in a slash.
-              (and (not (string-empty-p string))
-                   (not (directory-name-p string))
-                   (file-accessible-directory-p
-                    (expand-file-name string directory))
-                   (funcall predicate directory)))
-            (`(boundaries . ,suffix)
-             `(boundaries 0 . ,(string-match-p (rx (any ?/ ?:)) suffix))))
-        (file-error nil)))))
+      (ignore-error file-error
+        ;; ‘file-name-completion’ and ‘file-name-all-completions’ always
+        ;; return directories as directory names.  Since a directory name
+        ;; isn’t a valid package name, and we don’t want to give the user the
+        ;; impression that they can’t enter a colon, strip the trailing slash.
+        (pcase action
+          ('nil
+           (when-let ((res (file-name-completion string directory predicate)))
+             (bazel--remove-slash res)))
+          ('t
+           (cl-loop for cand in (file-name-all-completions string directory)
+                    when (funcall predicate cand)
+                    collect (bazel--remove-slash cand)))
+          ('lambda
+            ;; We complete target patterns, not packages!  In particular, a
+            ;; valid target pattern can’t end in a slash.
+            (and (not (string-empty-p string))
+                 (not (directory-name-p string))
+                 (file-accessible-directory-p
+                  (expand-file-name string directory))
+                 (funcall predicate directory)))
+          (`(boundaries . ,suffix)
+           `(boundaries 0 . ,(string-match-p (rx (any ?/ ?:)) suffix))))))))
 
 (defun bazel--target-completion-table-2
     (root repository package pattern only-tests colon)
