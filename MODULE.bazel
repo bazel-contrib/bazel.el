@@ -1,4 +1,4 @@
-# Copyright 2026 Philipp Stephani
+# Copyright 2023, 2026 Philipp Stephani
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+module(name = "bazelbuild_emacs_bazel_mode")
 
 bazel_dep(name = "phst_rules_elisp")
 git_override(
