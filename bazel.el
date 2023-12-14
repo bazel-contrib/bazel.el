@@ -972,6 +972,7 @@ Bazel workspace.  Use ‘xref-show-definitions-function’ to display
 the rule definition.  Right now, perform a best-effort attempt
 for finding the consuming rule by a textual search in the BUILD
 file."
+  (declare (interactive-only t))
   (interactive)
   (let* ((source-file (or buffer-file-name
                           (user-error "Buffer doesn’t visit a file")))
@@ -1263,6 +1264,7 @@ restrict the returned rules to test targets."
 
 (defun bazel-find-build-file ()
   "Find the BUILD file for the current package."
+  (declare (interactive-only t))
   (interactive)
   (let* ((source-file
           (or buffer-file-name default-directory
@@ -1278,6 +1280,7 @@ restrict the returned rules to test targets."
 
 (defun bazel-find-workspace-file ()
   "Find the WORKSPACE file for the current Bazel workspace."
+  (declare (interactive-only t))
   (interactive)
   (let* ((source-file
           (or buffer-file-name default-directory
@@ -1936,6 +1939,7 @@ Return nil if no .bazelignore file exists."
 
 (defun bazel-test-at-point ()
   "Run the test case at point."
+  (declare (interactive-only t))
   (interactive)
   (let* ((source-file (or buffer-file-name
                           (user-error "Buffer doesn’t visit a file")))
