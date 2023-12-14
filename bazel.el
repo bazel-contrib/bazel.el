@@ -5,7 +5,7 @@
 ;; Package-Requires: ((emacs "28.1"))
 ;; Version: 0
 
-;; Copyright (C) 2018-2023 Google LLC
+;; Copyright (C) 2018-2023, 2026 Google LLC
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
 ;; You may obtain a copy of the License at
@@ -371,6 +371,8 @@ and ‘bazel-starlark-mode’."
               (rx (or (seq (* (syntax whitespace)) (regexp comment-start-skip)
                            (regexp bazel--magic-comment-regexp))
                       (regexp paragraph-start))))
+  (setq-local fill-paragraph-function #'python-fill-paragraph)
+  (setq-local normal-auto-fill-function #'python-do-auto-fill)
   (add-hook 'before-save-hook #'bazel--buildifier-before-save-hook nil :local)
   (add-hook 'flymake-diagnostic-functions #'bazel-mode-flymake nil :local)
   (add-hook 'xref-backend-functions #'bazel-mode-xref-backend nil :local)
