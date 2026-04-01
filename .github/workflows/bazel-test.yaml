@@ -13,7 +13,7 @@
 # limitations under the License.
 
 name: Run Bazel tests
-on: [push, pull_request]
+on: push
 
 permissions:
   contents: read
