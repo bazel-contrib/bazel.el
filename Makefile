@@ -23,10 +23,13 @@ BAZELFLAGS :=
 # All potentially supported Emacs versions.
 versions := 29 30
 
-# Test both default toolchain and versioned toolchains.
-all: check $(versions)
+all:
+	$(BAZEL) build $(BAZELFLAGS) -- //...
 
-check:
+# Test both default toolchain and versioned toolchains.
+check: check-default $(versions)
+
+check-default:
 	$(BAZEL) test --test_output=errors $(BAZELFLAGS) -- //...
 
 COVERAGE_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off
