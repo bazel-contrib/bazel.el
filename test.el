@@ -1458,6 +1458,7 @@ See Info node ‘(org) Extracting Source Code’."
   (bazel-test--with-file-buffer (expand-file-name (concat "testdata/" org-file)
                                                   bazel-test--directory)
     (let ((default-directory directory)
+          (buffer-file-name (expand-file-name org-file directory))
           (org-babel-tangle-body-hook
            (list (lambda ()
                    ;; Replace the %ROOTDIR% placeholder added by
