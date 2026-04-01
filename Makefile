@@ -1,4 +1,4 @@
-# Copyright 2021, 2022, 2023 Google LLC
+# Copyright 2021, 2022, 2023, 2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,15 +22,6 @@ BAZELFLAGS :=
 
 # All potentially supported Emacs versions.
 versions := 28.1 28.2
-
-kernel := $(shell uname -s)
-ifeq ($(kernel),Linux)
-  # GNU/Linux supports all Emacs versions.
-else ifeq ($(kernel),Darwin)
-  # macOS supports all Emacs versions.
-else
-  $(error Unsupported kernel $(kernel))
-endif
 
 # Test both default toolchain and versioned toolchains.
 all: check $(versions)
