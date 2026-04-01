@@ -19,4 +19,4 @@ git_override(
     remote = "https://github.com/phst/rules_elisp.git",
 )
 
-bazel_dep(name = "rules_license", version = "0.0.8")
+bazel_dep(name = "rules_license", version = "1.0.0")
