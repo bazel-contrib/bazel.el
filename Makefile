@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-SHELL := /bin/sh
-
-.DEFAULT: all
+.POSIX:
 .SUFFIXES:
 
-BAZEL := bazel
-BAZELFLAGS :=
+SHELL = /bin/sh
+
+BAZEL = bazel
+BAZELFLAGS =
 
 all:
 	$(BAZEL) build $(BAZELFLAGS) -- //...
@@ -39,5 +39,3 @@ coverage:
 	$(BAZEL) coverage --combined_report=lcov $(COVERAGE_BAZELFLAGS) -- //...
 	$(GENHTML) --output-directory=coverage-report $(GENHTMLFLAGS) \
 	  -- bazel-out/_coverage/_coverage_report.dat
-
-.PHONY: all check coverage
