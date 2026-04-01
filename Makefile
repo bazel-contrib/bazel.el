@@ -20,17 +20,14 @@ SHELL := /bin/sh
 BAZEL := bazel
 BAZELFLAGS :=
 
-# All potentially supported Emacs versions.
-versions := 29 30
-
 all:
 	$(BAZEL) build $(BAZELFLAGS) -- //...
 
 # Test both default toolchain and versioned toolchains.
-check: check-default $(versions)
-
-check-default:
+check:
 	$(BAZEL) test --test_output=errors $(BAZELFLAGS) -- //...
+	$(BAZEL) test --test_output=errors $(BAZELFLAGS) --extra_toolchains=@phst_rules_elisp//elisp:emacs_29_toolchain -- //...
+	$(BAZEL) test --test_output=errors $(BAZELFLAGS) --extra_toolchains=@phst_rules_elisp//elisp:emacs_30_toolchain -- //...
 
 COVERAGE_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off
 GENHTML = genhtml
@@ -43,7 +40,4 @@ coverage:
 	$(GENHTML) --output-directory=coverage-report $(GENHTMLFLAGS) \
 	  -- bazel-out/_coverage/_coverage_report.dat
 
-$(versions):
-	$(MAKE) check BAZELFLAGS='$(BAZELFLAGS) --extra_toolchains=@phst_rules_elisp//elisp:emacs_$@_toolchain'
-
-.PHONY: all check coverage $(versions)
+.PHONY: all check coverage
