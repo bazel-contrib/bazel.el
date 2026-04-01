@@ -1,6 +1,6 @@
 ;;; test.el --- unit tests for bazel.el  -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021, 2022, 2023 Google LLC
+;; Copyright 2020, 2021, 2022, 2023, 2026 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -1136,7 +1136,7 @@ Process buildifier exited abnormally with code 1
            (default-directory dir))
       (skip-unless tar)
       (skip-unless sha256sum)
-      (process-lines tar "-c" "-z" "-f" archive "--" "prefix")
+      (ignore (process-lines tar "-c" "-z" "-f" archive "--" "prefix"))
       (let ((actual
              (with-temp-buffer
                (bazel-workspace-mode)
@@ -1178,7 +1178,7 @@ Process buildifier exited abnormally with code 1
            (default-directory dir))
       (skip-unless tar)
       ;; https://superuser.com/a/448624
-      (process-lines tar "-c" "-z" "-f" archive "-T" "/dev/null")
+      (ignore (process-lines tar "-c" "-z" "-f" archive "-T" "/dev/null"))
       (with-temp-buffer
         (let ((tick-before (buffer-modified-tick)))
           (bazel-workspace-mode)
@@ -1200,7 +1200,8 @@ Process buildifier exited abnormally with code 1
               (car collection)))
            (default-directory dir))
       (skip-unless tar)
-      (process-lines tar "-c" "-z" "-f" archive "--" "prefix-1" "prefix-2")
+      (ignore (process-lines tar "-c" "-z" "-f" archive
+                             "--" "prefix-1" "prefix-2"))
       (with-temp-buffer
         (bazel-workspace-mode)
         (bazel-insert-http-archive url)
@@ -1222,7 +1223,7 @@ Process buildifier exited abnormally with code 1
            (tar (executable-find "tar"))
            (default-directory dir))
       (skip-unless tar)
-      (process-lines tar "-c" "-z" "-f" archive "--" "WORKSPACE")
+      (ignore (process-lines tar "-c" "-z" "-f" archive "--" "WORKSPACE"))
       (with-temp-buffer
         (bazel-workspace-mode)
         (bazel-insert-http-archive url)
