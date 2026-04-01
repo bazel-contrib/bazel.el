@@ -21,7 +21,7 @@ BAZEL := bazel
 BAZELFLAGS :=
 
 # All potentially supported Emacs versions.
-versions := 28.1 28.2
+versions := 29 30
 
 # Test both default toolchain and versioned toolchains.
 all: check $(versions)
