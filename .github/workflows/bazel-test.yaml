@@ -38,6 +38,7 @@ jobs:
             build --show_result=0
             build --nostamp
             build --experimental_repository_cache_hardlinks
+            build --toolchain_resolution_debug=//:bazel
             test --test_output=errors
           disk-cache: true
           repository-cache: true
