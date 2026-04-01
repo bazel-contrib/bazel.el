@@ -29,17 +29,18 @@ all: check $(versions)
 check:
 	$(BAZEL) test --test_output=errors $(BAZELFLAGS) -- //...
 
-coverage: coverage.log
-	sed -r -n -e 's|^  (/.+/coverage\.dat)$$|\1|p' -- '$<' \
-	  | tr '\n' '\0' \
-	  | xargs -0 -r -t -- \
-	  genhtml --output-directory=coverage-report --branch-coverage --
-	echo "Coverage report written to $${PWD}/coverage-report" >&2
+COVERAGE_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off
+GENHTML = genhtml
+GENHTMLFLAGS = --branch-coverage \
+  --demangle-cpp='$(CPPFILT)' --demangle-cpp='--no-strip-underscore'
+CPPFILT = c++filt
 
-coverage.log:
-	$(BAZEL) coverage $(BAZELFLAGS) -- //... > '$@'
+coverage:
+	$(BAZEL) coverage --combined_report=lcov $(COVERAGE_BAZELFLAGS) -- //...
+	$(GENHTML) --output-directory=coverage-report $(GENHTMLFLAGS) \
+	  -- bazel-out/_coverage/_coverage_report.dat
 
 $(versions):
 	$(MAKE) check BAZELFLAGS='$(BAZELFLAGS) --extra_toolchains=@phst_rules_elisp//elisp:emacs_$@_toolchain'
 
-.PHONY: all check coverage coverage.log $(versions)
+.PHONY: all check coverage $(versions)
