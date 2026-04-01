@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Temporarily disable Bzlmod until it works.
-common --enable_workspace --noenable_bzlmod
+common --enable_workspace --enable_bzlmod
 
 # Temporarily disable a warning that breaks the build on macOS.
 build --copt=-Wno-deprecated-builtins --host_copt=-Wno-deprecated-builtins
