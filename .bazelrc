@@ -12,6 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Temporarily disable Bzlmod until it works.
+common --enable_workspace --noenable_bzlmod
+
+# Temporarily disable a warning that breaks the build on macOS.
+build --copt=-Wno-deprecated-builtins --host_copt=-Wno-deprecated-builtins
+
 # See
 # https://github.com/abseil/abseil-cpp/blob/master/FAQ.md#how-to-i-set-the-c-dialect-used-to-build-abseil
 # why we need to specify the -std option in .bazelrc.
