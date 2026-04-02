@@ -285,14 +285,13 @@ gets killed early."
             (search-spaces-regexp nil))
         (search-forward "\"" (line-end-position))
         (should (equal (ffap-file-at-point)
-                       (file-name-unquote (expand-file-name "root/aaa.h" dir))))
+                       (expand-file-name "root/aaa.h" dir)))
         (forward-line)
         (search-forward "\"" (line-end-position))
         (forward-comment (point-max))
         (should (equal (ffap-file-at-point)
-                       (file-name-unquote
-                        (expand-file-name "root/bazel-root/external/ws/bbb.h"
-                                          dir))))))))
+                       (expand-file-name "root/bazel-root/external/ws/bbb.h"
+                                         dir)))))))
 
 (ert-deftest bazel-build-mode/fill ()
   "Check that magic comments are left alone."
