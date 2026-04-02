@@ -1487,7 +1487,7 @@ Process buildifier exited abnormally with code 1
           (auto-mode-case-fold nil)
           (buffer-file-name (expand-file-name "MODULE.bazel.lock")))
       (set-auto-mode)
-      (should (derived-mode-p #'js-mode)))))
+      (should (derived-mode-p #'js-mode #'js-json-mode)))))
 
 ;;;; Test helpers
 
