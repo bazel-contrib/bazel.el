@@ -257,7 +257,9 @@ gets killed early."
                (jumps 0)
                (xref-after-jump-hook (list (lambda () (cl-incf jumps)))))
           (bazel-test--with-file-buffer (expand-file-name "root/aaa.cc" dir)
-            (bazel-show-consuming-rule))
+            (with-suppressed-warnings
+                ((interactive-only bazel-show-consuming-rule))
+              (bazel-show-consuming-rule)))
           (should (eql jumps 1))
           (should (eq (current-buffer) build-buffer))
           (should (looking-at-p (rx "lib"))))))
@@ -949,9 +951,10 @@ gets killed early."
                  ((symbol-function #'compile)
                   (lambda (command &optional _comint)
                     (push command commands))))
-        (should-error (bazel-test-at-point) :type 'user-error)
-        (re-search-forward (rx bol "(ert-deftest foo/test ()"))
-        (bazel-test-at-point)
+        (with-suppressed-warnings ((interactive-only bazel-test-at-point))
+          (should-error (bazel-test-at-point) :type 'user-error)
+          (re-search-forward (rx bol "(ert-deftest foo/test ()"))
+          (bazel-test-at-point))
         (should
          (equal commands
                 '("bazel test --test_filter\\=foo/test -- //\\:foo_test")))))))
@@ -966,11 +969,12 @@ gets killed early."
                  ((symbol-function #'compile)
                   (lambda (command &optional _comint)
                     (push command commands))))
-        (should-error (bazel-test-at-point) :type 'user-error)
-        (search-forward "# Test case class")
-        (bazel-test-at-point)
-        (search-forward "# Test method")
-        (bazel-test-at-point)
+        (with-suppressed-warnings ((interactive-only bazel-test-at-point))
+          (should-error (bazel-test-at-point) :type 'user-error)
+          (search-forward "# Test case class")
+          (bazel-test-at-point)
+          (search-forward "# Test method")
+          (bazel-test-at-point))
         (should
          (equal (reverse commands)
                 '("bazel test --test_filter\\=MyTest -- //\\:py_test"
@@ -986,11 +990,12 @@ gets killed early."
                  ((symbol-function #'compile)
                   (lambda (command &optional _comint)
                     (push command commands))))
-        (should-error (bazel-test-at-point) :type 'user-error)
-        (search-forward "EXPECT_EQ(1, 2)")
-        (bazel-test-at-point)
-        (search-forward "EXPECT_EQ(4, 5)")
-        (bazel-test-at-point)
+        (with-suppressed-warnings ((interactive-only bazel-test-at-point))
+          (should-error (bazel-test-at-point) :type 'user-error)
+          (search-forward "EXPECT_EQ(1, 2)")
+          (bazel-test-at-point)
+          (search-forward "EXPECT_EQ(4, 5)")
+          (bazel-test-at-point))
         (should
          (equal (reverse commands)
                 '("bazel test --test_filter\\=FooTest.Bar -- //\\:cc_test"
@@ -1016,11 +1021,12 @@ gets killed early."
                           (re-search-backward (rx bol "func" blank)
                                               nil t arg))))
           (run-hooks 'go-mode-hook))
-        (should-error (bazel-test-at-point) :type 'user-error)
-        (search-forward "t.Error(")
-        (bazel-test-at-point)
-        (search-forward "b.Error(")
-        (bazel-test-at-point)
+        (with-suppressed-warnings ((interactive-only bazel-test-at-point))
+          (should-error (bazel-test-at-point) :type 'user-error)
+          (search-forward "t.Error(")
+          (bazel-test-at-point)
+          (search-forward "b.Error(")
+          (bazel-test-at-point))
         (should
          (equal (reverse commands)
                 '("bazel test --test_filter\\=\\^\\\\QTest\\\\E\\$ -- //\\:go_test"
@@ -1328,15 +1334,17 @@ Process buildifier exited abnormally with code 1
           (let ((buffer-file-name
                  (expand-file-name "test.cc" (expand-file-name parent dir))))
             (bazel-test--with-buffers
-              (cl-etypecase expected
-                (string
-                 (bazel-find-build-file)
-                 (should buffer-file-name)
-                 (should (file-equal-p buffer-file-name
-                                       (expand-file-name expected dir))))
-                (symbol
-                 (should-error (bazel-find-build-file)
-                               :type expected))))))))))
+              (with-suppressed-warnings
+                  ((interactive-only bazel-find-build-file))
+                (cl-etypecase expected
+                  (string
+                   (bazel-find-build-file)
+                   (should buffer-file-name)
+                   (should (file-equal-p buffer-file-name
+                                         (expand-file-name expected dir))))
+                  (symbol
+                   (should-error (bazel-find-build-file)
+                                 :type expected)))))))))))
 
 (ert-deftest bazel-find-workspace-file ()
   (bazel-test--with-temp-directory dir nil
@@ -1366,7 +1374,9 @@ Process buildifier exited abnormally with code 1
           (let ((buffer-file-name
                  (expand-file-name "test.cc" (expand-file-name parent dir))))
             (bazel-test--with-buffers
-              (bazel-find-workspace-file)
+              (with-suppressed-warnings
+                  ((interactive-only bazel-find-workspace-file))
+                (bazel-find-workspace-file))
               (should buffer-file-name)
               (should (file-equal-p buffer-file-name
                                     (expand-file-name expected dir))))))))))
