@@ -1486,24 +1486,27 @@ filename within DIRECTORY.
 See Info node ‘(org) Extracting Source Code’."
   (cl-check-type directory string)
   (cl-check-type org-file string)
-  ;; Tangling requires a file-visiting Org buffer.
-  (bazel-test--with-file-buffer (expand-file-name (concat "testdata/" org-file)
-                                                  bazel-test--directory)
-    (let ((default-directory directory)
-          (buffer-file-name (expand-file-name org-file directory))
-          (org-babel-tangle-body-hook
-           (list (lambda ()
-                   ;; Replace the %ROOTDIR% placeholder added by
-                   ;; testdata/make_*_out by our temporary root.
-                   (save-excursion
-                     (let ((case-fold-search nil)
-                           (search-spaces-regexp nil))
-                       (goto-char (point-min))
-                       (while (search-forward "%ROOTDIR%" nil t)
-                         (replace-match
-                          (file-name-unquote (directory-file-name directory))
-                          :fixedcase :literal))))))))
-      (org-babel-tangle))))
+  ;; Tangling requires a file-visiting Org buffer in the destination directory.
+  (let ((temp-file (expand-file-name "tangle.tmp.org" directory))
+        (org-babel-tangle-body-hook
+         (list (lambda ()
+                 ;; Replace the %ROOTDIR% placeholder added by
+                 ;; testdata/make_*_out by our temporary root.
+                 (save-excursion
+                   (let ((case-fold-search nil)
+                         (search-spaces-regexp nil))
+                     (goto-char (point-min))
+                     (while (search-forward "%ROOTDIR%" nil t)
+                       (replace-match
+                        (file-name-unquote (directory-file-name directory))
+                        :fixedcase :literal))))))))
+    (copy-file
+     (expand-file-name (concat "testdata/" org-file) bazel-test--directory)
+     temp-file)
+    ;; ‘file-name-unquote’ is required due to https://bugs.gnu.org/80718.
+    (bazel-test--with-file-buffer (file-name-unquote temp-file)
+      (org-babel-tangle))
+    (delete-file temp-file)))
 
 (defun bazel-test--buildifier-running-p ()
   "Return whether we have a running Buildifier process.
