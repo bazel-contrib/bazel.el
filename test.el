@@ -486,7 +486,8 @@ gets killed early."
                   (bazel-display-coverage 'local))
               (insert-file-contents (expand-file-name "bazel.out" dir))
               ;; Simulate successful exit of the Bazel process.
-              (compilation-handle-exit 'exit 0 "finished\n")))
+              (run-hook-with-args 'compilation-finish-functions
+                                  (current-buffer) "finished\n")))
           (ert-info ("Comment line")
             ;; Package declaration isn’t covered at all.
             (should (looking-at-p (rx bol "package ")))
@@ -1450,7 +1451,9 @@ Process buildifier exited abnormally with code 1
         (insert-file-contents (expand-file-name "bazel.out" workspace))
         (let ((bazel-fix-visibility t)
               (default-directory (expand-file-name "lib/" workspace)))
-          (compilation-handle-exit 'exit 1 "exited abnormally with code 1\n")))
+          (run-hook-with-args 'compilation-finish-functions
+                              (current-buffer)
+                              "exited abnormally with code 1\n")))
       (should
        (equal commands
               '(("buildozer" "--" "add visibility //:__pkg__" "//lib:lib")))))))
