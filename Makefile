@@ -19,6 +19,9 @@ SHELL = /bin/sh
 
 BAZEL = bazel
 BAZELFLAGS =
+INSTALL = install
+INSTALL_PROGRAM = $(INSTALL)
+INSTALL_DATA = $(INSTALL) -m 644
 
 all:
 	$(BAZEL) build $(BAZELFLAGS) -- //...
@@ -43,3 +46,21 @@ coverage:
 	$(BAZEL) coverage --combined_report=lcov $(COVERAGE_BAZELFLAGS) -- //...
 	$(GENHTML) --output-directory=coverage-report $(GENHTMLFLAGS) \
 	  -- bazel-out/_coverage/_coverage_report.dat
+
+info:
+	$(BAZEL) build $(BAZELFLAGS) -- //:bazel.el.info
+
+prefix = /usr/local
+datarootdir = $(prefix)/share
+lispdir = $(datarootdir)/emacs/site-lisp
+infodir = $(datarootdir)/info
+
+install: all info
+	$(INSTALL) -d -- '$(DESTDIR)$(lispdir)' '$(DESTDIR)$(infodir)'
+	$(INSTALL_DATA) -- bazel.el '$(DESTDIR)$(lispdir)/bazel.el'
+	$(INSTALL_DATA) -- bazel-bin/bazel.elc '$(DESTDIR)$(lispdir)/bazel.elc'
+	$(INSTALL_DATA) -- bazel-bin/bazel.el.info \
+	  '$(DESTDIR)$(infodir)/bazel.el.info'
+	$(POST_INSTALL)
+	install-info -- '$(DESTDIR)$(infodir)/bazel.el.info' \
+	  '$(DESTDIR)$(infodir)/dir'
