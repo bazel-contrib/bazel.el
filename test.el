@@ -1448,14 +1448,13 @@ Process buildifier exited abnormally with code 1
 (ert-deftest bazel/set-auto-mode ()
   "Test that ‘set-auto-mode’ finds the expected modes."
   (with-temp-buffer
-    ;; We don’t test for MODULE.bazel.lock because that can use either
-    ;; ‘js-json-mode’ or ‘js-mode’.
     (pcase-dolist (`(,file ,mode)
                    '(("BUILD" bazel-build-mode)
                      ("BUILD.bazel" bazel-build-mode)
                      ("WORKSPACE" bazel-workspace-mode)
                      ("WORKSPACE.bazel" bazel-workspace-mode)
                      ("MODULE.bazel" bazel-module-mode)
+                     ("MODULE.bazel.lock" js-json-mode)
                      ("REPO.bazel" bazel-repo-mode)
                      ("def.bzl" bazel-starlark-mode)
                      (".bazelrc" bazelrc-mode)
@@ -1466,15 +1465,6 @@ Process buildifier exited abnormally with code 1
               (buffer-file-name (expand-file-name file)))
           (set-auto-mode)
           (should (eq major-mode mode)))))))
-
-(ert-deftest bazel/set-auto-mode/module-lock ()
-  "Test that ‘set-auto-mode’ finds the expected mode for MODULE.bazel.lock."
-  (with-temp-buffer
-    (let ((enable-local-variables nil)
-          (auto-mode-case-fold nil)
-          (buffer-file-name (expand-file-name "MODULE.bazel.lock")))
-      (set-auto-mode)
-      (should (derived-mode-p #'js-mode #'js-json-mode)))))
 
 ;;;; Test helpers
 
