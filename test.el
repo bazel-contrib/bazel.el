@@ -83,17 +83,16 @@ that buffer once BODY finishes."
           (buffer (make-symbol "buffer")))
       (macroexp-let2 nil filename filename
         `(ert-info (,filename :prefix "Visited test file: ")
-           (let ((,previous-buffers (buffer-list)))
-             (access-file ,filename "Visiting test file")
-             (save-current-buffer
-               (find-file-existing ,filename)
-               (let ((,buffer (current-buffer)))
-                 (unwind-protect
-                     ,(macroexp-progn body)
-                   ;; Kill the buffer only if ‘find-file-existing’ has generated
-                   ;; a new one.
-                   (unless (memq ,buffer ,previous-buffers)
-                     (kill-buffer ,buffer))))))))))
+           (access-file ,filename "Visiting test file")
+           (let ((,previous-buffers (buffer-list))
+                 (,buffer (find-file-noselect ,filename)))
+             (unwind-protect
+                 (with-current-buffer ,buffer
+                   ,@body)
+               ;; Kill the buffer only if ‘find-file-noselect’ has generated
+               ;; a new one.
+               (unless (memq ,buffer ,previous-buffers)
+                 (kill-buffer ,buffer))))))))
 
   (defmacro bazel-test--with-buffers (&rest body)
     "Evaluate BODY and kill all buffers that it created."
