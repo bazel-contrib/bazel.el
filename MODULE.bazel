@@ -15,7 +15,7 @@
 bazel_dep(name = "phst_rules_elisp")
 git_override(
     module_name = "phst_rules_elisp",
-    commit = "e70d001265393538b14c3f8376f041171c36010a",
+    commit = "253001047a878961ace441b924fa3730288db820",
     remote = "https://github.com/phst/rules_elisp.git",
 )
 
