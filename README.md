@@ -11,6 +11,9 @@ commands to [run Bazel commands][] and integration with core GNU Emacs
 infrastructure like [compilation][] and [xref][].  See the [manual][] for
 details.
 
+This repository is minimally maintained on a best-effort basis by volunteers in
+their spare time.
+
 [Bazel]: https://bazel.build/
 [GNU Emacs]: https://www.gnu.org/software/emacs/
 [BUILD files]: https://bazel.build/concepts/build-files
