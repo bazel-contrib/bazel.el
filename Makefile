@@ -47,8 +47,11 @@ coverage:
 	$(GENHTML) --output-directory=coverage-report $(GENHTMLFLAGS) \
 	  -- bazel-out/_coverage/_coverage_report.dat
 
+MAKEINFO = makeinfo
+
 info:
-	$(BAZEL) build $(BAZELFLAGS) -- //:bazel.el.info
+	$(BAZEL) build --action_env='MAKEINFO=$(MAKEINFO)' $(BAZELFLAGS) \
+	  -- //:bazel.el.info
 
 prefix = /usr/local
 datarootdir = $(prefix)/share

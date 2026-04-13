@@ -60,6 +60,6 @@ genrule(
     name = "info",
     srcs = ["manual.texi"],
     outs = ["bazel.el.info"],
-    cmd = "makeinfo --no-split --output=$@ -- $<",
+    cmd = "$${MAKEINFO:-makeinfo} --no-split --output=$@ -- $<",
     tags = ["manual"],
 )
