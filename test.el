@@ -186,6 +186,7 @@ gets killed early."
         (bazel-test--with-file-buffer (expand-file-name "buildifier.bzl" dir)
           (let ((flymake-diagnostic-functions '(bazel-mode-flymake)))
             (flymake-mode)
+            (flymake-start)
             (should (flymake-is-running))
             (should (equal (flymake-running-backends) '(bazel-mode-flymake))))
           ;; Wait for a Buildifier process to start before killing the buffer.
