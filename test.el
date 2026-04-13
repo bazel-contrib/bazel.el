@@ -140,6 +140,7 @@ MESSAGE is a message for ‘ert-info’."
         ;; Make the fake Buildifier report immediately.
         (write-region "" nil (expand-file-name "signal" dir) nil nil nil 'excl)
         (flymake-mode)
+        (flymake-start)
         (should (flymake-is-running))
         (should (equal (flymake-running-backends) '(bazel-mode-flymake)))
         ;; Wait for the backend to start reporting.
