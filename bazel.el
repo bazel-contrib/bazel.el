@@ -1274,7 +1274,7 @@ restrict the returned rules to test targets."
               (user-error "Buffer doesn’t visit a file or directory")))
          (root (or (bazel--repository-root source-file)
                    (user-error "File is not in a Bazel workspace")))
-         (module-file (or (locate-file "MODULE.bazel" (list root))
+         (module-file (or (bazel--locate-file "MODULE.bazel" (list root))
                           (user-error "No MODULE.bazel file found"))))
     (find-file module-file))
   nil)
@@ -1291,7 +1291,7 @@ This gets added to ‘ffap-alist’."
   (when-let* ((this-file (or buffer-file-name default-directory))
               (main-root (bazel--repository-root this-file)))
     (let ((external-roots (bazel--external-repository-roots main-root)))
-      (locate-file filename (cons main-root external-roots)))))
+      (bazel--locate-file filename (cons main-root external-roots)))))
 
 ;;;; ‘find-file-at-point’ support for ‘bazelrc-mode’
 
@@ -2090,8 +2090,8 @@ DIRECTORY can be a directory or file name."
   (cl-check-type directory string)
   (and (file-directory-p directory)
        (or (bazel--locate-workspace-file directory)
-           (locate-file "MODULE.bazel" (list directory))
-           (locate-file "REPO.bazel" (list directory)))))
+           (bazel--locate-file "MODULE.bazel" (list directory))
+           (bazel--locate-file "REPO.bazel" (list directory)))))
 
 (defvar bazel--repository-relative-name (make-hash-table :test #'equal)
   "Cache for the function ‘bazel--repository-relative-name’.
@@ -2198,17 +2198,20 @@ root directory as returned by ‘bazel--repository-root’."
   (cl-check-type main-root string)
   (let ((case-fold-search nil)
         (search-spaces-regexp nil))
-    (condition-case nil
-        (directory-files
-         (bazel--external-repository-dir main-root)
-         :full
-         ;; https://bazel.build/rules/lib/globals#parameters_51 claims that
-         ;; repository names may only contain letters, numbers, and underscores,
-         ;; but that’s wrong, since hyphens and dots are also allowed.  See
-         ;; https://github.com/bazelbuild/bazel/blob/bc9fc6144818528898336c0fbe4fe8b30ac25abb/src/main/java/com/google/devtools/build/lib/packages/WorkspaceGlobals.java#L52.
-         (rx bos (any "A-Z" "a-z") (* (any ?- ?. ?_ "A-Z" "a-z")) eos))
-      ;; If there’s no external repository directory, don’t signal an error.
-      (file-missing nil))))
+    (mapcar
+     (if (file-name-quoted-p main-root) #'file-name-quote #'identity)
+     (condition-case nil
+         (directory-files
+          (bazel--external-repository-dir main-root)
+          :full
+          ;; https://bazel.build/rules/lib/globals#parameters_51 claims that
+          ;; repository names may only contain letters, numbers, and
+          ;; underscores, but that’s wrong, since hyphens and dots are also
+          ;; allowed.  See
+          ;; https://github.com/bazelbuild/bazel/blob/bc9fc6144818528898336c0fbe4fe8b30ac25abb/src/main/java/com/google/devtools/build/lib/packages/WorkspaceGlobals.java#L52.
+          (rx bos (any "A-Z" "a-z") (* (any ?- ?. ?_ "A-Z" "a-z")) eos))
+       ;; If there’s no external repository directory, don’t signal an error.
+       (file-missing nil)))))
 
 (defun bazel--target-completion-table (pattern only-tests)
   "Return a completion table for Bazel targets and target patterns.
@@ -2577,7 +2580,7 @@ Assume that STRING comes from ‘file-name-completion’ or
 Return nil if DIRECTORY doesn’t contain a WORKSPACE file.
 DIRECTORY can be a directory name or directory file name."
   (cl-check-type directory string)
-  (locate-file "WORKSPACE" (list directory) '(".bazel" "")))
+  (bazel--locate-file "WORKSPACE" (list directory) '(".bazel" "")))
 
 (defun bazel--locate-build-file (directory)
   "Return the file name of the Bazel BUILD file in DIRECTORY.
@@ -2586,7 +2589,7 @@ contain a BUILD file).  Assume that DIRECTORY is within a Bazel
 repository.  DIRECTORY can be a directory name or directory file
 name."
   (cl-check-type directory string)
-  (locate-file "BUILD" (list directory) '(".bazel" "")))
+  (bazel--locate-file "BUILD" (list directory) '(".bazel" "")))
 
 (defun bazel--parse-label (label)
   "Parse Bazel label LABEL.
@@ -2761,6 +2764,19 @@ The returned completion table completes strings of the form
                                                  suffix)))
          (_ (complete-with-action action table string predicate))))
      prefix "")))
+
+(defun bazel--locate-file (filename path &optional suffixes)
+  "Variant of ‘locate-file’ that returns quoted filenames.
+See Info node ‘(elisp) Locating Files’ for a description of the
+FILENAME, PATH, and SUFFIXES arguments.  Plain ‘locate-file’ doesn’t
+return quoted filenames, see URL ‘https://bugs.gnu.org/80820’, but this
+function does if the first directory in PATH is quoted."
+  (declare (ftype (function (string cons &optional list) (or null string))))
+  (cl-check-type filename string)
+  (cl-check-type path cons)
+  (cl-check-type suffixes list)
+  (when-let ((result (locate-file filename path suffixes)))
+    (if (file-name-quoted-p (car path)) (file-name-quote result) result)))
 
 (defalias 'bazel--json-parse-buffer
   (if (and (fboundp 'json-parse-buffer) (json-available-p))
