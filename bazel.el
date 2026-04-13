@@ -180,7 +180,7 @@ If nil, don’t pass a -type flag to Buildifier.")
 Assume that VAL returns the name of a temporary file.  After BODY
 finishes, delete the temporary file."
     (declare (debug (symbolp form body)) (indent 2))
-    (let ((file (make-symbol "file")))
+    (cl-with-gensyms (file)
       `(let ((,file ,val))
          (unwind-protect
              (let ((,var ,file))
@@ -984,10 +984,8 @@ insert the contents of FILENAME there, and bind EXISTING to nil.
 In any case, return the value of the last BODY form."
     (declare (debug (symbolp form body)) (indent 2))
     (cl-check-type existing symbol)
-    (macroexp-let2 nil filename filename
-      (let ((function (make-symbol "function"))
-            (buffer (make-symbol "buffer"))
-            (arg (make-symbol "arg")))
+    (cl-once-only (filename)
+      (cl-with-gensyms (function buffer arg)
         ;; Bind a temporary function to reduce code duplication in the
         ;; byte-compiled version.
         `(cl-flet ((,function (,arg) (let ((,existing ,arg)) ,@body)))
@@ -2379,7 +2377,7 @@ nil, which is interpreted as an always-true predicate."
     (declare (indent 2) (debug (symbolp symbolp def-body)))
     (cl-check-type predicate symbol)
     (cl-check-type arg symbol)
-    (let ((original (make-symbol "original")))
+    (cl-with-gensyms (original)
       `(let ((,original ,predicate))
          (cl-check-type ,predicate (or function null))
          (setq ,predicate (if ,original

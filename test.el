@@ -64,8 +64,7 @@ ORG-FILE is non-nil, tangle code blocks in ORG-FILE into the
 directory first using ‘bazel-test--tangle’."
     (declare (indent 2) (debug (symbolp form body)))
     (cl-check-type name symbol)
-    (let ((directory (make-symbol "directory"))
-          (file (make-symbol "file")))
+    (cl-with-gensyms (directory file)
       `(let ((,directory (make-temp-file "bazel-mode-test-" :dir-flag)))
          (ert-info (,directory :prefix "Temporary directory: ")
            (prog2 (when-let ((,file ,org-file))
@@ -79,9 +78,8 @@ directory first using ‘bazel-test--tangle’."
 Execute BODY with the buffer that visits FILENAME current.  Kill
 that buffer once BODY finishes."
     (declare (indent 1) (debug t))
-    (let ((previous-buffers (make-symbol "previous-buffers"))
-          (buffer (make-symbol "buffer")))
-      (macroexp-let2 nil filename filename
+    (cl-with-gensyms (previous-buffers buffer)
+      (cl-once-only (filename)
         `(ert-info (,filename :prefix "Visited test file: ")
            (access-file ,filename "Visiting test file")
            (let ((,previous-buffers (buffer-list))
@@ -97,7 +95,7 @@ that buffer once BODY finishes."
   (defmacro bazel-test--with-buffers (&rest body)
     "Evaluate BODY and kill all buffers that it created."
     (declare (indent 0) (debug t))
-    (let ((buffers (make-symbol "buffers")))
+    (cl-with-gensyms (buffers)
       `(let ((,buffers (buffer-list)))
          (unwind-protect
              ,(macroexp-progn body)
