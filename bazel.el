@@ -484,8 +484,8 @@ an archive URL.  Attempt to detect repository name and prefix.
 Also add the date when the archive was likely last modified as a
 comment."
   "Archive download URL: "
-  '(eval str t)  ; force prompt now
-  '(setq v1 (bazel--download-http-archive str))  ; (name hash prefix time)
+  '(eval str t)                                 ; force prompt now
+  '(setq v1 (bazel--download-http-archive str)) ; (name hash prefix time)
   "http_archive(" \n
   "name = \"" (or (nth 0 v1) '_) "\"," \n
   "integrity = \"" (nth 1 v1) "\"," \n
