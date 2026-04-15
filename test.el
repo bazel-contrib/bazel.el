@@ -23,6 +23,7 @@
 (require 'bazel)
 
 (require 'add-log)
+(require 'browse-url)
 (require 'cl-lib)
 (require 'compile)
 (require 'eieio)
