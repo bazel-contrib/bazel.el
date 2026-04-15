@@ -498,6 +498,8 @@ comment."
   ?\) >)
 
 (function-put #'bazel-insert-http-archive 'interactive-only t)
+(function-put #'bazel-insert-http-archive 'command-modes
+              '(bazel-workspace-mode bazel-starlark-mode))
 
 (defun bazel--download-http-archive (url)
   "Download and interpret HTTP archive at URL.
