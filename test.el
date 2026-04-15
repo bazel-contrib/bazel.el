@@ -43,6 +43,7 @@
 (require 'subr-x)
 (require 'syntax)
 (require 'url)
+(require 'vc-git)
 (require 'warnings)
 (require 'which-func)
 (require 'xref)
@@ -1078,6 +1079,38 @@ Process buildifier exited abnormally with code 1
             (should (equal (buffer-string) expected)))
           (should (eq bazel-buildifier-before-save
                       (file-exists-p marker-file))))))))
+
+(ert-deftest bazel-insert-dependency ()
+  (skip-unless (executable-find vc-git-program))
+  (bazel-test--with-workspace dir "insert-dependency.org"
+    (let* ((bcr-dir (file-name-as-directory (expand-file-name "bcr" dir)))
+           (expected (with-temp-buffer
+                       (insert-file-contents
+                        (expand-file-name "MODULE.bazel.expected" dir))
+                       (buffer-string)))
+           (vc-command-messages 'log)
+           (completing-read-function
+            (lambda (_prompt collection &rest _args)
+              (should (seq-set-equal-p (hash-table-keys collection)
+                                       '("abseil-cpp" "abseil-py")))
+              ;; Pretend that the user has typed ‘abseil-py’.
+              "abseil-py"))
+           (bazel--central-registry-url
+            (concat "file://" (file-name-unquote bcr-dir))))
+      (let ((default-directory bcr-dir))
+        (vc-git-command nil 0 nil "init")
+        (vc-git-command nil 0 nil "config" "set" "user.email" "test@test.test")
+        (vc-git-command nil 0 nil "config" "set" "user.name" "Test")
+        (vc-git-command nil 0 nil "add" ".")
+        (vc-git-command nil 0 nil "commit" "--message=Initial commit"))
+      ;; Test with and without prompting.
+      (dolist (command '((bazel-insert-dependency)
+                         (bazel-insert-dependency "abseil-py")))
+        (ert-info ((prin1-to-string command) :prefix "Command: ")
+          (with-temp-buffer
+            (bazel-module-mode)
+            (ert-simulate-command command)
+            (should (equal (buffer-string) expected))))))))
 
 (ert-deftest bazel-insert-http-archive ()
   (bazel-test--with-workspace dir "http-archive.org"

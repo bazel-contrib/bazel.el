@@ -32,10 +32,12 @@
 (require 'ffap)
 (require 'imenu)
 (require 'json)
+(require 'multisession)
 (require 'project)
 (require 'python)
 (eval-when-compile (require 'subr-x))
 (require 'testcover)
+(require 'vc-git)
 (require 'which-func)
 (require 'xref)
 
@@ -512,6 +514,132 @@ This is the parent mode for the more specific modes
              ;; https://bazel.build/external/lockfile#lockfile-generation
              (cons (rx "/MODULE.bazel.lock" eos) #'js-json-mode))
 
+(defvar bazel-module-history nil
+  "Minibuffer history for Bazel module names.
+This is used by ‘bazel-insert-dependency’.
+See Info node ‘(emacs) Minibuffer History’,
+and see Info node ‘(elisp) Minibuffer History’.")
+
+(define-skeleton bazel-insert-dependency
+  "Insert a “bazel_dep” statement at point."
+  ;; We store the BCR table in ‘v1’.  Note that ‘skeleton-insert’ evaluates the
+  ;; interactor only when it’s first required (i.e., upon first encountering
+  ;; ‘str’, unless passed to the skeleton function as argument), so we can
+  ;; initialize ‘v1’ lexically after the interactor.  The ‘n’ element needs to
+  ;; be the first to work correctly.
+  (completing-read "Module: " v1 nil 'confirm nil 'bazel-module-history)
+  n "bazel_dep(name = \"" '(setq v1 (bazel--central-registry)) str
+  "\", version = \"" (gethash str v1) | _ "\")\n")
+
+(function-put #'bazel-insert-dependency 'interactive-only t)
+(function-put #'bazel-insert-dependency 'command-modes '(bazel-module-mode))
+
+(cl-defstruct (bazel--central-registry
+               (:constructor nil)
+               (:constructor bazel--make-central-registry (last-update table))
+               (:copier nil))
+  "Cache for the contents of the Bazel Central Registry."
+  (last-update nil
+               :read-only t
+               :type (or integer cons)
+               :documentation "The timestamp of the last fetch")
+  (table nil
+         :read-only t
+         :type hash-table
+         :documentation "Map of module names to their most recent versions"))
+
+(define-multisession-variable bazel--central-registry nil
+  "Cache for the contents of the Bazel Central Registry.
+If set, the value is a structure of type ‘bazel--central-registry’.")
+
+(defun bazel--central-registry ()
+  "Return the contents of the Bazel Central Registry.
+Return a hashtable mapping package names to their most recent versions.
+Use a cached value if the cache is not stale, and fetch the contents
+from the registry otherwise."
+  (declare (ftype (function () hash-table)))
+  (let ((cache (multisession-value bazel--central-registry)))
+    (if (and cache (time-less-p (time-subtract nil 3600)
+                                (bazel--central-registry-last-update cache)))
+        (bazel--central-registry-table cache)
+      (let ((table (bazel--fetch-central-registry)))
+        (setf (multisession-value bazel--central-registry)
+              (bazel--make-central-registry (current-time) table))
+        table))))
+
+(defvar bazel--central-registry-url
+  "https://github.com/bazelbuild/bazel-central-registry.git"
+  "URL of the Bazel Central Registry Git repository.
+This should only be overwritten in tests.")
+
+(defun bazel--fetch-central-registry ()
+  "Download the Bazel Central Registry.
+Return a hashtable mapping package names to their most recent versions."
+  (declare (ftype (function () hash-table)))
+  ;; Cache the Git repository of the Bazel Central Registry locally.  We clone
+  ;; into a new temporary directory each time.  Alternatively, we could keep a
+  ;; single clone in a cache directory, but according to some benchmarks, that
+  ;; would only be a bit faster (1.0 s vs. 1.3 s), and the added complexity
+  ;; doesn’t seem worth it.  Be sure to bind ‘default-directory’ so that Git
+  ;; runs on the correct host.
+  (with-temp-buffer
+    (let* ((git-dir
+            (file-name-as-directory (make-temp-file "bcr-" :directory ".git")))
+           (reporter
+            (make-progress-reporter "Fetching Bazel Central Registry..." 0 4))
+           (table (make-hash-table :test #'equal))
+           (default-directory git-dir)
+           (coding-system-for-read file-name-coding-system)
+           (coding-system-for-write file-name-coding-system))
+      ;; We only need the filenames in the registry, so we use a bare repisitory
+      ;; and filter out blobs (--filter=blob:none).  We also don’t need history
+      ;; (--depth=1) or tags (--no-tags).
+      (vc-git-command nil 0 nil "clone" "--bare" "--single-branch"
+                      "--filter=blob:none" "--depth=1" "--no-tags" "--"
+                      bazel--central-registry-url ".")
+      (progress-reporter-update reporter 1)
+      ;; List the files in the modules directory.  The filenames are terminated
+      ;; with NULL characters.  See
+      ;; https://bazel.build/external/registry#index_registry for the directory
+      ;; structure.  Instead of parsing the metadata.json files, we take the
+      ;; module names and versions from the filenames.
+      (vc-git-command t 0 nil "ls-tree" "-r" "-z" "--name-only" "--"
+                      "HEAD" "modules")
+      (progress-reporter-update reporter 2)
+      (goto-char (point-min))
+      ;; Look for source.json files and take module names and versions from
+      ;; their filenames.
+      (while (not (eobp))
+        (let* ((begin (point))
+               (end (+ begin (skip-chars-forward "^\0"))))
+          (pcase (buffer-substring-no-properties begin end)
+            ;; See https://bazel.build/rules/lib/globals/module#module and
+            ;; https://bazel.build/external/module#version-format for allowed
+            ;; module names and version strings.  We use somewhat relaxed
+            ;; formats here.
+            ((rx bos "modules/"
+                 (let mod (any "a-z") (* (any "a-z" "0-9" ?. ?- ?_))) ?/
+                 (let ver (+ (any "A-Z" "a-z" "0-9" ?. ?+ ?-)))
+                 "/source.json" eos)
+             ;; If the version is newer than the one in the hashtable, update
+             ;; the hashtable accordingly.  Note that we ignore errors when
+             ;; parsing versions; module versions can contain arbitrary strings
+             ;; that ‘version-to-list’ can’t parse.  Ignoring errors is harmless
+             ;; since users can’t rely on the returned version to be correct
+             ;; anyway.  The logic below simply takes the last version found in
+             ;; the buffer if version parsing fails.
+             (let ((max (gethash mod table)))
+               (unless (and max (ignore-errors (version<= ver max)))
+                 (puthash mod ver table))))))
+        ;; Skip over NULL character.
+        (forward-char))
+      (progress-reporter-update reporter 3)
+      ;; We delete the temporary directory only on success, so that the user can
+      ;; investigate if something goes wrong.
+      (delete-directory git-dir :recursive)
+      (progress-reporter-done reporter)
+      table)))
+
 (define-skeleton bazel-insert-http-archive
   "Insert an “http_archive” statement at point.
 See URL ‘https://bazel.build/rules/lib/repo/http#http_archive’
@@ -758,6 +886,8 @@ and Info node ‘(elisp) Syntax Table Internals’."
    ["Find MODULE.bazel file" bazel-find-module-file]
    ["Format buffer with Buildifier" bazel-buildifier
     (derived-mode-p 'bazel-mode)]
+   ["Insert bazel_dep statement..." bazel-insert-dependency
+    (derived-mode-p 'bazel-module-mode)]
    ["Insert http_archive statement..." bazel-insert-http-archive
     (derived-mode-p 'bazel-workspace-mode 'bazel-starlark-mode)])
  "Debugger (GDB)...")

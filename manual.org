@@ -61,6 +61,14 @@ REPO.bazel files, VENDOR.bazel files, and Starlark files is closely related, the
 corresponding modes derive from a parent mode, ~bazel-mode~.  Collectively,
 these modes are called “Bazel modes” in the rest of this manual.
 
+#+FINDEX: bazel-insert-dependency
+When editing a MODULE.bazel file, you can use the command
+~bazel-insert-dependency~ to quickly insert a
+[[https://bazel.build/rules/lib/globals/module#bazel_dep][~bazel_dep~]]
+statement.  The command uses the modules registered in the
+[[https://bazel.build/external/registry#bazel-central-registry][Bazel Central
+Registry]] to suggest modules to insert.
+
 #+FINDEX: bazel-insert-http-archive
 When editing a WORKSPACE file, you can use the command
 ~bazel-insert-http-archive~ to quickly insert an
