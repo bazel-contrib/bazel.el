@@ -497,6 +497,8 @@ comment."
   "]," > \n
   ?\) >)
 
+(function-put #'bazel-insert-http-archive 'interactive-only t)
+
 (defun bazel--download-http-archive (url)
   "Download and interpret HTTP archive at URL.
 Return a list (NAME INTEGRITY PREFIX TIME) for

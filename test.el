@@ -1148,7 +1148,9 @@ Process buildifier exited abnormally with code 1
       (let ((actual
              (with-temp-buffer
                (bazel-workspace-mode)
-               (bazel-insert-http-archive url)
+               (with-suppressed-warnings
+                   ((interactive-only bazel-insert-http-archive))
+                 (bazel-insert-http-archive url))
                (buffer-substring-no-properties (point-min) (point-max))))
             (expected
              (with-temp-buffer
@@ -1219,7 +1221,8 @@ Process buildifier exited abnormally with code 1
                              "--" "prefix-1" "prefix-2"))
       (with-temp-buffer
         (bazel-workspace-mode)
-        (bazel-insert-http-archive url)
+        (with-suppressed-warnings ((interactive-only bazel-insert-http-archive))
+          (bazel-insert-http-archive url))
         (should (eobp))
         (goto-char (point-min))
         (pcase-exhaustive completing-read-collections
@@ -1241,7 +1244,8 @@ Process buildifier exited abnormally with code 1
       (ignore (process-lines tar "-c" "-z" "-f" archive "--" "WORKSPACE"))
       (with-temp-buffer
         (bazel-workspace-mode)
-        (bazel-insert-http-archive url)
+        (with-suppressed-warnings ((interactive-only bazel-insert-http-archive))
+          (bazel-insert-http-archive url))
         (should (eobp))
         (goto-char (point-min))
         (should (looking-at-p (rx bot "http_archive(" eol)))
