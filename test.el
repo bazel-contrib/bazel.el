@@ -929,7 +929,7 @@ gets killed early."
       (let ((case-fold-search nil)
             (search-spaces-regexp nil))
         (re-search-forward (rx bol "(ert-deftest foo/not-really-a-test ()"))
-        ;; Point is on a test case, but the consuming rule is not a test rule.
+        ;; Point is on a test case, but the consuming target is not a test rule.
         (should-error (bazel-test-at-point) :type 'user-error)))
     (bazel-test--with-file-buffer (expand-file-name "foo-test.el" dir)
       (cl-letf* ((case-fold-search nil)
