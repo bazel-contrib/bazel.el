@@ -17,10 +17,12 @@
 * Test data for the ~bazel-fix-visibility~ test
 
 #+BEGIN_SRC bazel-module :tangle MODULE.bazel
-# empty
+bazel_dep(name = "rules_cc", version = "0.2.17")
 #+END_SRC
 
 #+BEGIN_SRC bazel-build :tangle BUILD
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
+
 cc_binary(
     name = "bin",
     srcs = ["bin.cc"],
