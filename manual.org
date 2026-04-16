@@ -181,9 +181,9 @@ command ~bazel-find-build-file~.  Similarly, to find the Bazel WORKSPACE or
 MODULE.bazel files, run ~bazel-find-workspace-file~ or ~bazel-find-module-file~,
 respectively.
 
-#+FINDEX: bazel-show-consuming-rule
+#+FINDEX: bazel-show-consuming-target
 To find out which Bazel rule target consumes the file that the current buffer
-visits, run the command ~bazel-show-consuming-rule~.  It will search the
+visits, run the command ~bazel-show-consuming-target~.  It will search the
 corresponding BUILD file for a rule target definition that has the visited file
 in its list of source files and jump there.
 
