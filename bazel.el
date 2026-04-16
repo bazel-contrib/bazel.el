@@ -388,8 +388,8 @@ and ‘bazel-starlark-mode’."
   ;; target definitions (= Python statements) as functions.
   (setq-local beginning-of-defun-function #'python-nav-beginning-of-statement)
   (setq-local end-of-defun-function #'python-nav-end-of-statement)
-  (add-hook 'which-func-functions #'bazel-mode-current-rule-name nil :local)
-  (setq-local add-log-current-defun-function #'bazel-mode-current-rule-name)
+  (add-hook 'which-func-functions #'bazel-current-target-name nil :local)
+  (setq-local add-log-current-defun-function #'bazel-current-target-name)
   (setq-local imenu-create-index-function #'bazel-mode-create-index))
 
 ;;;###autoload
@@ -405,8 +405,8 @@ and ‘bazel-starlark-mode’."
   ;; rule target definitions (= Python statements) as functions.
   (setq-local beginning-of-defun-function #'python-nav-beginning-of-statement)
   (setq-local end-of-defun-function #'python-nav-end-of-statement)
-  (add-hook 'which-func-functions #'bazel-mode-current-rule-name nil :local)
-  (setq-local add-log-current-defun-function #'bazel-mode-current-rule-name)
+  (add-hook 'which-func-functions #'bazel-current-target-name nil :local)
+  (setq-local add-log-current-defun-function #'bazel-current-target-name)
   (setq-local imenu-create-index-function #'bazel-mode-create-index))
 
 ;;;###autoload
@@ -426,8 +426,8 @@ and ‘bazel-starlark-mode’."
   ;; rule target definitions (= Python statements) as functions.
   (setq-local beginning-of-defun-function #'python-nav-beginning-of-statement)
   (setq-local end-of-defun-function #'python-nav-end-of-statement)
-  (add-hook 'which-func-functions #'bazel-mode-current-rule-name nil :local)
-  (setq-local add-log-current-defun-function #'bazel-mode-current-rule-name)
+  (add-hook 'which-func-functions #'bazel-current-target-name nil :local)
+  (setq-local add-log-current-defun-function #'bazel-current-target-name)
   (setq-local imenu-create-index-function #'bazel-mode-create-index))
 
 ;;;###autoload
@@ -444,8 +444,8 @@ and ‘bazel-starlark-mode’."
   ;; rule target definitions (= Python statements) as functions.
   (setq-local beginning-of-defun-function #'python-nav-beginning-of-statement)
   (setq-local end-of-defun-function #'python-nav-end-of-statement)
-  (add-hook 'which-func-functions #'bazel-mode-current-rule-name nil :local)
-  (setq-local add-log-current-defun-function #'bazel-mode-current-rule-name)
+  (add-hook 'which-func-functions #'bazel-current-target-name nil :local)
+  (setq-local add-log-current-defun-function #'bazel-current-target-name)
   (setq-local imenu-create-index-function #'bazel-mode-create-index))
 
 ;;;###autoload
@@ -708,7 +708,7 @@ and Info node ‘(elisp) Syntax Table Internals’."
    ["Test at point" bazel-test-at-point]
    ["Collect code coverage..." bazel-coverage]
    ["Run target..." bazel-run]
-   ["Show definition of consuming rule target" bazel-show-consuming-rule]
+   ["Show definition of consuming rule target" bazel-show-consuming-target]
    ["Find BUILD file" bazel-find-build-file]
    ["Find WORKSPACE file" bazel-find-workspace-file]
    ["Find MODULE.bazel file" bazel-find-module-file]
@@ -944,7 +944,7 @@ IDENTIFIER should be an XRef identifier returned by
   "Return a completion table for Bazel targets."
   (bazel--target-completion-table nil nil))
 
-(defun bazel-show-consuming-rule ()
+(defun bazel-show-consuming-target ()
   "Find the definition of the rule target consuming the current file.
 The current buffer must visit a file, and the file must be in a
 Bazel repository.  Use ‘xref-show-definitions-function’ to display
@@ -979,6 +979,9 @@ file."
      (propertize (bazel--canonical nil package target)
                  'bazel-mode-workspace root)))
   nil)
+
+(define-obsolete-function-alias 'bazel-show-consuming-rule
+  #'bazel-show-consuming-target "2026-04-16")
 
 (eval-when-compile
   (defmacro bazel--with-file-buffer (existing filename &rest body)
@@ -1037,7 +1040,7 @@ Return nil if no consuming rule target was found."
               (when (looking-back
                      (rx symbol-start "srcs" (* blank) ?= (* blank))
                      (line-beginning-position))
-                (when-let ((target-name (bazel-mode-current-rule-name)))
+                (when-let ((target-name (bazel-current-target-name)))
                   (when (or (not only-tests) (bazel--in-test-target-p))
                     (cl-return target-name))))
               ;; Ensure we don’t loop forever if we ended up in a weird place.
@@ -1774,7 +1777,7 @@ This function is useful as ‘imenu-create-index-function’ for
                 (push (cons name pos) index)))))
         (nreverse index)))))
 
-(defun bazel-mode-current-rule-name ()
+(defun bazel-current-target-name ()
   "Return the name of the Bazel rule target defined at point.
 Return nil if not inside a Bazel rule target definition."
   (let ((case-fold-search nil)
@@ -1797,6 +1800,9 @@ Return nil if not inside a Bazel rule target definition."
           (let ((name (match-string-no-properties 2)))
             (unless (python-syntax-comment-or-string-p)
               (cl-return name))))))))
+
+(define-obsolete-function-alias 'bazel-mode-current-rule-name
+  #'bazel-current-target-name "2026-04-16")
 
 (defun bazel-mode-extract-function-name ()
   "Return the name of the Starlark function at point.

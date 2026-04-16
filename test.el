@@ -252,12 +252,12 @@ gets killed early."
           (should (equal (try-completion ":" table) ":"))
           (should (equal (all-completions ":" table) '("lib" "bin" "aaa.cc")))
           (should (equal (completion-boundaries ":" table nil "") '(1 . 0))))
-        ;; Test ‘bazel-show-consuming-rule’.
+        ;; Test ‘bazel-show-consuming-target’.
         (let* ((build-buffer (current-buffer))
                (jumps 0)
                (xref-after-jump-hook (list (lambda () (cl-incf jumps)))))
           (bazel-test--with-file-buffer (expand-file-name "root/aaa.cc" dir)
-            (ert-simulate-command '(bazel-show-consuming-rule)))
+            (ert-simulate-command '(bazel-show-consuming-target)))
           (should (eql jumps 1))
           (should (eq (current-buffer) build-buffer))
           (should (looking-at-p (rx "lib"))))))
