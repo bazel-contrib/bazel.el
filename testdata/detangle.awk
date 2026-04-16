@@ -1,4 +1,4 @@
-# Copyright 2021 Google LLC
+# Copyright 2021, 2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ BEGIN {
   in_block = 0
 }
 
-/^#\+begin_src .+ :tangle / && $4 == out {
+/^#\+BEGIN_SRC .+ :tangle / && $4 == out {
   print
   while ((getline < src) == 1) print
   close(src)
@@ -27,7 +27,7 @@ BEGIN {
   next
 }
 
-/^#\+end_src$/ {
+/^#\+END_SRC$/ {
   print
   in_block = 0
   next
