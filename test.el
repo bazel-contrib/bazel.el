@@ -450,21 +450,19 @@ gets killed early."
 
 (ert-deftest bazel/project-files ()
   "Test ‘project-files’ support for Bazel workspaces."
-  ;; Try to work around https://bugs.gnu.org/48471 by picking GNU find on macOS.
-  (let ((find-program (if (eq system-type 'darwin) "gfind" find-program)))
-    (skip-unless (executable-find find-program))
-    (bazel-test--with-temp-directory dir "project.org"
-      ;; Unquote to work around https://bugs.gnu.org/47799.
-      (let* ((dir (file-name-unquote dir))
-             (project (project-current nil dir))
-             (files (project-files project)))
-        (should project)
-        (should (bazel-workspace-p project))
-        (should files)
-        (should (equal (sort (cl-loop for file in files
-                                      collect (file-relative-name file dir))
-                             #'string-lessp)
-                       '(".bazelignore" "WORKSPACE" "package/BUILD")))))))
+  (skip-unless (executable-find find-program))
+  (bazel-test--with-temp-directory dir "project.org"
+    ;; Unquote to work around https://bugs.gnu.org/47799.
+    (let* ((dir (file-name-unquote dir))
+           (project (project-current nil dir))
+           (files (project-files project)))
+      (should project)
+      (should (bazel-workspace-p project))
+      (should files)
+      (should (equal (sort (cl-loop for file in files
+                                    collect (file-relative-name file dir))
+                           #'string-lessp)
+                     '(".bazelignore" "WORKSPACE" "package/BUILD"))))))
 
 (ert-deftest bazel-test/coverage ()
   "Test coverage parsing and display."
