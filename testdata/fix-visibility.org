@@ -50,15 +50,26 @@ cc_library(
 ** Merged standard output and error from Bazel
 
 #+BEGIN_SRC fundamental :tangle bazel.out
-Loading:
-Loading: 0 packages loaded
-Analyzing: 2 targets (2 packages loaded, 0 targets configured)
-Analyzing: 2 targets (12 packages loaded, 49 targets configured)
-Analyzing: 2 targets (16 packages loaded, 62 targets configured)
-ERROR: %ROOTDIR%/BUILD:1:10: in cc_binary rule //:bin: target '//lib:lib' is not visible from target '//:bin'. Check the visibility declaration of the former target if you think the dependency is legitimate
-ERROR: Analysis of target '//:bin' failed; build aborted: Analysis of target '//:bin' failed
-INFO: Elapsed time: 3,862s
+INFO: Invocation ID: 45ef1223-d52c-4b40-b0d5-5101fc5f0086
+Computing main repo mapping: 
+Computing main repo mapping: 
+Computing main repo mapping: 
+Computing main repo mapping: 
+Computing main repo mapping: 
+Loading: 
+Loading: 1 packages loaded
+Analyzing: 2 targets (7 packages loaded, 6 targets configured)
+Analyzing: 2 targets (59 packages loaded, 7 targets configured)
+Analyzing: 2 targets (78 packages loaded, 430 targets configured)
+Analyzing: 2 targets (82 packages loaded, 445 targets configured)
+Analyzing: 2 targets (82 packages loaded, 445 targets configured)
+ERROR: %ROOTDIR%/BUILD:3:10: in cc_binary rule //:bin: Visibility error:
+target '//lib:lib' is not visible from
+target '//:bin'
+Recommendation: modify the visibility declaration if you think the dependency is legitimate. For more info see https://bazel.build/concepts/visibility
+ERROR: %ROOTDIR%/BUILD:3:10: Analysis of target '//:bin' (config: 2e55aa3) failed
+ERROR: Analysis of target '//:bin' failed; build aborted
+INFO: Elapsed time: 10.294s
 INFO: 0 processes.
-FAILED: Build did NOT complete successfully (17 packages loaded, 143 targets configured)
-FAILED: Build did NOT complete successfully (17 packages loaded, 143 targets configured)
+ERROR: Build did NOT complete successfully
 #+END_SRC

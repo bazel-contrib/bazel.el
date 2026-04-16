@@ -1429,14 +1429,15 @@ This function is suitable for ‘compilation-finish-functions’."
                   (rx bol "ERROR: " (+ (any alnum ?/ ?- ?. ?_)) ?:
                       (+ digit) ?: (+ digit) ": "
                       (group
-                       (+ nonl)
+                       (+ nonl) "Visibility error:\n"
                        "target '"
                        (group (+ (any "a-z" "A-Z" "0-9"
                                       ?- "!%@^_` #$&()*+,;<=>?[]{|}~/.:")))
-                       "' is not visible from target '"
+                       "' is not visible from\n"
+                       "target '"
                        (group (+ (any "a-z" "A-Z" "0-9"
                                       ?- "!%@^_` #$&()*+,;<=>?[]{|}~/.:")))
-                       "'."))
+                       "'" eol))
                   nil t)
             (push (list (match-string-no-properties 3)
                         (match-string-no-properties 2)
