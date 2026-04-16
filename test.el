@@ -462,7 +462,7 @@ gets killed early."
       (should (equal (sort (cl-loop for file in files
                                     collect (file-relative-name file dir))
                            #'string-lessp)
-                     '(".bazelignore" "WORKSPACE" "package/BUILD"))))))
+                     '(".bazelignore" "MODULE.bazel" "package/BUILD"))))))
 
 (ert-deftest bazel-test/coverage ()
   "Test coverage parsing and display."
