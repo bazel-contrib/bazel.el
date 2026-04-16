@@ -1109,7 +1109,7 @@ the buffer visits a remote file, avoid hitting the filesystem and
 only complete rule targets defined within the current buffer."
   (cl-check-type start natnum)
   (if (and non-essential (file-remote-p default-directory))
-      ;; Completing files or rule targetss in other packages would require
+      ;; Completing files or rule targets in other packages would require
       ;; filesystem access.  Only complete local rule targets starting with a
       ;; colon.
       (when (eql (char-after start) ?:)
