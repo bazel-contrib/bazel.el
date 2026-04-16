@@ -14,7 +14,7 @@
 
 #+PROPERTY: header-args :mkdirp yes :main no
 
-#+BEGIN_SRC bazel-repo :tangle REPO.bazel
+#+BEGIN_SRC bazel-module :tangle MODULE.bazel
 # empty
 #+END_SRC
 

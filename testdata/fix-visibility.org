@@ -16,7 +16,7 @@
 
 * Test data for the ~bazel-fix-visibility~ test
 
-#+BEGIN_SRC bazel-repo :tangle REPO.bazel
+#+BEGIN_SRC bazel-module :tangle MODULE.bazel
 # empty
 #+END_SRC
 

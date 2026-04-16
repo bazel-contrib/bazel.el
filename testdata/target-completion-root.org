@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#+BEGIN_SRC bazel-repo :tangle REPO.bazel :main no
+#+BEGIN_SRC bazel-module :tangle REPO.bazel :main no
 # empty
 #+END_SRC
 

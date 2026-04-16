@@ -16,7 +16,7 @@
 
 * Test data for ~bazel-starlark-mode/which-function~
 
-#+BEGIN_SRC bazel-repo :tangle REPO.bazel
+#+BEGIN_SRC bazel-module :tangle MODULE.bazel
 # empty
 #+END_SRC
 

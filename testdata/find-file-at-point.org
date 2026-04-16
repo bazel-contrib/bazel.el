@@ -16,7 +16,7 @@
 
 * Test data for the ~bazel-mode/ffap~ test
 
-#+BEGIN_SRC bazel-repo :tangle root/REPO.bazel
+#+BEGIN_SRC bazel-module :tangle root/MODULE.bazel
 # empty
 #+END_SRC
 
@@ -31,7 +31,7 @@
 
 Files in an external repository:
 
-#+BEGIN_SRC bazel-repo :tangle root/bazel-root/external/ws/REPO.bazel
+#+BEGIN_SRC bazel-module :tangle root/bazel-root/external/ws/MODULE.bazel
 # empty
 #+END_SRC
 

@@ -16,7 +16,7 @@
 
 * Test target completion for external repositories
 
-#+BEGIN_SRC bazel-repo :tangle main/REPO.bazel
+#+BEGIN_SRC bazel-module :tangle main/MODULE.bazel
 # empty
 #+END_SRC
 
@@ -28,7 +28,7 @@
 # Dummy BUILD file
 #+END_SRC
 
-#+BEGIN_SRC bazel-repo :tangle main/bazel-main/external/ext/REPO.bazel
+#+BEGIN_SRC bazel-module :tangle main/bazel-main/external/ext/MODULE.bazel
 # empty
 #+END_SRC
 
