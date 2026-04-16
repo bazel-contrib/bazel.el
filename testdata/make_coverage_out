@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2021-2022, 2024 Google LLC
+# Copyright 2021-2022, 2024, 2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ trap 'rm -r -f -- "${dir}"' EXIT
 
 # Canonicalize the directory so that the textual replacement below doesn’t
 # choke on symbolic links.
-dir="$(realpath -e -- "${dir:?}")" || exit
+dir="$(realpath -- "${dir:?}")" || exit
 
 # Set up a basic repository layout in the temporary directory.
 emacs --quick --batch --visit="${org:?}" \
