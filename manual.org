@@ -61,7 +61,8 @@ derive from a parent mode, ~bazel-mode~.  Collectively, these modes are called
 #+FINDEX: bazel-insert-http-archive
 When editing a WORKSPACE file, you can use the command
 ~bazel-insert-http-archive~ to quickly insert an
-[[https://bazel.build/rules/lib/repo/http#http_archive][~http_archive~ rule]].
+[[https://bazel.build/rules/lib/repo/http#http_archive][~http_archive~ rule]]
+statement.
 
 #+CINDEX: Xref
 #+KINDEX: M-.
@@ -71,8 +72,8 @@ see [[info:Emacs#Xref][Xref]].
 
 #+CINDEX: Speedbar
 #+FINDEX: speedbar
-When =bazel.el= is loaded, rules in Bazel BUILD and WORKSPACE files will show
-up in the Speedbar.  For more information about Speedbar, see
+When =bazel.el= is loaded, rule targets defined in Bazel BUILD and WORKSPACE
+files will show up in the Speedbar.  For more information about Speedbar, see
 [[info:Emacs#Speedbar][Speedbar]].
 
 #+CINDEX: FFAP, for @samp{.bazelrc} files
@@ -139,7 +140,7 @@ Compilation mode, see [[info:Emacs#Compilation Mode][Compilation Mode]].
 #+VINDEX: bazel-covered-line
 #+VINDEX: bazel-uncovered-line
 #+FINDEX: bazel-remove-coverage-display
-For rule types integrated with Bazel’s code coverage framework, =bazel.el=
+For rules integrated with Bazel’s code coverage framework, =bazel.el=
 provides support for displaying line coverage information in buffers that visit
 instrumented source files.  If you set the user option ~bazel-display-coverage~
 to ~t~ and then run =bazel coverage= (either via the ~bazel-coverage~ command
@@ -181,9 +182,10 @@ MODULE.bazel files, run ~bazel-find-workspace-file~ or ~bazel-find-module-file~,
 respectively.
 
 #+FINDEX: bazel-show-consuming-rule
-To find out which Bazel rule consumes the file that the current buffer visits,
-run the command ~bazel-show-consuming-rule~.  It will search the corresponding
-BUILD file that has the source file in its list of source files and jump there.
+To find out which Bazel rule target consumes the file that the current buffer
+visits, run the command ~bazel-show-consuming-rule~.  It will search the
+corresponding BUILD file for a rule target definition that has the visited file
+in its list of source files and jump there.
 
 #+CINDEX: Projects
 =bazel.el= provides a project backend, ~bazel-find-project~.  By default, it

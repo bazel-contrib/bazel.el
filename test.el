@@ -302,7 +302,7 @@ gets killed early."
           (should (equal (buffer-string) before)))))))
 
 (ert-deftest bazel-build-mode/beginning-of-defun ()
-  "Check that ‘beginning-of-defun’ moves to the beginning of the rule."
+  "Check that ‘beginning-of-defun’ moves to the beginning of the definition."
   (bazel-test--with-temp-directory dir "defun-navigation.org"
     (bazel-test--with-file-buffer (expand-file-name "BUILD" dir)
       (search-forward "bazel.el")
@@ -311,7 +311,7 @@ gets killed early."
                                 "    name = \"bazel\","))))))
 
 (ert-deftest bazel-build-mode/end-of-defun ()
-  "Check that ‘end-of-defun’ moves to the end of the rule."
+  "Check that ‘end-of-defun’ moves to the end of the definition."
   (bazel-test--with-temp-directory dir "defun-navigation.org"
     (bazel-test--with-file-buffer (expand-file-name "BUILD" dir)
       (search-forward "bazel.el")
@@ -362,7 +362,7 @@ gets killed early."
           (should-error (compilation-next-error 1)))))))
 
 (ert-deftest bazel-build-mode/imenu ()
-  "Check that ‘imenu’ finds BUILD rules."
+  "Check that ‘imenu’ finds BUILD rule targets."
   (bazel-test--with-temp-directory dir "xref.org"
     (with-temp-buffer
       (insert-file-contents (expand-file-name "root/BUILD" dir))
@@ -599,8 +599,8 @@ gets killed early."
                              (cons bound 6))))))))
     ;; The test cases are of the form (STRING ONLY-TESTS TRY ALL TEST BOUND).
     ;; STRING is the input string.  ONLY-TESTS specifies whether to restrict the
-    ;; search to test rules; if TEST-ONLY is ‘*’, try both with and without this
-    ;; restriction.  TRY, ALL, and TEST are the expected results of
+    ;; search to test targets; if TEST-ONLY is ‘*’, try both with and without
+    ;; this restriction.  TRY, ALL, and TEST are the expected results of
     ;; ‘try-completion’, ‘all-completions’, and ‘test-completion’, respectively.
     ;; BOUND is the expected prefix completion bound returned by
     ;; ‘completion-bounds’.
