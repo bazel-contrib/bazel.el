@@ -35,6 +35,7 @@ This manual describes ~bazel.el~, a GNU Emacs package to work with the
 #+FINDEX: bazel-build-mode
 #+FINDEX: bazel-workspace-mode
 #+FINDEX: bazel-module-mode
+#+FINDEX: bazel-repo-mode
 #+FINDEX: bazelrc-mode
 #+FINDEX: bazelignore-mode
 #+FINDEX: bazeliskrc-mode
