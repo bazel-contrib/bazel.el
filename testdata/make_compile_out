@@ -33,8 +33,10 @@ trap 'rm -r -f -- "${dir}"' EXIT
 dir="$(realpath -- "${dir:?}")" || exit
 
 # Set up a basic repository layout in the temporary directory.
-emacs --quick --batch --visit="${org:?}" \
-  --eval="(let ((default-directory \"${dir:?}/\")) (org-babel-tangle))" || exit
+cp -- "${org:?}" "${dir:?}/.tangle.org" || exit
+emacs --quick --batch --visit="${dir:?}/.tangle.org" \
+  --funcall='org-babel-tangle' || exit
+rm -- "${dir:?}/.tangle.org" || exit
 
 execroot="$(cd "${dir:?}" && bazel --bazelrc=/dev/null info execution_root)"
 
