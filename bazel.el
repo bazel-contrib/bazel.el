@@ -965,10 +965,10 @@ file."
                          (user-error "No BUILD file found")))
          (relative-file (file-relative-name source-file directory))
          (case-fold-file (file-name-case-insensitive-p source-file))
-         (rule (or (bazel--consuming-rule build-file relative-file
-                                          case-fold-file nil)
-                   (user-error "No rule target for file %s found"
-                               relative-file)))
+         (target (or (bazel--consuming-target build-file relative-file
+                                              case-fold-file nil)
+                     (user-error "No rule target for file %s found"
+                                 relative-file)))
          ;; We press ‘xref-find-definitions’ into service for finding and
          ;; showing the rule target definition.  For that to work, our Xref
          ;; backend must be found unconditionally.
@@ -976,7 +976,7 @@ file."
     (xref-find-definitions
      ;; Create a target identifier similar to what
      ;; ‘xref-backend-identifier-at-point’ returns.
-     (propertize (bazel--canonical nil package rule)
+     (propertize (bazel--canonical nil package target)
                  'bazel-mode-workspace root)))
   nil)
 
@@ -1001,7 +1001,8 @@ In any case, return the value of the last BODY form."
                (insert-file-contents ,filename)
                (,function nil))))))))
 
-(defun bazel--consuming-rule (build-file source-file case-fold-file only-tests)
+(defun bazel--consuming-target
+    (build-file source-file case-fold-file only-tests)
   "Return the name of the rule target in BUILD-FILE that consumes SOURCE-FILE.
 If CASE-FOLD-FILE is non-nil, ignore filename case when
 searching.  If ONLY-TESTS is non-nil, look only for test targets.
@@ -1036,9 +1037,9 @@ Return nil if no consuming rule target was found."
               (when (looking-back
                      (rx symbol-start "srcs" (* blank) ?= (* blank))
                      (line-beginning-position))
-                (when-let ((rule-name (bazel-mode-current-rule-name)))
-                  (when (or (not only-tests) (bazel--in-test-rule-p))
-                    (cl-return rule-name))))
+                (when-let ((target-name (bazel-mode-current-rule-name)))
+                  (when (or (not only-tests) (bazel--in-test-target-p))
+                    (cl-return target-name))))
               ;; Ensure we don’t loop forever if we ended up in a weird place.
               (goto-char end))))))))
 
@@ -1060,7 +1061,7 @@ valid file target is indeed a file target."
       ;; A label that likely refers to a rule target.  Try to find the target
       ;; definition in the BUILD file of the package.
       (when-let ((build-file (bazel--locate-build-file directory)))
-        (bazel--rule-location build-file target)))))
+        (bazel--rule-target-location build-file target)))))
 
 ;;;; Completion support
 
@@ -1116,7 +1117,7 @@ only complete rule targets defined within the current buffer."
           (completion-table-with-cache
            (lambda (prefix)
              (cl-check-type prefix string)
-             (bazel--complete-rules prefix nil))
+             (bazel--complete-targets prefix nil))
            completion-ignore-case)))
     (bazel--target-completion-table nil nil)))
 
@@ -1144,7 +1145,7 @@ directories and BUILD files."
            (push filename files)))
     (sort files #'string-lessp)))
 
-(defun bazel--rule-location (build-file name)
+(defun bazel--rule-target-location (build-file name)
   "Return an ‘xref-location’ for a rule target definition within a BUILD file.
 The name of the BUILD file is BUILD-FILE, and NAME is the local
 name of the rule target.  If a definition for NAME doesn’t seem to exist
@@ -1152,9 +1153,9 @@ in BUILD-FILE, return a location referring to an arbitrary position
 within the BUILD file."
   (cl-check-type build-file string)
   (cl-check-type name string)
-  (bazel--xref-location build-file (lambda () (bazel--find-rule name))))
+  (bazel--xref-location build-file (lambda () (bazel--find-rule-target name))))
 
-(defun bazel--find-rule (name)
+(defun bazel--find-rule-target (name)
   "Find the rule target definition with the given NAME in the current buffer.
 The current buffer should visit a BUILD file.  If there’s a definition
 of a rule target with the given NAME, return its location.  Otherwise,
@@ -1199,7 +1200,7 @@ or change the buffer state permanently."
                                  (line-number-at-pos)
                                  (- (point) (line-beginning-position)))))))
 
-(defun bazel--complete-rules (prefix only-tests)
+(defun bazel--complete-targets (prefix only-tests)
   "Find all rule targets starting with the given PREFIX in the current buffer.
 The current buffer should visit a BUILD file.  Return a list of
 target names that start with PREFIX.  If ONLY-TESTS is non-nil,
@@ -1208,7 +1209,7 @@ restrict the returned targets to test targets."
   (when (derived-mode-p 'bazel-mode)
     (let ((case-fold-search nil)
           (search-spaces-regexp nil)
-          (rules ()))
+          (targets ()))
       (save-excursion
         ;; We don’t widen here.  If the user has narrowed the buffer, it’s fair
         ;; to assume they only want completions within the narrowed portion.
@@ -1221,11 +1222,11 @@ restrict the returned targets to test targets."
                 nil t)
           (let ((name (match-string-no-properties 2)))
             (and (not (python-syntax-comment-or-string-p))
-                 (or (not only-tests) (bazel--in-test-rule-p))
-                 (push name rules)))))
-      (nreverse rules))))
+                 (or (not only-tests) (bazel--in-test-target-p))
+                 (push name targets)))))
+      (nreverse targets))))
 
-(defun bazel--in-test-rule-p ()
+(defun bazel--in-test-target-p ()
   "Return non-nil if point is probably in a test rule target definition."
   (save-excursion
     (let ((case-fold-search nil)
@@ -1938,15 +1939,15 @@ Return nil if no .bazelignore file exists."
                          (user-error "No BUILD file found")))
          (relative-file (file-relative-name source-file directory))
          (case-fold-file (file-name-case-insensitive-p source-file))
-         (rule (or (bazel--consuming-rule build-file relative-file
-                                          case-fold-file :only-tests)
-                   (user-error "No rule target for file %s found"
-                               relative-file)))
+         (target (or (bazel--consuming-target build-file relative-file
+                                              case-fold-file :only-tests)
+                     (user-error "No rule target for file %s found"
+                                 relative-file)))
          (name
           (or (run-hook-with-args-until-success 'bazel-test-at-point-functions)
               (user-error "Point is not on a test case"))))
     (bazel--compile "test" (concat "--test_filter=" name) "--"
-                    (bazel--canonical nil package rule)))
+                    (bazel--canonical nil package target)))
   nil)
 
 (defun bazel-coverage (target)
@@ -2011,9 +2012,9 @@ was found."
            (relative-file (file-relative-name source-file directory))
            (case-fold-file (file-name-case-insensitive-p source-file)))
       (when-let* ((build-file (bazel--locate-build-file directory))
-                  (rule (bazel--consuming-rule build-file relative-file
-                                               case-fold-file only-tests)))
-        (bazel--canonical nil package rule)))))
+                  (target (bazel--consuming-target build-file relative-file
+                                                   case-fold-file only-tests)))
+        (bazel--canonical nil package target)))))
 
 ;;;; Language-specific support
 
@@ -2550,9 +2551,9 @@ the wildcards with a colon.  This is a helper function for
           (cl-check-type prefix string)
           (append
            (bazel--with-file-buffer existing build-file
-             ;; ‘bazel--complete-rules’ only works in ‘bazel-mode’.
+             ;; ‘bazel--complete-targets’ only works in ‘bazel-mode’.
              (unless existing (bazel-build-mode))
-             (bazel--complete-rules prefix only-tests))
+             (bazel--complete-targets prefix only-tests))
            (unless pattern
              ;; Include source files only if we’re not completing a target
              ;; pattern.  Building a source file makes no sense.
