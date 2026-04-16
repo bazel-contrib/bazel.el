@@ -17,9 +17,9 @@
 
 SHELL = /bin/sh
 
-BAZEL = bazel
+BAZEL ?= bazel
 BAZELFLAGS =
-INSTALL = install
+INSTALL ?= install
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL) -m 644
 
@@ -37,17 +37,17 @@ check:
 	  $(BAZELFLAGS) -- //...
 
 COVERAGE_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off
-GENHTML = genhtml
+GENHTML ?= genhtml
 GENHTMLFLAGS = --branch-coverage \
   --demangle-cpp='$(CPPFILT)' --demangle-cpp='--no-strip-underscore'
-CPPFILT = c++filt
+CPPFILT ?= c++filt
 
 coverage:
 	$(BAZEL) coverage --combined_report=lcov $(COVERAGE_BAZELFLAGS) -- //...
 	$(GENHTML) --output-directory=coverage-report $(GENHTMLFLAGS) \
 	  -- bazel-out/_coverage/_coverage_report.dat
 
-MAKEINFO = makeinfo
+MAKEINFO ?= makeinfo
 
 info:
 	$(BAZEL) build --action_env='MAKEINFO=$(MAKEINFO)' $(BAZELFLAGS) \
