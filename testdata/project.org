@@ -17,7 +17,7 @@
 * Test data for project tests
 
 #+BEGIN_SRC bazel-module :tangle MODULE.bazel
-# empty
+bazel_dep(name = "rules_cc", version = "0.2.17")
 #+END_SRC
 
 #+BEGIN_SRC fundamental :tangle bazel-out
@@ -31,6 +31,9 @@ ignored directory # with number sign
 #+END_SRC
 
 #+BEGIN_SRC bazel-build :tangle package/BUILD
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
 cc_library(
     name = "lib",
     srcs = [

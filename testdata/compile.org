@@ -15,10 +15,12 @@
 #+PROPERTY: header-args :mkdirp yes :main no
 
 #+BEGIN_SRC bazel-module :tangle MODULE.bazel
-# empty
+bazel_dep(name = "rules_cc", version = "0.2.17")
 #+END_SRC
 
 #+BEGIN_SRC bazel-build :tangle package/BUILD
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
 cc_library(
     name = "test",
     srcs = ["test.cc"],
@@ -33,28 +35,40 @@ UnknownType foo;
 Merged standard output and error from Bazel:
 
 #+BEGIN_SRC fundamental :tangle bazel.out
+INFO: Invocation ID: 106c722c-f5b5-47a7-8a68-7c6ea5680d95
+Computing main repo mapping: 
+Computing main repo mapping: 
+Computing main repo mapping: 
+Computing main repo mapping: 
+Computing main repo mapping: 
 Loading: 
-Loading: 0 packages loaded
-WARNING: %ROOTDIR%/package/BUILD:1:11: target '//package:test' is deprecated: Deprecated!
-Analyzing: target //package:test (1 packages loaded, 0 targets configured)
-Analyzing: target //package:test (11 packages loaded, 18 targets configured)
-INFO: Analyzed target //package:test (15 packages loaded, 51 targets configured).
-INFO: Found 1 target...
+Loading: 1 packages loaded
+WARNING: %ROOTDIR%/package/BUILD:3:11: target '//package:test' is deprecated: Deprecated!
 bazel: Entering directory `%ROOTDIR%/'
-[0 / 6] [Prepa] Writing file package/libtest.a-2.params ... (3 actions, 0 running)
-ERROR: %ROOTDIR%/package/BUILD:1:11: Compiling package/test.cc failed: (Exit 1): gcc failed: error executing command /usr/bin/gcc -U_FORTIFY_SOURCE -fstack-protector -Wall -Wunused-but-set-parameter -Wno-free-nonheap-object -fno-omit-frame-pointer '-std=c++0x' -MD -MF ... (remaining 16 argument(s) skipped)
+Analyzing: target //package:test (6 packages loaded, 6 targets configured)
+Analyzing: target //package:test (6 packages loaded, 6 targets configured)
 
-Use --sandbox_debug to see verbose messages from the sandbox gcc failed: error executing command /usr/bin/gcc -U_FORTIFY_SOURCE -fstack-protector -Wall -Wunused-but-set-parameter -Wno-free-nonheap-object -fno-omit-frame-pointer '-std=c++0x' -MD -MF ... (remaining 16 argument(s) skipped)
+Analyzing: target //package:test (58 packages loaded, 7 targets configured)
 
-Use --sandbox_debug to see verbose messages from the sandbox
-package/test.cc:1:1: error: 'UnknownType' does not name a type
+Analyzing: target //package:test (76 packages loaded, 429 targets configured)
+
+Analyzing: target //package:test (76 packages loaded, 429 targets configured)
+
+Analyzing: target //package:test (80 packages loaded, 444 targets configured)
+
+INFO: Analyzed target //package:test (84 packages loaded, 465 targets configured).
+[2 / 4] Compiling package/test.cc; 0s disk-cache, darwin-sandbox
+ERROR: %ROOTDIR%/package/BUILD:3:11: Compiling package/test.cc failed: (Exit 1): cc_wrapper.sh failed: error executing CppCompile command (from cc_library rule target //package:test) external/rules_cc++cc_configure_extension+local_config_cc/cc_wrapper.sh -U_FORTIFY_SOURCE -fstack-protector -Wall -Wthread-safety -Wself-assign -Wunused-but-set-parameter -Wno-free-nonheap-object ... (remaining 21 arguments skipped)
+
+Use --sandbox_debug to see verbose messages from the sandbox and retain the sandbox build root for debugging
+package/test.cc:1:1: error: unknown type name 'UnknownType'
     1 | UnknownType foo;
-      | ^~~~~~~~~~~
+      | ^
+1 error generated.
 bazel: Leaving directory `%ROOTDIR%/'
 Target //package:test failed to build
 Use --verbose_failures to see the command lines of failed build steps.
-INFO: Elapsed time: 1.702s, Critical Path: 0.04s
-INFO: 4 processes: 4 internal.
-FAILED: Build did NOT complete successfully
-FAILED: Build did NOT complete successfully
+INFO: Elapsed time: 12.217s, Critical Path: 0.40s
+INFO: 3 processes: 3 internal.
+ERROR: Build did NOT complete successfully
 #+END_SRC

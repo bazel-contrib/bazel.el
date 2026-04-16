@@ -337,7 +337,7 @@ gets killed early."
         (ert-info ("Deprecation warning")
           (compilation-next-error 1)
           (should (looking-at-p
-                   (rx bol "WARNING: " (+ nonl) "/package/BUILD:1:11: target "
+                   (rx bol "WARNING: " (+ nonl) "/package/BUILD:3:11: target "
                        "'//package:test' is deprecated: Deprecated!" eol)))
           (save-current-buffer (compile-goto-error))
           (should (equal file (file-name-unquote
@@ -346,7 +346,7 @@ gets killed early."
         (ert-info ("Target failure")
           (compilation-next-error 1)
           (should (looking-at-p
-                   (rx bol "ERROR: " (+ nonl) "/package/BUILD:1:11: "
+                   (rx bol "ERROR: " (+ nonl) "/package/BUILD:3:11: "
                        "Compiling package/test.cc failed: ")))
           (save-current-buffer (compile-goto-error))
           (should (equal file (file-name-unquote
@@ -369,11 +369,11 @@ gets killed early."
       (bazel-build-mode)
       (let ((imenu-use-markers nil))
         (should (equal (funcall imenu-create-index-function)
-                       '(("lib" . 1) ("bin" . 185)))))
+                       '(("lib" . 102) ("bin" . 286)))))
       (let ((imenu-use-markers t))
         (should (equal (funcall imenu-create-index-function)
-                       `(("lib" . ,(copy-marker 1))
-                         ("bin" . ,(copy-marker 185)))))))))
+                       `(("lib" . ,(copy-marker 102))
+                         ("bin" . ,(copy-marker 286)))))))))
 
 (ert-deftest bazel-mode/speedbar ()
   "Check that \\[speedbar] detects BUILD files."
@@ -1086,13 +1086,17 @@ gets killed early."
               (temp-buffer-window-show-hook
                (list (lambda () (push (current-buffer) temp-buffers)))))
           (bazel-buildifier)
-          (should (equal (buffer-string) "cc_library(\n"))  ; no change
+          (should (equal (buffer-string)  ; no change
+                         "load(\"@rules_cc//cc:cc_library.bzl\", \"cc_library\")
+
+cc_library(
+"))
           (should (eql (buffer-modified-tick) tick-before))))
       (should (eql (length temp-buffers) 1))
       (with-current-buffer (car temp-buffers)
         (ert-info ("Error buffer")
           (should (file-equal-p default-directory dir))
-          (should (equal (buffer-string) "pkg/BUILD:3:1: syntax error
+          (should (equal (buffer-string) "pkg/BUILD:5:1: syntax error
 pkg/BUILD # reformat
 
 Process buildifier exited abnormally with code 1

@@ -15,10 +15,12 @@
 #+PROPERTY: header-args :mkdirp yes :main no
 
 #+BEGIN_SRC bazel-module :tangle MODULE.bazel
-# empty
+bazel_dep(name = "rules_cc", version = "0.2.17")
 #+END_SRC
 
 #+BEGIN_SRC bazel-build :tangle package/BUILD
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
 cc_library(
     name = "test",
     srcs = ["test.cc"],

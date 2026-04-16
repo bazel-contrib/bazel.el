@@ -17,11 +17,13 @@
 * Test data for ~bazel-buildifier~
 
 #+BEGIN_SRC bazel-module :tangle MODULE.bazel
-# empty
+bazel_dep(name = "rules_cc", version = "0.2.17")
 #+END_SRC
 
 #+NAME: build
 #+BEGIN_SRC bazel-build :tangle pkg/BUILD
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
 cc_library(
 #+END_SRC
 
@@ -37,6 +39,6 @@ EOF
 
 #+RESULTS:
 #+BEGIN_SRC fundamental :tangle buildifier.err
-pkg/BUILD:3:1: syntax error
+pkg/BUILD:5:1: syntax error
 pkg/BUILD # reformat
 #+END_SRC

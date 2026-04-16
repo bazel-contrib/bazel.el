@@ -13,10 +13,14 @@
 # limitations under the License.
 
 #+BEGIN_SRC bazel-module :tangle REPO.bazel :main no
-# empty
+bazel_dep(name = "rules_cc", version = "0.2.17")
+bazel_dep(name = "rules_python", version = "1.9.0")
 #+END_SRC
 
 #+BEGIN_SRC bazel-build :tangle BUILD
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_python//python:py_test.bzl", "py_test")
+
 cc_library(
     name = "test",
     srcs = ["test.cc"],
