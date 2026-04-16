@@ -105,31 +105,48 @@ end_of_record
 Merged standard output and error from Bazel:
 
 #+BEGIN_SRC fundamental :tangle bazel.out
+WARNING: The following rc files are no longer being read, please transfer their contents or import their path into one of the standard rc files:
+/Users/p/.bazelrc
+Computing main repo mapping: 
 Loading: 
 Loading: 0 packages loaded
 INFO: Using default value for --instrumentation_filter: "^//src/main/java/example[/:]".
 INFO: Override the above default with --instrumentation_filter
-Analyzing: 2 targets (2 packages loaded, 0 targets configured)
-Analyzing: 2 targets (13 packages loaded, 49 targets configured)
-Analyzing: 2 targets (13 packages loaded, 49 targets configured)
-Analyzing: 2 targets (23 packages loaded, 362 targets configured)
-Analyzing: 2 targets (25 packages loaded, 423 targets configured)
-Analyzing: 2 targets (26 packages loaded, 587 targets configured)
-INFO: Analyzed 2 targets (27 packages loaded, 764 targets configured).
-INFO: Found 1 target and 1 test target...
 bazel: Entering directory `%ROOTDIR%/'
-[0 / 10] [Prepa] BazelWorkspaceStatusAction stable-status.txt
-[8 / 13] Action external/bazel_tools/tools/jdk/platformclasspath_classes/DumpPlatformClassPath.class; 1s darwin-sandbox
-[10 / 13] Compiling Java headers src/main/java/example/libexample-hjar.jar (1 source file); 0s darwin-sandbox ... (2 actions running)
-[19 / 22] Action external/bazel_tools/tools/jdk/platformclasspath.jar; 0s darwin-sandbox
+Analyzing: 2 targets (2 packages loaded, 0 targets configured)
+Analyzing: 2 targets (2 packages loaded, 0 targets configured)
+
+Analyzing: 2 targets (87 packages loaded, 1412 targets configured)
+
+Analyzing: 2 targets (87 packages loaded, 1412 targets configured)
+
+Analyzing: 2 targets (91 packages loaded, 1446 targets configured)
+
+Analyzing: 2 targets (97 packages loaded, 3889 targets configured)
+
+Analyzing: 2 targets (98 packages loaded, 3910 targets configured)
+
+Analyzing: 2 targets (98 packages loaded, 3910 targets configured)
+
+INFO: Analyzed 2 targets (101 packages loaded, 4079 targets configured).
+[9 / 15] [Prepa] JavaToolchainCompileBootClasspath external/rules_java+/toolchains/platformclasspath_unstripped.jar
+[10 / 15] [Prepa] Extracting interfaces from external/rules_java+/toolchains/platformclasspath_unstripped.jar
+[11 / 15] Compiling Java headers src/main/java/example/libexample-hjar.jar (1 source file); 0s darwin-sandbox ... (2 actions running)
+[25 / 31] JavaToolchainCompileClasses external/rules_java+/toolchains/platformclasspath_classes [for tool]; 0s darwin-sandbox
+[27 / 31] Extracting interfaces from external/rules_java+/toolchains/platformclasspath_unstripped.jar [for tool]; 0s darwin-sandbox
+[30 / 31] Testing //src/test/java/example:example_test; 0s darwin-sandbox
+INFO: LCOV coverage report is located at %ROOTDIR%/bazel-out/_coverage/_baseline_report.dat
+ and execpath is bazel-out/_coverage/_baseline_report.dat
+INFO: LCOV coverage report is located at %ROOTDIR%/bazel-out/_coverage/_coverage_report.dat
+ and execpath is bazel-out/_coverage/_coverage_report.dat
+INFO: Found 1 target and 1 test target...
 bazel: Leaving directory `%ROOTDIR%/'
-INFO: Elapsed time: 13,442s, Critical Path: 4,12s
-INFO: 22 processes: 12 internal, 7 darwin-sandbox, 3 worker.
-INFO: Build completed successfully, 22 total actions
-//src/test/java/example:example_test                                     PASSED in 0.8s
+INFO: Elapsed time: 15.886s, Critical Path: 5.77s
+INFO: 36 processes: 22 internal, 11 darwin-sandbox, 3 worker.
+INFO: Build completed successfully, 36 total actions
+//src/test/java/example:example_test                                     PASSED in 1.3s
   %ROOTDIR%/bazel-out/k8-fastbuild/testlogs/src/test/java/example/example_test/coverage.dat
 
 Executed 1 out of 1 test: 1 test passes.
 There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.
-INFO: Build completed successfully, 22 total actions
 #+END_SRC
