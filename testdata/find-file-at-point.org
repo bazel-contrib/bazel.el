@@ -1,4 +1,4 @@
-# Copyright 2021-2022, 2024 Google LLC
+# Copyright 2021-2022, 2024, 2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 * Test data for the ~bazel-mode/ffap~ test
 
-#+BEGIN_SRC bazel-workspace :tangle root/WORKSPACE
-workspace(name = "root")
+#+BEGIN_SRC bazel-repo :tangle root/REPO.bazel
+# empty
 #+END_SRC
 
 #+BEGIN_SRC C :tangle root/aaa.h
@@ -31,8 +31,8 @@ workspace(name = "root")
 
 Files in an external repository:
 
-#+BEGIN_SRC bazel-workspace :tangle root/bazel-root/external/ws/WORKSPACE
-workspace(name = "ws")
+#+BEGIN_SRC bazel-repo :tangle root/bazel-root/external/ws/REPO.bazel
+# empty
 #+END_SRC
 
 #+BEGIN_SRC C :tangle root/bazel-root/external/ws/bbb.h

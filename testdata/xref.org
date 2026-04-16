@@ -14,8 +14,8 @@
 
 #+PROPERTY: header-args :mkdirp yes :main no
 
-#+BEGIN_SRC bazel-workspace :tangle root/WORKSPACE
-workspace(name = "root")
+#+BEGIN_SRC bazel-repo :tangle root/REPO.bazel
+# empty
 #+END_SRC
 
 #+BEGIN_SRC bazel-build :tangle root/BUILD
@@ -68,7 +68,7 @@ Create empty files that the labels in the test BUILD file refer to.
 
 Files in an external repository:
 
-#+BEGIN_SRC bazel-workspace :tangle root/bazel-root/external/ws/WORKSPACE
+#+BEGIN_SRC bazel-repo :tangle root/bazel-root/external/ws/REPO.bazel
 # empty
 #+END_SRC
 

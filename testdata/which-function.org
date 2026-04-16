@@ -16,8 +16,8 @@
 
 * Test data for ~bazel-starlark-mode/which-function~
 
-#+BEGIN_SRC bazel-workspace :tangle WORKSPACE
-workspace(name = "test")
+#+BEGIN_SRC bazel-repo :tangle REPO.bazel
+# empty
 #+END_SRC
 
 #+BEGIN_SRC bazel-build :tangle BUILD
