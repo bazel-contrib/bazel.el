@@ -6,10 +6,10 @@ libraries.  You can install it by dropping the file somewhere in your
 `load-path` and byte-compiling it.
 
 The library provides major modes for editing Bazel [BUILD files][], [WORKSPACE
-files][], [.bazelrc files][], as well as [Starlark files][].  It also provides
-commands to [run Bazel commands][] and integration with core GNU Emacs
-infrastructure like [compilation][] and [xref][].  See the [manual][] for
-details.
+files][], [MODULE.bazel files][], [REPO.bazel files][], [.bazelrc files][], as
+well as [Starlark files][].  It also provides commands to [run Bazel commands][]
+and integration with core GNU Emacs infrastructure like [compilation][] and
+[xref][].  See the [manual][] for details.
 
 This repository is minimally maintained on a best-effort basis by volunteers in
 their spare time.
@@ -18,6 +18,8 @@ their spare time.
 [GNU Emacs]: https://www.gnu.org/software/emacs/
 [BUILD files]: https://bazel.build/concepts/build-files
 [WORKSPACE files]: https://bazel.build/concepts/build-ref#workspace
+[MODULE.bazel files]: https://bazel.build/external/overview#overview
+[REPO.bazel files]: https://bazel.build/external/overview#repo.bazel
 [.bazelrc files]: https://bazel.build/run/bazelrc
 [Starlark files]: https://bazel.build/rules/language
 [run Bazel commands]: https://bazel.build/run/build
