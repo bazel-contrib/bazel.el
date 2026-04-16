@@ -38,12 +38,12 @@ emacs --quick --batch --visit="${dir:?}/.tangle.org" \
   --funcall='org-babel-tangle' || exit
 rm -- "${dir:?}/.tangle.org" || exit
 
-execroot="$(cd "${dir:?}" && bazel --bazelrc=/dev/null info execution_root)"
+execroot="$(cd "${dir:?}" && bazel --nohome_rc info execution_root)"
 
 # We explicitly compile with the current directory set to a subdirectory to
 # ensure that repository-relative filenames still work as expected.  Invert the
 # exit status of “bazel build” because we expect it to fail.
-out="$(cd "${dir:?}/lib" && ! bazel --bazelrc=/dev/null build --nobuild //... 2>&1)"
+out="$(cd "${dir:?}/lib" && ! bazel --nohome_rc build --nobuild //... 2>&1)"
 
 # Replace the arbitrary temporary directory in the output with placeholders.
 out="${out//${dir}/%ROOTDIR%}"

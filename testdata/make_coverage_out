@@ -43,12 +43,12 @@ rm -- "${dir:?}/.tangle.org" || exit
 # This would interfere with the Bazel run below.
 rm -r -- "${dir:?}/bazel-out"
 
-execroot="$(cd "${dir:?}" && bazel --bazelrc=/dev/null info execution_root)"
-testlogs="$(cd "${dir:?}" && bazel --bazelrc=/dev/null info bazel-testlogs)"
+execroot="$(cd "${dir:?}" && bazel --nohome_rc info execution_root)"
+testlogs="$(cd "${dir:?}" && bazel --nohome_rc info bazel-testlogs)"
 
 # We explicitly compile with the current directory set to a subdirectory to
 # ensure that repository-relative filenames still work as expected.
-out="$(cd "${dir:?}/src" && bazel --bazelrc=/dev/null coverage //... 2>&1)"
+out="$(cd "${dir:?}/src" && bazel --nohome_rc coverage //... 2>&1)"
 
 # Parse output to find location of coverage.dat.  The output should be
 # relatively stable, cf. https://bazel.build/run/scripts#parsing-output.
