@@ -13,6 +13,7 @@
 # limitations under the License.
 
 .POSIX:
+.PHONY: all check coverage info install
 .SUFFIXES:
 
 SHELL = /bin/sh
