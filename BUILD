@@ -62,4 +62,10 @@ genrule(
     outs = ["bazel.el.info"],
     cmd = "$${MAKEINFO:-makeinfo} --no-split --output=$@ -- $<",
     tags = ["manual"],
+    visibility = ["//dev:__pkg__"],
+)
+
+exports_files(
+    ["bazel.el"],
+    visibility = ["//dev:__pkg__"],
 )

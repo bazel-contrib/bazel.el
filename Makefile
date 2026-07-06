@@ -13,7 +13,7 @@
 # limitations under the License.
 
 .POSIX:
-.PHONY: all check coverage info install
+.PHONY: all check coverage info install release
 .SUFFIXES:
 
 SHELL = /bin/sh
@@ -68,3 +68,7 @@ install: all info
 	$(POST_INSTALL)
 	install-info -- '$(DESTDIR)$(infodir)/bazel.el.info' \
 	  '$(DESTDIR)$(infodir)/dir'
+
+release: check
+	$(BAZEL) build --action_env='MAKEINFO=$(MAKEINFO)' \
+	  --compilation_mode=opt $(BAZELFLAGS) -- //dev:release.tar
