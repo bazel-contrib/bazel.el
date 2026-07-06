@@ -1,4 +1,4 @@
-# Copyright 2023, 2026 Philipp Stephani
+# Copyright 2026 Philipp Stephani
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,14 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-bazel_dep(name = "phst_rules_elisp")
-git_override(
-    module_name = "phst_rules_elisp",
-    commit = "e0b1bb5470c0ce1ae2c13d6ce769af7517b577b8",
-    remote = "https://github.com/phst/rules_elisp.git",
+load("@bazel_skylib//rules:select_file.bzl", "select_file")
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
+
+package(
+    default_applicable_licenses = ["//:license"],
+    default_visibility = ["//visibility:private"],
 )
 
-bazel_dep(name = "rules_license", version = "1.0.0")
+licenses(["notice"])
 
-bazel_dep(name = "bazel_skylib", version = "1.9.0", dev_dependency = True)
-bazel_dep(name = "rules_pkg", version = "1.2.0", dev_dependency = True)
+pkg_tar(
+    name = "release",
+    srcs = [
+        ":bazel.elc",
+        "//:bazel.el",
+        "//:bazel.el.info",
+    ],
+    mode = "0444",
+    tags = ["manual"],
+)
+
+select_file(
+    name = "bazel.elc",
+    srcs = "//:bazel",
+    subpath = "bazel.elc",
+)
