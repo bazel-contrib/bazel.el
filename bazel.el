@@ -1085,8 +1085,8 @@ See Info node ‘(elisp) Completion in Buffers’ for context."
       ;; cover most cases (e.g. “deps” attributes), but not add large amounts of
       ;; false positives.
       (let ((state (syntax-ppss)))
-        (when (nth 3 state)  ; in string
-          (let ((start (1+ (nth 8 state))))  ; first character in string
+        (when (ppss-string-terminator state)  ; in string
+          (let ((start (1+ (ppss-comment-or-string-start state))))
             (save-excursion
               ;; Jump to the closing quotation mark.
               (parse-partial-sexp (point) (point-max) nil nil state
@@ -2706,8 +2706,8 @@ either @REPOSITORY//PACKAGE:TARGET or //PACKAGE:TARGET."
 (defun bazel--string-at-point ()
   "Return the string literal at point, or nil if not inside a string literal."
   (let ((state (syntax-ppss)))
-    (when (nth 3 state)  ; in string
-      (let ((start (1+ (nth 8 state))))  ; (nth 8 state) is the opening quote
+    (when (ppss-string-terminator state)  ; in string
+      (let ((start (1+ (ppss-comment-or-string-start state))))
         (save-excursion
           ;; Jump to the closing quotation mark.
           (parse-partial-sexp (point) (point-max) nil nil state 'syntax-table)
@@ -2730,7 +2730,8 @@ the match text.  The second match group matches the name."
               (backref 1) (* blank) (any ?, ?\)))
           bound t)
          (let ((syntax (syntax-ppss (match-beginning 0))))
-           (and (> (nth 0 syntax) 0) (null (nth 8 syntax)))))))
+           (and (> (ppss-depth syntax) 0)
+                (null (ppss-comment-or-string-start syntax)))))))
 
 (defun bazel--find-magic-comment (bound)
   "Search for a magic comment from point to BOUND.
@@ -2743,7 +2744,7 @@ the comment text."
         (search-spaces-regexp nil))
     (with-case-table ascii-case-table
       (and (re-search-forward bazel--magic-comment-regexp bound t)
-           (nth 4 (syntax-ppss))))))
+           (ppss-comment-depth (syntax-ppss))))))
 
 (defun bazel--line-column-pos (line column)
   "Return buffer position in the current buffer for LINE and COLUMN.

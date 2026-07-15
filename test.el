@@ -398,16 +398,16 @@ gets killed early."
       (ert-info ((format "at position %d; rest of buffer is %S"
                          (point)
                          (buffer-substring-no-properties (point) (point-max))))
-        (cl-destructuring-bind
-            (depth _ _ in-string-p in-comment-p _ _ _ string-start . rest)
-            (syntax-ppss)
-          (should (eq depth 0))
-          (when (< 4 (point) (- (point-max) 5)) (should in-string-p))
-          (should-not in-comment-p)
-          ;; The syntactic start of a triple-quoted string could be on the first
-          ;; (Emacs 27) or the last (Emacs 28) quote,
+        (let* ((state (syntax-ppss))
+               (context (syntax-ppss-context state)))
+          (should (eq (ppss-depth state) 0))
+          (when (< 4 (point) (- (point-max) 5)) (should (eq context 'string)))
+          (should-not (eq context 'comment))
+          ;; The syntactic start of a triple-quoted string could be on the
+          ;; first (Emacs 27) or the last (Emacs 28) quote,
           ;; cf. https://bugs.gnu.org/49518.
-          (should (eq (not in-string-p) (not string-start))))
+          (should (eq (not (eq context 'string))
+                      (not (ppss-comment-or-string-start state)))))
         (should (eq (face-at-point)
                     (and (< (point) (1- (point-max))) 'font-lock-string-face)))
         (forward-char)))))
