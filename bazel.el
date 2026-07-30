@@ -433,7 +433,10 @@ This is the parent mode for the more specific modes
 ;;;###autoload
 (add-to-list 'auto-mode-alist
              ;; https://bazel.build/build/bzlmod#module-bazel
-             (cons (rx "/MODULE.bazel" eos) #'bazel-module-mode))
+             ;; and
+             ;; https://bazel.build/rules/lib/globals/module#include
+             (cons (rx ?/ (? (+ nonl) ?.) "MODULE.bazel" eos)
+                   #'bazel-module-mode))
 
 ;;;###autoload
 (define-derived-mode bazel-repo-mode bazel-mode "REPO.bazel"

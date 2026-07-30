@@ -1449,6 +1449,7 @@ Process buildifier exited abnormally with code 1
                      ("WORKSPACE" bazel-workspace-mode)
                      ("WORKSPACE.bazel" bazel-workspace-mode)
                      ("MODULE.bazel" bazel-module-mode)
+                     ("deps.MODULE.bazel" bazel-module-mode)
                      ("MODULE.bazel.lock" js-json-mode)
                      ("REPO.bazel" bazel-repo-mode)
                      ("def.bzl" bazel-starlark-mode)
