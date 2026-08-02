@@ -40,6 +40,7 @@ jobs:
             build --experimental_repository_cache_hardlinks
             build --toolchain_resolution_debug=//:bazel
             test --test_output=errors
+            run --noomit_run_args
           disk-cache: true
           repository-cache: true
       - name: Run Bazel tests
