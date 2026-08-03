@@ -1,0 +1,41 @@
+#!/bin/sh
+
+# Copyright 2026 Philipp Stephani
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# shellcheck disable=SC3040
+set -Cefu -o pipefail
+
+case "$#" in
+  0) tag="$(git tag --points-at=HEAD -- 'v*')" ;;
+  1) tag="$1" ;;
+  *) echo "Usage: $0 [TAG]" >&2
+     exit 2 ;;
+esac
+
+if [ -z "${tag}" ]; then
+  echo 'No tag given' >&2
+  exit 2
+fi
+
+root="$(git rev-parse --show-toplevel)"
+
+set -x
+
+cd "${root}"
+
+make release
+
+gh release create --draft --generate-notes -- \
+  "${tag:?}" bazel-bin/dev/release.tar
