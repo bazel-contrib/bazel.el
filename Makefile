@@ -76,5 +76,5 @@ release: check
 	$(BAZEL) build --action_env='MAKEINFO=$(MAKEINFO)' \
 	  --compilation_mode=opt $(BAZELFLAGS) -- //dev:release.tar
 	tag="$$($(GIT) tag --points-at=HEAD -- 'v*')" && \
-	  $(GH) release create --draft --generate-notes --verify-tag -- \
+	  $(GH) release create --generate-notes --verify-tag -- \
 	    "$${tag:?}" bazel-bin/dev/release.tar
