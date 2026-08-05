@@ -17,17 +17,17 @@
 # shellcheck disable=SC3040
 set -Cefu -o pipefail
 
-case "$#" in
-  0) tag="$(git tag --points-at=HEAD -- 'v*')" ;;
-  1) tag="$1" ;;
-  *) echo "Usage: $0 [TAG]" >&2
-     exit 2 ;;
-esac
+if [ -n "$(git status --porcelain)" ]; then
+  echo 'Worktree is unclean' >&2
+  exit 1
+fi
 
+tag="$(git tag --points-at=HEAD -- 'v*')"
 if [ -z "${tag}" ]; then
   echo 'No tag given' >&2
   exit 2
 fi
+git rev-parse --verify "refs/tags/${tag:?}"
 
 root="$(git rev-parse --show-toplevel)"
 
