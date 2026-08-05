@@ -23,6 +23,8 @@ BAZELFLAGS =
 INSTALL ?= install
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL) -m 644
+GIT = git
+GH = gh
 
 all:
 	$(BAZEL) build $(BAZELFLAGS) -- //...
@@ -70,5 +72,9 @@ install: all info
 	  '$(DESTDIR)$(infodir)/dir'
 
 release: check
+	test -z "$$($(GIT) status --porcelain)"
 	$(BAZEL) build --action_env='MAKEINFO=$(MAKEINFO)' \
 	  --compilation_mode=opt $(BAZELFLAGS) -- //dev:release.tar
+	tag="$$($(GIT) tag --points-at=HEAD -- 'v*')" && \
+	  $(GH) release create --draft --generate-notes -- \
+	    "$${tag:?}" bazel-bin/dev/release.tar
