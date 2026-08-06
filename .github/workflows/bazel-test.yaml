@@ -21,7 +21,12 @@ permissions:
 jobs:
   test:
     name: Tests
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+    runs-on: ${{matrix.os}}
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
