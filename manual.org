@@ -40,7 +40,7 @@ This manual describes ~bazel.el~, a GNU Emacs package to work with the
 #+FINDEX: bazelignore-mode
 #+FINDEX: bazeliskrc-mode
 #+FINDEX: bazel-starlark-mode
-The package provides five major modes for editing Bazel-related files:
+The package provides several major modes for editing Bazel-related files:
 ~bazel-build-mode~ for BUILD files, ~bazel-workspace-mode~ for WORKSPACE files,
 ~bazel-module-mode~ for MODULE.bazel files as well as =*.MODULE.bazel= segment
 files pulled in with ~include~, ~bazel-repo-mode~ for REPO.bazel
