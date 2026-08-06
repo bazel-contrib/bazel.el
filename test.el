@@ -1452,6 +1452,7 @@ Process buildifier exited abnormally with code 1
                      ("deps.MODULE.bazel" bazel-module-mode)
                      ("MODULE.bazel.lock" js-json-mode)
                      ("REPO.bazel" bazel-repo-mode)
+                     ("VENDOR.bazel" bazel-vendor-mode)
                      ("def.bzl" bazel-starlark-mode)
                      (".bazelrc" bazelrc-mode)
                      (".bazelignore" bazelignore-mode)))

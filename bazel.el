@@ -342,7 +342,7 @@ mentioned in the Buildifier source code at URL
   "Major mode for editing Bazel files with Starlark-like syntax.
 This is the parent mode for the more specific modes
 ‘bazel-build-mode’, ‘bazel-workspace-mode’, ‘bazel-module-mode’,
-‘bazel-repo-mode’, and ‘bazel-starlark-mode’."
+‘bazel-repo-mode’, ‘bazel-vendor-mode’, and ‘bazel-starlark-mode’."
   ;; Almost all Starlark code in existence uses 4 spaces for indentation.
   ;; Buildifier also enforces this style.
   (setq-local tab-width 4)
@@ -458,6 +458,21 @@ This is the parent mode for the more specific modes
 (add-to-list 'auto-mode-alist
              ;; https://docs.google.com/document/d/1rS-B3d_sfZFY2AcSwIq2ibQc7X1lgeycddLJqjYKgOA/comment
              (cons (rx "/REPO.bazel" eos) #'bazel-repo-mode))
+
+;;;###autoload
+(define-derived-mode bazel-vendor-mode bazel-mode "VENDOR.bazel"
+  "Major mode for editing VENDOR.bazel files."
+  ;; Buildifier doesn’t have special support for VENDOR.bazel files yet.
+  (setq bazel--buildifier-type 'default)
+  ;; In VENDOR.bazel files, we don’t have function definitions.  Instead, treat
+  ;; directives (= Python statements) as functions.
+  (setq-local beginning-of-defun-function #'python-nav-beginning-of-statement)
+  (setq-local end-of-defun-function #'python-nav-end-of-statement))
+
+;;;###autoload
+(add-to-list 'auto-mode-alist
+             ;; https://bazel.build/external/vendor#configure-vendor-mode
+             (cons (rx "/VENDOR.bazel" eos) #'bazel-vendor-mode))
 
 ;;;###autoload
 (define-derived-mode bazel-starlark-mode bazel-mode "Starlark"
