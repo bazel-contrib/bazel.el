@@ -278,7 +278,7 @@ mentioned in the Buildifier source code at URL
                     "finally" "from" "global" "import" "is" "nonlocal" "raise"
                     "try" "while" "with" "yield")
                   'symbols)
-     . 'font-lock-keyword-face)
+     . 'font-lock-warning-face)
     ;; Constants
     (,(regexp-opt '("True" "False" "None")
                   'symbols)
