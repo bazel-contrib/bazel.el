@@ -1768,8 +1768,8 @@ and REPOSITORY is the repository containing PACKAGE."
 (defun bazel-mode-create-index ()
   "Return an Imenu index for the rule targets defined in the current buffer.
 This function is useful as ‘imenu-create-index-function’ for
-‘bazel-build-mode’, ‘bazel-workspace-mode’, ‘bazel-module-mode’, and
-‘bazel-repo-mode’.  See Info node ‘(elisp) Imenu’ for details."
+‘bazel-build-mode’, ‘bazel-workspace-mode’, and
+‘bazel-module-mode’.  See Info node ‘(elisp) Imenu’ for details."
   (save-excursion
     (save-restriction
       (widen)
