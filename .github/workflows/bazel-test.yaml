@@ -26,6 +26,11 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
+        bazel:
+          - '8.0.0'
+          - '8.x'
+          - '9.x'
+          - ''  # use .bazelversion
     runs-on: ${{matrix.os}}
     steps:
       - name: Check out repository
@@ -37,7 +42,7 @@ jobs:
             common --announce_rc
             common --show_progress_rate_limit=10
             common --remote_download_minimal
-            common --lockfile_mode=error
+            common --lockfile_mode=${{matrix.bazel && 'off' || 'error'}}
             build --verbose_failures
             build --experimental_convenience_symlinks=ignore
             build --show_result=0
@@ -46,8 +51,10 @@ jobs:
             build --toolchain_resolution_debug=//:bazel
             test --test_output=errors
             run --noomit_run_args
-          disk-cache: true
+          disk-cache: ${{matrix.bazel || 'default'}}
           repository-cache: true
       - name: Run Bazel tests
+        env:
+          USE_BAZEL_VERSION: ${{matrix.bazel}}
         shell: bash
         run: make check
