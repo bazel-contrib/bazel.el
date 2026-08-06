@@ -44,4 +44,5 @@ jobs:
           disk-cache: true
           repository-cache: true
       - name: Run Bazel tests
+        shell: bash
         run: make check
