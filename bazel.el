@@ -454,12 +454,9 @@ This is the parent mode for the more specific modes
   ;; Buildifier doesn’t have special support for REPO.bazel files yet.
   (setq bazel--buildifier-type 'default)
   ;; In REPO.bazel files, we don’t have function definitions.  Instead, treat
-  ;; rule target definitions (= Python statements) as functions.
+  ;; directives (= Python statements) as functions.
   (setq-local beginning-of-defun-function #'python-nav-beginning-of-statement)
-  (setq-local end-of-defun-function #'python-nav-end-of-statement)
-  (add-hook 'which-func-functions #'bazel-current-target-name nil :local)
-  (setq-local add-log-current-defun-function #'bazel-current-target-name)
-  (setq-local imenu-create-index-function #'bazel-mode-create-index))
+  (setq-local end-of-defun-function #'python-nav-end-of-statement))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist
