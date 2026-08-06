@@ -258,7 +258,8 @@ mentioned in the Buildifier source code at URL
 
 (defconst bazel-font-lock-keywords-1
   ;; Only include file directives.  See Info node ‘(elisp) Levels of Font Lock’.
-  `((,(regexp-opt '("include" "module" "visibility" "workspace") 'symbols)
+  `((,(regexp-opt '("include" "module" "repo" "visibility" "workspace")
+                  'symbols)
      . 'font-lock-builtin-face)
     (,(regexp-opt '("load") 'symbols) . 'font-lock-keyword-face))
   "Value of ‘font-lock-keywords’ in ‘bazel-mode’ at font lock level 1.")
