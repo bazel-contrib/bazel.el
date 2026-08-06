@@ -269,14 +269,14 @@ mentioned in the Buildifier source code at URL
     ;; Starlark files.  Even if some of them are forbidden in BUILD files, they
     ;; should be highlighted.  See
     ;; https://github.com/bazelbuild/starlark/blob/master/spec.md.
-    (,(regexp-opt '("and" "else" "for" "if" "in" "not" "or" "load"
-                    "break" "continue" "def" "pass" "elif" "return")
+    (,(regexp-opt '("and" "break" "continue" "def" "elif" "else" "for" "if" "in"
+                    "lambda" "not" "or" "pass" "return")
                   'symbols)
      . 'font-lock-keyword-face)
     ;; Reserved keywords
-    (,(regexp-opt '("as" "is" "assert" "lambda" "class" "nonlocal" "del" "raise"
-                    "except" "try" "finally" "while" "from" "with" "global"
-                    "yield" "import")
+    (,(regexp-opt '("as" "assert" "async" "await" "class" "del" "except"
+                    "finally" "from" "global" "import" "is" "nonlocal" "raise"
+                    "try" "while" "with" "yield")
                   'symbols)
      . 'font-lock-keyword-face)
     ;; Constants
