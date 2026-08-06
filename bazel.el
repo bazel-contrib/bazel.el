@@ -268,7 +268,8 @@ mentioned in the Buildifier source code at URL
     ;; Include keywords and constants.  Keywords for BUILD files are the same as
     ;; Starlark files.  Even if some of them are forbidden in BUILD files, they
     ;; should be highlighted.  See
-    ;; https://github.com/bazelbuild/starlark/blob/master/spec.md.
+    ;; https://github.com/bazelbuild/starlark/blob/master/spec.md.  “load” is
+    ;; already included in level 1.
     (,(regexp-opt '("and" "break" "continue" "def" "elif" "else" "for" "if" "in"
                     "lambda" "not" "or" "pass" "return")
                   'symbols)
