@@ -1,6 +1,6 @@
 ;;; bazel.el --- Bazel support for Emacs -*- lexical-binding: t; -*-
 
-;; URL: https://github.com/bazelbuild/emacs-bazel-mode
+;; URL: https://github.com/bazel-contrib/bazel.el
 ;; Keywords: build tools, languages
 ;; Package-Requires: ((emacs "29.1"))
 ;; Version: 0.0.3
@@ -46,7 +46,7 @@
   :group 'languages
   :link '(custom-manual "(bazel.el) Top")
   :link '(url-link "https://bazel.build")
-  :link '(url-link "https://github.com/bazelbuild/emacs-bazel-mode"))
+  :link '(url-link "https://github.com/bazel-contrib/bazel.el"))
 
 (defcustom bazel-command '("bazel")
   "Command and arguments that should be used to invoke Bazel.
