@@ -42,7 +42,7 @@ jobs:
             common --announce_rc
             common --show_progress_rate_limit=10
             common --remote_download_minimal
-            common --lockfile_mode=${{matrix.bazel && 'off' || 'error'}}
+            common --lockfile_mode=${{case(matrix.bazel == '', 'error', 'off')}}
             build --verbose_failures
             build --experimental_convenience_symlinks=ignore
             build --show_result=0
