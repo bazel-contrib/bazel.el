@@ -41,9 +41,7 @@ check:
 
 COVERAGE_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off
 GENHTML ?= genhtml
-GENHTMLFLAGS = --branch-coverage \
-  --demangle-cpp='$(CPPFILT)' --demangle-cpp='--no-strip-underscore'
-CPPFILT ?= c++filt
+GENHTMLFLAGS = --branch-coverage
 
 coverage:
 	$(BAZEL) coverage --combined_report=lcov $(COVERAGE_BAZELFLAGS) -- //...
