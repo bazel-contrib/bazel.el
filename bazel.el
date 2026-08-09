@@ -2247,10 +2247,12 @@ root directory as returned by ‘bazel--repository-root’."
        (directory-files
         (bazel--external-repository-dir main-root)
         :full
-        ;; https://bazel.build/rules/lib/globals/workspace#parameters_3 states
-        ;; that workspace names may only contain letters, numbers, underscores,
-        ;; hyphens, and dots.
-        (rx bos (any "A-Z" "a-z") (* (any ?- ?. ?_ "A-Z" "a-z")) eos))))))
+        ;; https://bazel.build/rules/lib/globals/module#parameters-8 states that
+        ;; module names may only contain letters, numbers, underscores, hyphens,
+        ;; and dots.  We also include the plus sign since it’s part of canonical
+        ;; repository names.
+        (rx bos (any ?+ "A-Z" "a-z") (* (any ?+ ?- ?. ?_ "A-Z" "a-z" "0-9"))
+            eos))))))
 
 (defun bazel--target-completion-table (pattern only-tests)
   "Return a completion table for Bazel targets and target patterns.

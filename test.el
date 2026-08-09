@@ -286,7 +286,7 @@ gets killed early."
         (search-forward "\"" (line-end-position))
         (forward-comment (point-max))
         (should (equal (ffap-file-at-point)
-                       (expand-file-name "root/bazel-root/external/ws/bbb.h"
+                       (expand-file-name "root/bazel-root/external/repo+/bbb.h"
                                          dir)))))))
 
 (ert-deftest bazel-build-mode/fill ()
