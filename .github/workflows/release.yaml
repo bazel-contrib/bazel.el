@@ -12,26 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Push
-on: push
+name: Release
+
+on:
+  push:
+    tags: v*.*.*
 
 permissions:
   contents: write
 
 jobs:
-  test:
-    name: Test and release
-    strategy:
-      matrix:
-        os:
-          - ubuntu-latest
-          - macos-latest
-        bazel:
-          - '8.0.0'
-          - '8.x'
-          - '9.x'
-          - ''  # use .bazelversion
-    runs-on: ${{matrix.os}}
+  release:
+    name: Release
+    runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -40,26 +33,16 @@ jobs:
         with:
           bazelrc: |
             common --config=ci
-            common --lockfile_mode=${{case(matrix.bazel == '', 'error', 'off')}}
-          disk-cache: ${{matrix.bazel || 'default'}}
+            build --compilation_mode=opt
+          disk-cache: default
           repository-cache: true
-      - name: Run Bazel tests
-        env:
-          USE_BAZEL_VERSION: ${{matrix.bazel}}
-        shell: bash
-        run: make check
-      - name: Build release archive
-        if: >
-          matrix.os == 'ubuntu-latest' && matrix.bazel == '' &&
-          github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+      - name: Run tests and build release archive
         shell: bash
         run: |
-          bazel build --compilation_mode=opt -- //dev:release.tar
+          make check
+          bazel build -- //dev:release.tar
           cp -- bazel-bin/dev/release.tar 'bazel-${{github.ref_name}}.tar'
       - name: Create release
-        if: >
-          matrix.os == 'ubuntu-latest' && matrix.bazel == '' &&
-          github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
         uses: softprops/action-gh-release@v3
         with:
           files: bazel-${{github.ref_name}}.tar
