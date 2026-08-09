@@ -19,7 +19,7 @@ load("@rules_elisp//elisp:defs.bzl", "elisp_library", "elisp_manual", "elisp_tes
 load("@rules_license//rules:license.bzl", "license")
 
 package(
-    default_applicable_licenses = [":license"],
+    default_package_metadata = [":license"],
     default_visibility = ["//visibility:private"],
 )
 
