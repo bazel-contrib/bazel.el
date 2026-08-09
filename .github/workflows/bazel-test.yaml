@@ -16,7 +16,7 @@ name: Run Bazel tests
 on: push
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   test:
@@ -58,3 +58,19 @@ jobs:
           USE_BAZEL_VERSION: ${{matrix.bazel}}
         shell: bash
         run: make check
+      - name: Build release archive
+        if: >
+          matrix.os == 'ubuntu-latest' && matrix.bazel == '' &&
+          github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+        shell: bash
+        run: |
+          bazel build --compilation_mode=opt -- //dev:release.tar
+          cp -- bazel-bin/dev/release.tar 'bazel-${{github.ref_name}}.tar'
+      - name: Create release
+        if: >
+          matrix.os == 'ubuntu-latest' && matrix.bazel == '' &&
+          github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+        uses: softprops/action-gh-release@v3
+        with:
+          files: bazel-${{github.ref_name}}.tar
+          generate_release_notes: true
