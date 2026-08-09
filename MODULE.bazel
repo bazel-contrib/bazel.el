@@ -12,13 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-bazel_dep(name = "phst_rules_elisp")
-git_override(
-    module_name = "phst_rules_elisp",
-    commit = "e0b1bb5470c0ce1ae2c13d6ce769af7517b577b8",
-    remote = "https://github.com/phst/rules_elisp.git",
-)
-
+bazel_dep(name = "rules_elisp", version = "0.0.2")
 bazel_dep(name = "rules_license", version = "1.0.0")
 
 include("//:dev.MODULE.bazel")
