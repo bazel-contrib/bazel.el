@@ -13,7 +13,7 @@
 # limitations under the License.
 
 .POSIX:
-.PHONY: all check coverage info install release
+.PHONY: all check coverage info install
 .SUFFIXES:
 
 SHELL = /bin/sh
@@ -68,11 +68,3 @@ install: all info
 	$(POST_INSTALL)
 	install-info -- '$(DESTDIR)$(infodir)/bazel.el.info' \
 	  '$(DESTDIR)$(infodir)/dir'
-
-release: check
-	test -z "$$($(GIT) status --porcelain)"
-	$(BAZEL) build --action_env='MAKEINFO=$(MAKEINFO)' \
-	  --compilation_mode=opt $(BAZELFLAGS) -- //dev:release.tar
-	tag="$$($(GIT) tag --points-at=HEAD -- 'v*')" && \
-	  $(GH) release create --generate-notes --verify-tag -- \
-	    "$${tag:?}" bazel-bin/dev/release.tar
