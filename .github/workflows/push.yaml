@@ -39,18 +39,8 @@ jobs:
         uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
-            common --announce_rc
-            common --show_progress_rate_limit=10
-            common --remote_download_minimal
+            common --config=ci
             common --lockfile_mode=${{case(matrix.bazel == '', 'error', 'off')}}
-            build --verbose_failures
-            build --experimental_convenience_symlinks=ignore
-            build --show_result=0
-            build --nostamp
-            build --experimental_repository_cache_hardlinks
-            build --toolchain_resolution_debug=//:bazel
-            test --test_output=errors
-            run --noomit_run_args
           disk-cache: ${{matrix.bazel || 'default'}}
           repository-cache: true
       - name: Run Bazel tests
