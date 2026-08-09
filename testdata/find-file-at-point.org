@@ -31,10 +31,10 @@
 
 Files in an external repository:
 
-#+BEGIN_SRC bazel-module :tangle root/bazel-root/external/ws/MODULE.bazel
+#+BEGIN_SRC bazel-module :tangle root/bazel-root/external/repo+/MODULE.bazel
 # empty
 #+END_SRC
 
-#+BEGIN_SRC C :tangle root/bazel-root/external/ws/bbb.h
+#+BEGIN_SRC C :tangle root/bazel-root/external/repo+/bbb.h
 // Dummy file
 #+END_SRC
