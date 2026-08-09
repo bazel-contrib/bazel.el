@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Run Bazel tests
+name: Push
 on: push
 
 permissions:
@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   test:
-    name: Tests
+    name: Test and release
     strategy:
       matrix:
         os:
