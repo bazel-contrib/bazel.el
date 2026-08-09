@@ -2230,7 +2230,7 @@ directory as returned by ‘bazel--repository-root’."
   ;; repositories.
   (expand-file-name
    (concat "bazel-" (file-name-nondirectory (directory-file-name root))
-           "/external/" )
+           "/external/")
    root))
 
 (defun bazel--external-repository-roots (main-root)
