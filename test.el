@@ -1244,11 +1244,10 @@ Process buildifier exited abnormally with code 1
       (make-directory (file-name-directory file) :parents)
       (write-region "" nil file nil nil nil 'excl))
     ;; CASE is a pair (FILE EXPECTED), where FILE is the current file and
-    ;; EXPECTED is either the name of the BUILD file to find or a symbol
-    ;; denoting an expected error.
+    ;; EXPECTED is the name of the BUILD file to find.
     (pcase-dolist (`(,parent ,expected)
                    '(("" "BUILD")
-                     ("a" user-error)
+                     ("a" "a/BUILD.bazel")
                      ("a/b" "a/b/BUILD.bazel")
                      ("a/b/c" "a/b/c/BUILD")
                      ("a/b/c/d" "a/b/c/d/BUILD.bazel")
@@ -1261,15 +1260,25 @@ Process buildifier exited abnormally with code 1
           (let ((buffer-file-name
                  (expand-file-name "test.cc" (expand-file-name parent dir))))
             (bazel-test--with-buffers
-              (cl-etypecase expected
-                (string
-                 (ert-simulate-command '(bazel-find-build-file))
-                 (should buffer-file-name)
-                 (should (file-equal-p buffer-file-name
-                                       (expand-file-name expected dir))))
-                (symbol
-                 (should-error (ert-simulate-command '(bazel-find-build-file))
-                               :type expected))))))))))
+              (ert-simulate-command '(bazel-find-build-file))
+              (should buffer-file-name)
+              (should (equal buffer-file-name
+                             (expand-file-name expected dir))))))))))
+
+(ert-deftest bazel-find-build-file/nonexisting ()
+  (bazel-test--with-workspace root nil
+    (dolist (package '("" "pkg"))
+      (ert-info (package :prefix "Package: ")
+        (with-temp-buffer
+          (let* ((dir (file-name-as-directory (expand-file-name package root)))
+                 (buffer-file-name (expand-file-name "test.cc" dir)))
+            (make-directory dir :parents)
+            (bazel-test--with-buffers
+              (ert-simulate-command '(bazel-find-build-file))
+              (should buffer-file-name)
+              (should-not (file-exists-p buffer-file-name))
+              (should (equal buffer-file-name
+                             (expand-file-name "BUILD.bazel" dir))))))))))
 
 (ert-deftest bazel-find-workspace-file ()
   (bazel-test--with-workspace dir nil
@@ -1304,6 +1313,21 @@ Process buildifier exited abnormally with code 1
               (should (file-equal-p buffer-file-name
                                     (expand-file-name expected dir))))))))))
 
+(ert-deftest bazel-find-workspace-file/nonexisting ()
+  (bazel-test--with-workspace root nil
+    (dolist (package '("" "pkg"))
+      (ert-info (package :prefix "Package: ")
+        (with-temp-buffer
+          (let* ((dir (file-name-as-directory (expand-file-name package root)))
+                 (buffer-file-name (expand-file-name "test.cc" dir)))
+            (make-directory dir :parents)
+            (bazel-test--with-buffers
+              (ert-simulate-command '(bazel-find-workspace-file))
+              (should buffer-file-name)
+              (should-not (file-exists-p buffer-file-name))
+              (should (equal buffer-file-name
+                             (expand-file-name "WORKSPACE.bazel" root))))))))))
+
 (ert-deftest bazel-find-module-file ()
   (bazel-test--with-workspace dir nil
     (let ((expected (expand-file-name "MODULE.bazel" dir)))
@@ -1329,6 +1353,21 @@ Process buildifier exited abnormally with code 1
                 (ert-simulate-command '(bazel-find-repo-file))
                 (should buffer-file-name)
                 (should (file-equal-p buffer-file-name expected))))))))))
+
+(ert-deftest bazel-find-repo-file/nonexisting ()
+  (bazel-test--with-workspace root nil
+    (dolist (package '("" "pkg"))
+      (ert-info (package :prefix "Package: ")
+        (with-temp-buffer
+          (let* ((dir (file-name-as-directory (expand-file-name package root)))
+                 (buffer-file-name (expand-file-name "test.cc" dir)))
+            (make-directory dir :parents)
+            (bazel-test--with-buffers
+              (ert-simulate-command '(bazel-find-repo-file))
+              (should buffer-file-name)
+              (should-not (file-exists-p buffer-file-name))
+              (should (equal buffer-file-name
+                             (expand-file-name "REPO.bazel" root))))))))))
 
 (ert-deftest bazel-test/completion ()
   "Test completion for ‘bazel-test’."

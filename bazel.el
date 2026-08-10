@@ -1513,9 +1513,9 @@ This is a heuristic.  Return nil if the rule kind can’t be determined."
          (root (or (bazel--repository-root source-file)
                    (user-error "File is not in a Bazel repository")))
          (directory (or (bazel--package-directory source-file root)
-                        (user-error "File is not in a Bazel package")))
+                        (file-name-directory source-file)))
          (build-file (or (bazel--locate-build-file directory)
-                         (user-error "No BUILD file found"))))
+                         (expand-file-name "BUILD.bazel" directory))))
     (find-file build-file))
   nil)
 
@@ -1529,9 +1529,8 @@ This is a heuristic.  Return nil if the rule kind can’t be determined."
               (user-error "Buffer doesn’t visit a file or directory")))
          (root (or (bazel--repository-root source-file)
                    (user-error "File is not in a Bazel repository")))
-         (workspace-file
-          (or (bazel--locate-workspace-file root)
-              (user-error "No WORKSPACE file found"))))
+         (workspace-file (or (bazel--locate-workspace-file root)
+                             (expand-file-name "WORKSPACE.bazel" root))))
     (find-file workspace-file))
   nil)
 
@@ -1545,8 +1544,7 @@ This is a heuristic.  Return nil if the rule kind can’t be determined."
               (user-error "Buffer doesn’t visit a file or directory")))
          (root (or (bazel--repository-root source-file)
                    (user-error "File is not in a Bazel workspace")))
-         (module-file (or (bazel--locate-file "MODULE.bazel" (list root))
-                          (user-error "No MODULE.bazel file found"))))
+         (module-file (expand-file-name "MODULE.bazel" root)))
     (find-file module-file))
   nil)
 
@@ -1560,8 +1558,7 @@ This is a heuristic.  Return nil if the rule kind can’t be determined."
               (user-error "Buffer doesn’t visit a file or directory")))
          (root (or (bazel--repository-root source-file)
                    (user-error "File is not in a Bazel workspace")))
-         (repo-file (or (bazel--locate-file "REPO.bazel" (list root))
-                        (user-error "No REPO.bazel file found"))))
+         (repo-file (expand-file-name "REPO.bazel" root)))
     (find-file repo-file))
   nil)
 
