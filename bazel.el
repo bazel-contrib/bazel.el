@@ -938,6 +938,8 @@ This function (or its return value) can be used for the value
    ["Find WORKSPACE file" bazel-find-workspace-file]
    ["Find MODULE.bazel file" bazel-find-module-file]
    ["Find REPO.bazel file" bazel-find-repo-file]
+   ["Find package directory" bazel-find-package-dir]
+   ["Find repository root directory" bazel-find-repo-root]
    ["Format buffer with Buildifier" bazel-buildifier
     (derived-mode-p 'bazel-mode)]
    ["Insert bazel_dep statement..." bazel-insert-dependency
@@ -1560,6 +1562,34 @@ This is a heuristic.  Return nil if the rule kind can’t be determined."
                    (user-error "File is not in a Bazel workspace")))
          (repo-file (expand-file-name "REPO.bazel" root)))
     (find-file repo-file))
+  nil)
+
+;;;; Finding special directories
+
+(defun bazel-find-package-dir ()
+  "Find the current Bazel package directory in a Dired buffer."
+  (declare (ftype (function () null))
+           (interactive-only t))
+  (interactive)
+  (let* ((file (or buffer-file-name default-directory
+                   (user-error "Buffer doesn’t visit a file or directory")))
+         (root (or (bazel--repository-root file)
+                   (user-error "File is not in a Bazel repository")))
+         (dir (or (bazel--package-directory file root)
+                  (user-error "File is not in a Bazel package"))))
+    (dired dir))
+  nil)
+
+(defun bazel-find-repo-root ()
+  "Find the current repository’s root directory in a Dired buffer."
+  (declare (ftype (function () null))
+           (interactive-only t))
+  (interactive)
+  (let* ((file (or buffer-file-name default-directory
+                   (user-error "Buffer doesn’t visit a file or directory")))
+         (root (or (bazel--repository-root file)
+                   (user-error "File is not in a Bazel repository"))))
+    (dired root))
   nil)
 
 ;;;; ‘find-file-at-point’ support for ‘bazel-mode’
