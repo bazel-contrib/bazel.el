@@ -715,7 +715,7 @@ and Info node ‘(elisp) Syntax Table Internals’."
         (put-text-property (match-beginning 0) (match-end 0)
                            'syntax-table '(11))
         (end-of-line)
-        (unless (eobp)  ; otherwise (1+ (point)) is invalid
+        (unless (eobp)                  ; otherwise (1+ (point)) is invalid
           (put-text-property (point) (1+ (point))
                              'syntax-table '(12))))))
   nil)
@@ -1119,7 +1119,7 @@ See Info node ‘(elisp) Completion in Buffers’ for context."
       ;; cover most cases (e.g. “deps” attributes), but not add large amounts of
       ;; false positives.
       (let ((state (syntax-ppss)))
-        (when (ppss-string-terminator state)  ; in string
+        (when (ppss-string-terminator state) ; in string
           (let ((start (1+ (ppss-comment-or-string-start state))))
             (save-excursion
               ;; Jump to the closing quotation mark.
@@ -1816,8 +1816,8 @@ This function is useful as ‘imenu-create-index-function’ for
           (let ((name (match-string-no-properties 2)))
             (unless (python-syntax-comment-or-string-p)
               (let ((pos (save-excursion
-                            (python-nav-beginning-of-statement)
-                            (if imenu-use-markers (point-marker) (point)))))
+                           (python-nav-beginning-of-statement)
+                           (if imenu-use-markers (point-marker) (point)))))
                 (push (cons name pos) index)))))
         (nreverse index)))))
 
@@ -1831,16 +1831,16 @@ Return nil if not inside a Bazel rule target definition."
       (python-nav-beginning-of-statement)
       (cl-block nil
         (while (re-search-forward
-               ;; The target pattern isn’t the same as
-               ;; https://bazel.build/concepts/labels#target-names (we don’t
-               ;; allow quotation marks in target names), but should be good
-               ;; enough here.
-               (rx symbol-start "name" (* blank) ?= (* blank)
-                   (group (any ?\" ?'))
-                   (group (+ (any "a-z" "A-Z" "0-9"
-                                  ?- "!%@^_` #$&()*+,;<=>?[]{|}~/.")))
-                   (backref 1))
-               bound t)
+                ;; The target pattern isn’t the same as
+                ;; https://bazel.build/concepts/labels#target-names (we don’t
+                ;; allow quotation marks in target names), but should be good
+                ;; enough here.
+                (rx symbol-start "name" (* blank) ?= (* blank)
+                    (group (any ?\" ?'))
+                    (group (+ (any "a-z" "A-Z" "0-9"
+                                   ?- "!%@^_` #$&()*+,;<=>?[]{|}~/.")))
+                    (backref 1))
+                bound t)
           (let ((name (match-string-no-properties 2)))
             (unless (python-syntax-comment-or-string-p)
               (cl-return name))))))))
@@ -2750,7 +2750,7 @@ either @REPOSITORY//PACKAGE:TARGET or //PACKAGE:TARGET."
 (defun bazel--string-at-point ()
   "Return the string literal at point, or nil if not inside a string literal."
   (let ((state (syntax-ppss)))
-    (when (ppss-string-terminator state)  ; in string
+    (when (ppss-string-terminator state) ; in string
       (let ((start (1+ (ppss-comment-or-string-start state))))
         (save-excursion
           ;; Jump to the closing quotation mark.
