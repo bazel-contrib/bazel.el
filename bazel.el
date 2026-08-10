@@ -935,6 +935,7 @@ This function (or its return value) can be used for the value
    ["Find BUILD file" bazel-find-build-file]
    ["Find WORKSPACE file" bazel-find-workspace-file]
    ["Find MODULE.bazel file" bazel-find-module-file]
+   ["Find REPO.bazel file" bazel-find-repo-file]
    ["Format buffer with Buildifier" bazel-buildifier
     (derived-mode-p 'bazel-mode)]
    ["Insert bazel_dep statement..." bazel-insert-dependency
@@ -1547,6 +1548,21 @@ This is a heuristic.  Return nil if the rule kind can’t be determined."
          (module-file (or (bazel--locate-file "MODULE.bazel" (list root))
                           (user-error "No MODULE.bazel file found"))))
     (find-file module-file))
+  nil)
+
+(defun bazel-find-repo-file ()
+  "Find the REPO.bazel file for the current Bazel workspace."
+  (declare (ftype (function () null))
+           (interactive-only t))
+  (interactive)
+  (let* ((source-file
+          (or buffer-file-name default-directory
+              (user-error "Buffer doesn’t visit a file or directory")))
+         (root (or (bazel--repository-root source-file)
+                   (user-error "File is not in a Bazel workspace")))
+         (repo-file (or (bazel--locate-file "REPO.bazel" (list root))
+                        (user-error "No REPO.bazel file found"))))
+    (find-file repo-file))
   nil)
 
 ;;;; ‘find-file-at-point’ support for ‘bazel-mode’

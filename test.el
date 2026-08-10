@@ -1317,6 +1317,19 @@ Process buildifier exited abnormally with code 1
                 (should buffer-file-name)
                 (should (file-equal-p buffer-file-name expected))))))))))
 
+(ert-deftest bazel-find-repo-file ()
+  (bazel-test--with-workspace dir nil
+    (let ((expected (expand-file-name "REPO.bazel" dir)))
+      (make-empty-file expected)
+      (dolist (parent '("" "dir"))
+        (ert-info (parent :prefix "Parent directory: ")
+          (with-temp-buffer
+            (let ((buffer-file-name (file-name-concat dir parent "test.cc")))
+              (bazel-test--with-buffers
+                (ert-simulate-command '(bazel-find-repo-file))
+                (should buffer-file-name)
+                (should (file-equal-p buffer-file-name expected))))))))))
+
 (ert-deftest bazel-test/completion ()
   "Test completion for ‘bazel-test’."
   (bazel-test--with-workspace dir "target-completion-root.org"

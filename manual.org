@@ -193,10 +193,11 @@ information about ~find-file-at-point~, see [[info:Emacs#FFAP][FFAP]].
 #+FINDEX: bazel-find-build-file
 #+FINDEX: bazel-find-workspace-file
 #+FINDEX: bazel-find-module-file
+#+FINDEX: bazel-find-repo-file
 To visit the BUILD file that defines the package for the current file, run the
-command ~bazel-find-build-file~.  Similarly, to find the Bazel WORKSPACE or
-MODULE.bazel files, run ~bazel-find-workspace-file~ or ~bazel-find-module-file~,
-respectively.
+command ~bazel-find-build-file~.  Similarly, to find the Bazel WORKSPACE,
+MODULE.bazel, or REPO.bazel files, run ~bazel-find-workspace-file~,
+~bazel-find-module-file~, or ~bazel-find-repo-file~, respectively.
 
 #+FINDEX: bazel-show-consuming-target
 To find out which Bazel rule target consumes the file that the current buffer
