@@ -110,7 +110,8 @@ See Info node ‘(elisp) Variable Definitions’ for an explanation
 of the OPTION and VALUE arguments."
   (cl-check-type option symbol)
   (dolist (function (eval value t))
-    (add-hook option function 80)))
+    (add-hook option function 80))
+  nil)
 
 (defcustom bazel-test-at-point-functions '(which-function)
   "Abnormal hook to find a test case at point.
@@ -234,7 +235,8 @@ of the symbols ‘build’, ‘bzl’, ‘workspace’, ‘module’, or
 (defun bazel--buildifier-before-save-hook ()
   "Run buildifer in `before-save-hook'."
   (when bazel-buildifier-before-save
-    (bazel-buildifier)))
+    (bazel-buildifier))
+  nil)
 
 ;;;; ‘bazel-mode’ and child modes
 
@@ -386,7 +388,8 @@ This is the parent mode for the more specific modes
             nil :local)
   (when-let ((filename buffer-file-name))
     ;; Initialize filename cache.
-    (bazel--repository-relative-name filename)))
+    (bazel--repository-relative-name filename))
+  nil)
 
 ;;;###autoload
 (define-derived-mode bazel-build-mode bazel-mode "BUILD.bazel"
@@ -398,7 +401,8 @@ This is the parent mode for the more specific modes
   (setq-local end-of-defun-function #'python-nav-end-of-statement)
   (add-hook 'which-func-functions #'bazel-current-target-name nil :local)
   (setq-local add-log-current-defun-function #'bazel-current-target-name)
-  (setq-local imenu-create-index-function #'bazel-mode-create-index))
+  (setq-local imenu-create-index-function #'bazel-mode-create-index)
+  nil)
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist
@@ -415,7 +419,8 @@ This is the parent mode for the more specific modes
   (setq-local end-of-defun-function #'python-nav-end-of-statement)
   (add-hook 'which-func-functions #'bazel-current-target-name nil :local)
   (setq-local add-log-current-defun-function #'bazel-current-target-name)
-  (setq-local imenu-create-index-function #'bazel-mode-create-index))
+  (setq-local imenu-create-index-function #'bazel-mode-create-index)
+  nil)
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist
@@ -436,7 +441,8 @@ This is the parent mode for the more specific modes
   (setq-local end-of-defun-function #'python-nav-end-of-statement)
   (add-hook 'which-func-functions #'bazel-current-target-name nil :local)
   (setq-local add-log-current-defun-function #'bazel-current-target-name)
-  (setq-local imenu-create-index-function #'bazel-mode-create-index))
+  (setq-local imenu-create-index-function #'bazel-mode-create-index)
+  nil)
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist
@@ -454,7 +460,8 @@ This is the parent mode for the more specific modes
   ;; In REPO.bazel files, we don’t have function definitions.  Instead, treat
   ;; directives (= Python statements) as functions.
   (setq-local beginning-of-defun-function #'python-nav-beginning-of-statement)
-  (setq-local end-of-defun-function #'python-nav-end-of-statement))
+  (setq-local end-of-defun-function #'python-nav-end-of-statement)
+  nil)
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist
@@ -469,7 +476,8 @@ This is the parent mode for the more specific modes
   ;; In VENDOR.bazel files, we don’t have function definitions.  Instead, treat
   ;; directives (= Python statements) as functions.
   (setq-local beginning-of-defun-function #'python-nav-beginning-of-statement)
-  (setq-local end-of-defun-function #'python-nav-end-of-statement))
+  (setq-local end-of-defun-function #'python-nav-end-of-statement)
+  nil)
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist
@@ -487,7 +495,8 @@ This is the parent mode for the more specific modes
   (add-hook 'which-func-functions #'python-info-current-defun nil :local)
   (setq-local add-log-current-defun-function #'python-info-current-defun)
   (setq-local imenu-extract-index-name-function
-              #'bazel-mode-extract-function-name))
+              #'bazel-mode-extract-function-name)
+  nil)
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist
@@ -614,7 +623,8 @@ Return a list (NAME INTEGRITY PREFIX TIME) for
                                   "-C" (file-name-unquote directory))))
         (unless (eql status 0)
           (error "Program %s failed with status %s, output %s"
-                 program status (buffer-string)))))))
+                 program status (buffer-string))))))
+  nil)
 
 (defun bazel--workspace-name ()
   "Return the name of the workspace.
@@ -650,7 +660,8 @@ return its name.  See URL
 
 ;;;###autoload
 (define-derived-mode bazelrc-mode conf-space-mode "bazelrc"
-  "Major mode for editing .bazelrc files.")
+  "Major mode for editing .bazelrc files."
+  nil)
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist
@@ -687,7 +698,8 @@ return its name.  See URL
   ;; .bazelignore files don’t have any keywords, but we still need to set
   ;; ‘font-lock-defaults’ to a non-nil value to enable syntactic fontification.
   ;; See Info node ‘(elisp) Font Lock Basics’.
-  (setq-local font-lock-defaults '(nil)))
+  (setq-local font-lock-defaults '(nil))
+  nil)
 
 (defun bazelignore--syntax-propertize (start end)
   "Detect .bazelignore syntax between START and END.
@@ -705,13 +717,15 @@ and Info node ‘(elisp) Syntax Table Internals’."
         (end-of-line)
         (unless (eobp)  ; otherwise (1+ (point)) is invalid
           (put-text-property (point) (1+ (point))
-                             'syntax-table '(12)))))))
+                             'syntax-table '(12))))))
+  nil)
 
 ;;;; ‘bazeliskrc-mode’
 
 ;;;###autoload
 (define-derived-mode bazeliskrc-mode conf-unix-mode
-  "Major mode for editing .bazeliskrc files.")
+  "Major mode for editing .bazeliskrc files."
+  nil)
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist
@@ -1548,7 +1562,8 @@ COVERAGE."
                                   (+ previous taken)
                                 (or previous taken))))
                     (puthash branch new branches))))))
-          (goto-char end))))))
+          (goto-char end)))))
+  nil)
 
 (defun bazel--match-natnum (index)
   "Return the natural number matched by the subgroup INDEX.
@@ -1625,7 +1640,8 @@ structures.  Remove existing coverage overlays first."
                      (setq some-branch-coverage t)))))
       (when (and some-branch-coverage (< left-margin-width margin-width))
         (setq left-margin-width margin-width)
-        (bazel--update-margin-display)))))
+        (bazel--update-margin-display))))
+  nil)
 
 (defun bazel--branch-coverage-string (block-table)
   "Return a branch coverage information string for BLOCK-TABLE.
@@ -1685,7 +1701,8 @@ See Info node ‘(elisp) Display Margins’."
                (propertize "unused"  ; must be nonempty
                            ;; Don’t inherit face from surrounding text.
                            'face 'default
-                           'display `((margin left-margin) ,string))))
+                           'display `((margin left-margin) ,string)))
+  nil)
 
 (defun bazel-remove-coverage-display ()
   "Remove all Bazel coverage display in the current buffer.
@@ -1695,7 +1712,8 @@ portion."
   (bazel--remove-coverage-overlays)
   (unless (eq left-margin-width 0)
     (kill-local-variable 'left-margin-width)
-    (bazel--update-margin-display)))
+    (bazel--update-margin-display))
+  nil)
 
 ;; Default overlay properties.
 (put 'bazel-coverage 'priority 10)
@@ -1703,14 +1721,16 @@ portion."
 
 (defun bazel--remove-coverage-overlays ()
   "Remove line coverage overlays in the current buffer."
-  (remove-overlays (point-min) (point-max) 'category 'bazel-coverage))
+  (remove-overlays (point-min) (point-max) 'category 'bazel-coverage)
+  nil)
 
 (defun bazel--update-margin-display ()
   "Announce margin change in the current buffer to Emacs.
 See Info node ‘(elisp) Display Margins’."
   (let ((buffer (current-buffer)))
     (dolist (window (get-buffer-window-list buffer nil t))
-      (set-window-buffer window buffer))))
+      (set-window-buffer window buffer)))
+  nil)
 
 (defun bazel--add-visibility (root source destination begin end ask)
   "Make SOURCE visible to DESTINATION.
@@ -1992,7 +2012,8 @@ Return nil if no .bazelignore file exists."
 COMMAND is a Bazel command such as \"build\" or \"run\"."
   (cl-check-type command string)
   (cl-check-type target-pattern string)
-  (bazel--compile command "--" target-pattern))
+  (bazel--compile command "--" target-pattern)
+  nil)
 
 (defun bazel--compile (command &rest args)
   "Run Bazel in a Compilation buffer with the given COMMAND and ARGS.
@@ -2001,7 +2022,8 @@ COMMAND and ARGS."
   (compile (mapconcat #'shell-quote-argument
                       (append bazel-command (list command)
                               bazel-command-options args)
-                      " ")))
+                      " "))
+  nil)
 
 (defvar bazel-target-history nil
   "History for Bazel target pattern completion.
