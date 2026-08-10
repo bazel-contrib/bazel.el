@@ -195,7 +195,7 @@ of the symbols ‘build’, ‘bzl’, ‘workspace’, ‘module’, or
 ‘default’, corresponding to the file types documented at URL
 ‘https://github.com/bazelbuild/buildtools/tree/master/buildifier#usage’."
   (interactive "*" bazel-mode)
-  (cl-check-type type (member nil build bzl workspace default))
+  (cl-check-type type (member nil build bzl workspace module default))
   (let ((directory default-directory)
         (input-file buffer-file-name)
         (temp-buffer (temp-buffer-window-setup "*buildifier*"))
