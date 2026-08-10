@@ -265,9 +265,8 @@ mentioned in the Buildifier source code at URL
                       'symbols)
          . 'font-lock-builtin-face)
         (,(regexp-opt '("load") 'symbols) . 'font-lock-keyword-face)))
-    "Value of ‘font-lock-keywords’ in ‘bazel-mode’ at font lock level 1."))
+    "Value of ‘font-lock-keywords’ in ‘bazel-mode’ at font lock level 1.")
 
-(eval-and-compile
   (defconst bazel-font-lock-keywords-2
     (eval-when-compile
       `(,@bazel-font-lock-keywords-1
@@ -290,9 +289,8 @@ mentioned in the Buildifier source code at URL
         (,(regexp-opt '("True" "False" "None")
                       'symbols)
          . 'font-lock-constant-face)))
-    "Value of ‘font-lock-keywords’ in ‘bazel-mode’ at font lock level 2."))
+    "Value of ‘font-lock-keywords’ in ‘bazel-mode’ at font lock level 2.")
 
-(eval-and-compile
   (defconst bazel-font-lock-keywords-3
     (eval-when-compile
       `(,@bazel-font-lock-keywords-2
