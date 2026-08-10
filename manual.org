@@ -197,7 +197,9 @@ information about ~find-file-at-point~, see [[info:Emacs#FFAP][FFAP]].
 To visit the BUILD file that defines the package for the current file, run the
 command ~bazel-find-build-file~.  Similarly, to find the Bazel WORKSPACE,
 MODULE.bazel, or REPO.bazel files, run ~bazel-find-workspace-file~,
-~bazel-find-module-file~, or ~bazel-find-repo-file~, respectively.
+~bazel-find-module-file~, or ~bazel-find-repo-file~, respectively.  It is not an
+error if these files don’t exist yet: the commands will create buffers that
+visit a non-existing file in that case.
 
 #+FINDEX: bazel-show-consuming-target
 To find out which Bazel rule target consumes the file that the current buffer
