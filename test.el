@@ -66,7 +66,8 @@ tree, and a symbolic link ‘bazel-out’ to an empty output directory; see
 URL ‘https://bazel.build/remote/output-directories’.  If ORG-FILE is
 non-nil, tangle code blocks in ORG-FILE into the workspace directory
 first using ‘bazel-test--tangle’."
-    (declare (indent 2) (debug (symbolp form body)))
+    (declare (ftype (function (symbol t &rest t) t))
+             (indent 2) (debug (symbolp form body)))
     (cl-check-type name symbol)
     (cl-with-gensyms (directory workspace output-base file)
       `(let* ((,directory (make-temp-file "bazel-mode-test-" :dir-flag))
@@ -84,7 +85,7 @@ first using ‘bazel-test--tangle’."
     "Visit FILENAME in a temporary buffer.
 Execute BODY with the buffer that visits FILENAME current.  Kill
 that buffer once BODY finishes."
-    (declare (indent 1) (debug t))
+    (declare (ftype (function (t &rest t) t)) (indent 1) (debug t))
     (cl-with-gensyms (previous-buffers buffer)
       (cl-once-only (filename)
         `(ert-info (,filename :prefix "Visited test file: ")
@@ -101,7 +102,7 @@ that buffer once BODY finishes."
 
   (defmacro bazel-test--with-buffers (&rest body)
     "Evaluate BODY and kill all buffers that it created."
-    (declare (indent 0) (debug t))
+    (declare (ftype (function (&rest t) t)) (indent 0) (debug t))
     (cl-with-gensyms (buffers)
       `(let ((,buffers (buffer-list)))
          (unwind-protect
@@ -112,7 +113,7 @@ that buffer once BODY finishes."
   (defmacro bazel-test--wait-for (message condition)
     "Busy wait for CONDITION to become non-nil.
 MESSAGE is a message for ‘ert-info’."
-    (declare (indent 1) (debug t))
+    (declare (ftype (function (t t) t)) (indent 1) (debug t))
     `(ert-info (,message)
        (ert-info (,(prin1-to-string condition) :prefix "Condition: ")
          (with-timeout (10 (ert-fail "Timed out waiting for condition"))
@@ -1405,6 +1406,7 @@ Process buildifier exited abnormally with code 1
   "ERT explainer for ‘looking-at-p’.
 See Info node ‘(ert) Defining Explanation Functions’.  REGEXP is
 the expected regular expression."
+  (declare (ftype (function (string) t)))
   (cl-check-type regexp string)
   (unless (looking-at-p regexp)
     `(rest-of-line ,(buffer-substring-no-properties
@@ -1416,6 +1418,7 @@ Create an empty MODULE.bazel file and an output base tree as described in
 URL ‘https://bazel.build/remote/output-directories’.  The symbolic link
 ‘bazel-out’ in WORKSPACE will point to the output directory within
 OUTPUT-BASE.  WORKSPACE and OUTPUT-BASE can be directory or file names."
+  (declare (ftype (function (string string) null)))
   (make-empty-file (file-name-concat workspace "MODULE.bazel") :parents)
   (let ((out-dir (file-name-concat output-base "execroot" "_main" "bazel-out")))
     (make-directory out-dir :parents)
@@ -1429,6 +1432,7 @@ ORG-FILE is a filename within the “testdata” directory.  The code
 blocks should have a ‘:tangle’ header argument specifying the
 filename within DIRECTORY.
 See Info node ‘(org) Extracting Source Code’."
+  (declare (ftype (function (string string) null)))
   (cl-check-type directory string)
   (cl-check-type org-file string)
   ;; Tangling requires a file-visiting Org buffer in the destination directory.
@@ -1457,6 +1461,7 @@ See Info node ‘(org) Extracting Source Code’."
 (defun bazel-test--buildifier-running-p ()
   "Return whether we have a running Buildifier process.
 This relies on the variable ‘bazel-buildifier-command’"
+  (declare (ftype (function () t)))
   (cl-some (lambda (process)
              (and (eq (process-type process) 'real)
                   (file-equal-p (car (process-command process))
@@ -1467,6 +1472,7 @@ This relies on the variable ‘bazel-buildifier-command’"
   "Fontify the current buffer, and convert face properties to markup.
 After fontification, search for text ranges with the same face, and
 convert them to markup of the form {face text}."
+  (declare (ftype (function () null)))
   (font-lock-flush)
   (font-lock-ensure)
   (cl-flet* ((abbreviate (face)
