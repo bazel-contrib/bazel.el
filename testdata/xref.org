@@ -71,10 +71,10 @@ Create empty files that the labels in the test BUILD file refer to.
 
 Files in an external repository:
 
-#+BEGIN_SRC bazel-module :tangle bazel-workspace/external/ws/MODULE.bazel
+#+BEGIN_SRC bazel-module :tangle .output-base/external/ws/MODULE.bazel
 # empty
 #+END_SRC
 
-#+BEGIN_SRC C++ :tangle bazel-workspace/external/ws/pkg/ddd.cc
+#+BEGIN_SRC C++ :tangle .output-base/external/ws/pkg/ddd.cc
 // empty
 #+END_SRC

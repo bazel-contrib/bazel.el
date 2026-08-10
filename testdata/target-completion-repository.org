@@ -28,14 +28,14 @@
 # Dummy BUILD file
 #+END_SRC
 
-#+BEGIN_SRC bazel-module :tangle bazel-workspace/ext/MODULE.bazel
+#+BEGIN_SRC bazel-module :tangle .output-base/external/ext/MODULE.bazel
 # empty
 #+END_SRC
 
-#+BEGIN_SRC bazel-build :tangle bazel-workspace/external/ext/BUILD
+#+BEGIN_SRC bazel-build :tangle .output-base/external/ext/BUILD
 # Dummy BUILD file
 #+END_SRC
 
-#+BEGIN_SRC bazel-build :tangle bazel-workspace/external/ext/ext-pkg/BUILD
+#+BEGIN_SRC bazel-build :tangle .output-base/external/ext/ext-pkg/BUILD
 # Dummy BUILD file
 #+END_SRC
