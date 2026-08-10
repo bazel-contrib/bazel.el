@@ -2209,13 +2209,14 @@ determined for any reason."
   (if repository-name
       ;; See https://bazel.build/remote/output-directories for some overview of
       ;; the Bazel directory layout.  Empirically, the directory
-      ;; ROOT/bazel-ROOT/external/REPOSITORY is a symlink to the repository root
-      ;; of the external repository REPOSITORY.  Again, this is a heuristic, and
-      ;; should work for the common case.  In particular, we don’t want to shell
-      ;; out to “bazel info workspace” here, because that might block
-      ;; indefinitely if another Bazel instance holds the lock.  We don’t check
-      ;; whether the directory exists, because it’s generated and cached when
-      ;; needed.
+      ;; $(readlink ROOT/bazel-out)/../../../external/REPOSITORY is a symlink to
+      ;; the repository root of the external repository REPOSITORY; see
+      ;; https://bazel.build/remote/output-directories#layout-diagram.  Again,
+      ;; this is a heuristic, and should work for the common case.  In
+      ;; particular, we don’t want to shell out to “bazel info workspace” here,
+      ;; because that might block indefinitely if another Bazel instance holds
+      ;; the lock.  We don’t check whether the directory exists, because it’s
+      ;; generated and cached when needed.
       (when-let ((dir (bazel--external-repository-dir this-repository-root)))
         (file-name-as-directory (expand-file-name repository-name dir)))
     (file-name-as-directory this-repository-root)))
@@ -2229,10 +2230,11 @@ non-nil return value is no guarantee that the directory exists."
   (cl-check-type root string)
   ;; See the commentary in ‘bazel--external-repository’ for how to find external
   ;; repositories.
-  (expand-file-name
-   (concat "bazel-" (file-name-nondirectory (directory-file-name root))
-           "/external/")
-   root))
+  (when-let ((output-dir (file-chase-links (expand-file-name "bazel-out" root)))
+             (main-exec-root (file-name-parent-directory output-dir))
+             (exec-root (file-name-parent-directory main-exec-root))
+             (output-base (file-name-parent-directory exec-root)))
+    (expand-file-name "external" output-base)))
 
 (defun bazel--external-repository-roots (main-root)
   "Return the directory names of the external repository roots.

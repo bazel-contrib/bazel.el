@@ -264,18 +264,17 @@ gets killed early."
           (should (eql jumps 1))
           (should (eq (current-buffer) build-buffer))
           (should (looking-at-p (rx "lib"))))))
-    (should (equal
-             (nreverse definitions)
-             '(("//:aaa.cc" "aaa.cc")
-               ("//:dir/bbb.cc" "dir/bbb.cc")
-               ("//:aaa.cc" "aaa.cc")
-               ("//:aaa.cc" "aaa.cc")
-               ("//pkg:ccc.cc" "pkg/ccc.cc")
-               ("@ws//pkg:ddd.cc" "bazel-workspace/external/ws/pkg/ddd.cc")
-               ("//:lib" "BUILD")
-               ("//:lib" "BUILD")
-               ("//pkg:pkg" "pkg/BUILD")
-               ("//pkg:lib" "pkg/BUILD"))))))
+    (should (equal (nreverse definitions)
+                   '(("//:aaa.cc" "aaa.cc")
+                     ("//:dir/bbb.cc" "dir/bbb.cc")
+                     ("//:aaa.cc" "aaa.cc")
+                     ("//:aaa.cc" "aaa.cc")
+                     ("//pkg:ccc.cc" "pkg/ccc.cc")
+                     ("@ws//pkg:ddd.cc" ".output-base/external/ws/pkg/ddd.cc")
+                     ("//:lib" "BUILD")
+                     ("//:lib" "BUILD")
+                     ("//pkg:pkg" "pkg/BUILD")
+                     ("//pkg:lib" "pkg/BUILD"))))))
 
 (ert-deftest bazel-mode/ffap ()
   "Unit test for ‘find-file-at-point’ support."
@@ -290,7 +289,7 @@ gets killed early."
         (search-forward "\"" (line-end-position))
         (forward-comment (point-max))
         (should (equal (ffap-file-at-point)
-                       (expand-file-name "bazel-workspace/external/repo+/bbb.h"
+                       (expand-file-name ".output-base/external/repo+/bbb.h"
                                          dir)))))))
 
 (ert-deftest bazel-build-mode/fill ()
