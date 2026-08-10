@@ -1374,6 +1374,54 @@ Process buildifier exited abnormally with code 1
   ;; call it here to ensure that calling it doesn’t signal an error.
   (bazel-clear-caches))
 
+(ert-deftest bazel-find-package-dir/no-package ()
+  (bazel-test--with-workspace dir nil
+    (bazel-test--with-file-buffer (expand-file-name "MODULE.bazel" dir)
+      (should-error (ert-simulate-command '(bazel-find-package-dir))
+                    :type 'user-error))))
+
+(ert-deftest bazel-find-package-dir/root-dir ()
+  (bazel-test--with-workspace dir nil
+    (make-empty-file (expand-file-name "BUILD" dir))
+    (bazel-test--with-file-buffer (expand-file-name "MODULE.bazel" dir)
+      (ert-simulate-command '(bazel-find-package-dir))
+      (should (derived-mode-p #'dired-mode))
+      (should (file-equal-p default-directory dir)))))
+
+(ert-deftest bazel-find-package-dir/subdir ()
+  (bazel-test--with-workspace dir nil
+    (make-empty-file (expand-file-name "BUILD" dir))
+    (let ((file (expand-file-name "subdir/file" dir)))
+      (make-empty-file file :parents)
+      (bazel-test--with-file-buffer file
+        (ert-simulate-command '(bazel-find-package-dir))
+        (should (derived-mode-p #'dired-mode))
+        (should (file-equal-p default-directory dir))))))
+
+(ert-deftest bazel-find-repo-root/no-repo ()
+  (ert-with-temp-directory dir
+    (let ((file (expand-file-name "BUILD" dir)))
+      (make-empty-file file)
+      (bazel-test--with-file-buffer file
+        (should-error (ert-simulate-command '(bazel-find-repo-root))
+                      :type 'user-error)))))
+
+(ert-deftest bazel-find-repo-root/root-dir ()
+  (bazel-test--with-workspace dir nil
+    (bazel-test--with-file-buffer (expand-file-name "MODULE.bazel" dir)
+      (ert-simulate-command '(bazel-find-repo-root))
+      (should (derived-mode-p #'dired-mode))
+      (should (file-equal-p default-directory dir)))))
+
+(ert-deftest bazel-find-repo-root/subpackage ()
+  (bazel-test--with-workspace dir nil
+    (let ((file (expand-file-name "subdir/BUILD" dir)))
+      (make-empty-file file :parents)
+      (bazel-test--with-file-buffer file
+        (ert-simulate-command '(bazel-find-repo-root))
+        (should (derived-mode-p #'dired-mode))
+        (should (file-equal-p default-directory dir))))))
+
 ;;;; Test helpers
 
 (put #'looking-at-p 'ert-explainer #'bazel-test--explain-looking-at-p)

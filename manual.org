@@ -195,6 +195,13 @@ REPO.bazel, or WORKSPACE files, run ~bazel-find-workspace-file~,
 error if these files don’t exist yet: the commands will create buffers that
 visit a non-existing file in that case.
 
+#+FINDEX: bazel-find-package-dir
+#+FINDEX: bazel-find-repo-root
+Another family of commands lets you browse some special directories in a Dired
+buffer.  See [[info:emacs#Dired][Dired]].  To find the directory of the package
+that the current file belongs to, use ~bazel-find-package-dir~; and to find the
+repository root directory, use ~bazel-find-repo-root~.
+
 #+FINDEX: bazel-show-consuming-target
 To find out which Bazel rule target consumes the file that the current buffer
 visits, run the command ~bazel-show-consuming-target~.  It will search the
