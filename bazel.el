@@ -2211,12 +2211,6 @@ DIRECTORY can be a directory or file name."
   (and (file-directory-p directory)
        (bazel--locate-build-file directory)))
 
-;; This definition isn’t very restrictive, but catches the common case of an
-;; accidentally-empty repository name.  That would refer to the main repository,
-;; which might be incorrect depending on context.
-(cl-deftype bazel--repository-name ()
-  '(and string (not (satisfies string-empty-p))))
-
 (defun bazel--external-repository (repository-name this-repository-root)
   "Return the repository root of an external repository.
 REPOSITORY-NAME should be either a string naming an external
@@ -2224,8 +2218,9 @@ repository, or nil to refer to the current repository.
 THIS-REPOSITORY-ROOT should be the name of the current repository
 root directory, as returned by ‘bazel--repository-root’.  The
 return value is a directory name."
-  (cl-check-type repository-name (or null bazel--repository-name))
+  (cl-check-type repository-name (or null string))
   (cl-check-type this-repository-root string)
+  (cl-assert (not (string-empty-p repository-name)))
   (file-name-as-directory
    (if repository-name
        ;; See https://bazel.build/remote/output-directories for some overview of
@@ -2714,8 +2709,9 @@ for the lexical syntax of labels."
 For a package “foo/bar”, “bar” is the default target.  For a
 repository “foo”, “foo” in the root package is the default target.
 REPOSITORY can be nil to refer to the current repository."
-  (cl-check-type repository (or null bazel--repository-name))
+  (cl-check-type repository (or null string))
   (cl-check-type package string)
+  (cl-assert (not (string-empty-p repository)))
   (if (and (stringp repository) (string-empty-p package))
       repository
     (let ((case-fold-search nil)
