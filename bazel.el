@@ -2234,7 +2234,7 @@ non-nil return value is no guarantee that the directory exists."
              (main-exec-root (file-name-parent-directory output-dir))
              (exec-root (file-name-parent-directory main-exec-root))
              (output-base (file-name-parent-directory exec-root)))
-    (expand-file-name "external" output-base)))
+    (file-name-as-directory (expand-file-name "external" output-base))))
 
 (defun bazel--external-repository-roots (main-root)
   "Return the directory names of the external repository roots.
