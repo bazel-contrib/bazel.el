@@ -110,7 +110,8 @@ MESSAGE is a message for ‘ert-info’."
        (ert-info (,(prin1-to-string condition) :prefix "Condition: ")
          (with-timeout (10 (ert-fail "Timed out waiting for condition"))
            (while (not ,condition)
-             (sleep-for 0.1)))))))
+             (sleep-for 0.1))))
+       nil)))
 
 ;;;; Unit tests
 
@@ -1504,7 +1505,8 @@ See Info node ‘(org) Extracting Source Code’."
     ;; ‘file-name-unquote’ is required due to https://bugs.gnu.org/80718.
     (bazel-test--with-file-buffer (file-name-unquote temp-file)
       (org-babel-tangle))
-    (delete-file temp-file)))
+    (delete-file temp-file))
+  nil)
 
 (defun bazel-test--buildifier-running-p ()
   "Return whether we have a running Buildifier process.
