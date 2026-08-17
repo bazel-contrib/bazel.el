@@ -969,10 +969,8 @@ IDENTIFIER should be an XRef identifier returned by
                                         buffer-file-name this-repository)))
                              (bazel--package-name directory
                                                   this-repository)))))
-                 (location
-                  (bazel--target-location
-                   (bazel--external-repository repository this-repository)
-                   package target)))
+                 (root (bazel--external-repository repository this-repository))
+                 (location (bazel--target-location root package target)))
        (list (xref-make (bazel--canonical repository package target)
                         location))))))
 
@@ -1777,12 +1775,12 @@ and REPOSITORY is the repository containing PACKAGE."
   (cl-check-type root string)
   (cl-check-type repository (or null string))
   (cl-check-type package string)
-  (let ((external-root (bazel--external-repository repository root)))
-    (when-let* ((build-file (bazel--locate-build-file
-                             (expand-file-name package external-root))))
-      (save-some-buffers nil (lambda ()
-                               (when-let ((file-name buffer-file-truename))
-                                 (file-equal-p file-name build-file))))))
+  (when-let* ((external-root (bazel--external-repository repository root))
+              (build-file (bazel--locate-build-file
+                           (expand-file-name package external-root))))
+    (save-some-buffers nil (lambda ()
+                             (when-let ((file-name buffer-file-truename))
+                               (file-equal-p file-name build-file)))))
   nil)
 
 ;;;; Imenu support
@@ -2214,29 +2212,31 @@ REPOSITORY-NAME should be either a string naming an external
 repository, or nil to refer to the current repository.
 THIS-REPOSITORY-ROOT should be the name of the current repository
 root directory, as returned by ‘bazel--repository-root’.  The
-return value is a directory name."
+return value is a directory name or nil if the repository root can’t be
+determined for any reason."
   (cl-check-type repository-name (or null string))
   (cl-check-type this-repository-root string)
   (cl-assert (not (string-empty-p repository-name)))
-  (file-name-as-directory
-   (if repository-name
-       ;; See https://bazel.build/remote/output-directories for some overview of
-       ;; the Bazel directory layout.  Empirically, the directory
-       ;; ROOT/bazel-ROOT/external/REPOSITORY is a symlink to the repository
-       ;; root of the external repository REPOSITORY.  Again, this is a
-       ;; heuristic, and should work for the common case.  In particular, we
-       ;; don’t want to shell out to “bazel info workspace” here, because that
-       ;; might block indefinitely if another Bazel instance holds the lock.  We
-       ;; don’t check whether the directory exists, because it’s generated and
-       ;; cached when needed.
-       (expand-file-name repository-name
-                         (bazel--external-repository-dir this-repository-root))
-     this-repository-root)))
+  (if repository-name
+      ;; See https://bazel.build/remote/output-directories for some overview of
+      ;; the Bazel directory layout.  Empirically, the directory
+      ;; ROOT/bazel-ROOT/external/REPOSITORY is a symlink to the repository root
+      ;; of the external repository REPOSITORY.  Again, this is a heuristic, and
+      ;; should work for the common case.  In particular, we don’t want to shell
+      ;; out to “bazel info workspace” here, because that might block
+      ;; indefinitely if another Bazel instance holds the lock.  We don’t check
+      ;; whether the directory exists, because it’s generated and cached when
+      ;; needed.
+      (when-let ((dir (bazel--external-repository-dir this-repository-root)))
+        (file-name-as-directory (expand-file-name repository-name dir)))
+    (file-name-as-directory this-repository-root)))
 
 (defun bazel--external-repository-dir (root)
   "Return a directory name for the parent directory of the external repositories.
 ROOT should be the name or file name of the main repository root
-directory as returned by ‘bazel--repository-root’."
+directory as returned by ‘bazel--repository-root’.  If the external
+repository root can’t be determined for any reason, the return value is
+nil."
   (cl-check-type root string)
   ;; See the commentary in ‘bazel--external-repository’ for how to find external
   ;; repositories.
@@ -2250,21 +2250,21 @@ directory as returned by ‘bazel--repository-root’."
 MAIN-ROOT should be the name or file name of the main repository
 root directory as returned by ‘bazel--repository-root’."
   (cl-check-type main-root string)
-  (let ((case-fold-search nil)
-        (search-spaces-regexp nil))
-    (mapcar
-     (if (file-name-quoted-p main-root) #'file-name-quote #'identity)
-     ;; If there’s no external repository directory, don’t signal an error.
-     (ignore-error file-missing
-       (directory-files
-        (bazel--external-repository-dir main-root)
-        :full
-        ;; https://bazel.build/rules/lib/globals/module#parameters-8 states that
-        ;; module names may only contain letters, numbers, underscores, hyphens,
-        ;; and dots.  We also include the plus sign since it’s part of canonical
-        ;; repository names.
-        (rx bos (any ?+ "A-Z" "a-z") (* (any ?+ ?- ?. ?_ "A-Z" "a-z" "0-9"))
-            eos))))))
+  (when-let ((dir (bazel--external-repository-dir main-root)))
+    (let ((case-fold-search nil)
+          (search-spaces-regexp nil))
+      (mapcar
+       (if (file-name-quoted-p main-root) #'file-name-quote #'identity)
+       ;; If there’s no external repository directory, don’t signal an error.
+       (ignore-error file-missing
+         (directory-files
+          dir :full
+          ;; https://bazel.build/rules/lib/globals/module#parameters-8 states that
+          ;; module names may only contain letters, numbers, underscores, hyphens,
+          ;; and dots.  We also include the plus sign since it’s part of canonical
+          ;; repository names.
+          (rx bos (any ?+ "A-Z" "a-z") (* (any ?+ ?- ?. ?_ "A-Z" "a-z" "0-9"))
+              eos)))))))
 
 (defun bazel--target-completion-table (pattern only-tests)
   "Return a completion table for Bazel targets and target patterns.
@@ -2333,8 +2333,8 @@ completion to test targets.  This is a helper function for
      ;; repository here.
      (bazel--completion-table-with-prefix prefix
        (completion-table-merge
-        (bazel--target-repository-completion-table
-         (bazel--external-repository-dir root))
+        (when-let ((dir (bazel--external-repository-dir root)))
+          (bazel--target-repository-completion-table dir))
         '("//"))))
     ((rx bos (let prefix (* (not (any ?:))) "/...:"))
      ;; Combination of package wildcard and target wildcard.
@@ -2503,9 +2503,10 @@ for ‘bazel--target-completion-table’."
   (cl-check-type root string)
   (cl-check-type repository string)
   (cl-check-type package string)
-  (let* ((root (if (string-empty-p repository) root
-                 (bazel--external-repository repository root)))
-         (directory (file-name-as-directory (expand-file-name package root))))
+  (when-let* ((root (if (string-empty-p repository) root
+                     (bazel--external-repository repository root)))
+              (directory (file-name-as-directory
+                          (expand-file-name package root))))
     (lambda (string predicate action)
       (let* ((slash (string-match-p (rx ?/ (* (not (any ?/))) eos) string))
              (parent (substring-no-properties string 0 (or slash 0)))
@@ -2580,12 +2581,10 @@ the wildcards with a colon.  This is a helper function for
   (cl-check-type root string)
   (cl-check-type repository string)
   (cl-check-type package string)
-  (when-let ((build-file
-              (bazel--locate-build-file
-               (expand-file-name package
-                                 (if (string-empty-p repository) root
-                                   (bazel--external-repository repository
-                                                               root))))))
+  (when-let ((external-root (if (string-empty-p repository) root
+                              (bazel--external-repository repository root)))
+             (build-file (bazel--locate-build-file
+                          (expand-file-name package external-root))))
     (let ((completion-regexp-list
            (cons (rx bos (+ (any "a-z" "A-Z" "0-9" ?-
                                  "!%@^_` \"#$&'()*+,;<=>?[]{|}~/.")
