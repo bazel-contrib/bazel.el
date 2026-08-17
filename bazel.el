@@ -2174,14 +2174,11 @@ If FILE-NAME is not in a Bazel package, return nil.  FILE-NAME
 and REPOSITORY-ROOT can be file or directory names."
   (cl-check-type file-name string)
   (cl-check-type repository-root string)
-  (let* ((parent (file-name-directory (directory-file-name repository-root)))
-         ;; Don’t search beyond repository root.
-         (locate-dominating-stop-dir-regexp
-          (if parent
-              (rx (or (seq bos (literal parent) eos)
-                      (regexp locate-dominating-stop-dir-regexp)))
-            locate-dominating-stop-dir-regexp)))
-    (locate-dominating-file file-name #'bazel--package-directory-p)))
+  (locate-dominating-file file-name
+                          (lambda (directory)
+                            ;; Don’t search beyond repository root.
+                            (and (file-in-directory-p directory repository-root)
+                                 (bazel--package-directory-p directory)))))
 
 (defun bazel--package-name (build-file-directory repository-root)
   "Return the Bazel package name for BUILD-FILE-DIRECTORY.
