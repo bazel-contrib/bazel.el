@@ -2259,10 +2259,10 @@ root directory as returned by ‘bazel--repository-root’."
        (ignore-error file-missing
          (directory-files
           dir :full
-          ;; https://bazel.build/rules/lib/globals/module#parameters-8 states that
-          ;; module names may only contain letters, numbers, underscores, hyphens,
-          ;; and dots.  We also include the plus sign since it’s part of canonical
-          ;; repository names.
+          ;; https://bazel.build/rules/lib/globals/module#parameters-8 states
+          ;; that module names may only contain letters, numbers, underscores,
+          ;; hyphens, and dots.  We also include the plus sign since it’s part
+          ;; of canonical repository names.
           (rx bos (any ?+ "A-Z" "a-z") (* (any ?+ ?- ?. ?_ "A-Z" "a-z" "0-9"))
               eos)))))))
 
