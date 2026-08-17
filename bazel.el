@@ -2808,18 +2808,7 @@ The returned completion table completes strings of the form
   (cl-check-type prefix string)
   (if (string-empty-p prefix)
       table  ; small optimization
-    (completion-table-subvert
-     ;; We’d like to pass TABLE here directly, but before Emacs 28,
-     ;; ‘completion-table-subvert’ reports incorrect completion boundaries in
-     ;; case TABLE has trivial boundaries, so we ensure that its underlying
-     ;; table has nontrivial ones.
-     (lambda (string predicate action)
-       (pcase action
-         (`(boundaries . ,suffix)
-          `(boundaries . ,(completion-boundaries string table predicate
-                                                 suffix)))
-         (_ (complete-with-action action table string predicate))))
-     prefix "")))
+    (completion-table-subvert table prefix "")))
 
 (defun bazel--locate-file (filename path &optional suffixes)
   "Variant of ‘locate-file’ that returns quoted filenames.
