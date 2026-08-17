@@ -2234,9 +2234,9 @@ determined for any reason."
 (defun bazel--external-repository-dir (root)
   "Return a directory name for the parent directory of the external repositories.
 ROOT should be the name or file name of the main repository root
-directory as returned by ‘bazel--repository-root’.  If the external
-repository root can’t be determined for any reason, the return value is
-nil."
+directory as returned by ‘bazel--repository-root’.  Return nil if the
+external repository directory can’t be determined for any reason; but a
+non-nil return value is no guarantee that the directory exists."
   (cl-check-type root string)
   ;; See the commentary in ‘bazel--external-repository’ for how to find external
   ;; repositories.
