@@ -113,19 +113,14 @@ MESSAGE is a message for ‘ert-info’."
              (sleep-for 0.1))))
        nil)))
 
+;;;; ERTS tests
+
+(ert-deftest bazel/erts ()
+  "Run ERTS tests.
+See Info node ‘(ert) erts files’."
+  (ert-test-erts-file (expand-file-name "test.erts" bazel-test--directory)))
+
 ;;;; Unit tests
-
-(ert-deftest bazel-starlark-mode/indent-after-colon ()
-  (with-temp-buffer
-    (bazel-starlark-mode)
-    (insert "def foo():")
-    (newline-and-indent)
-    (should (= (current-column) 4))))
-
-(ert-deftest bazel-mode/indent-region ()
-  (bazel-test--with-temp-directory dir "indent.org"
-    (bazel-test--with-file-buffer (expand-file-name "BUILD" dir)
-      (should (equal (buffer-string) (ert-buffer-string-reindented))))))
 
 (ert-deftest bazel-mode-flymake ()
   "Unit test for the ‘bazel-mode-flymake’ Flymake backend."
@@ -301,23 +296,6 @@ gets killed early."
         (ert-info ((format "fill-paragraph on line %d" (line-number-at-pos)))
           (fill-paragraph)
           (should (equal (buffer-string) before)))))))
-
-(ert-deftest bazel-build-mode/beginning-of-defun ()
-  "Check that ‘beginning-of-defun’ moves to the beginning of the definition."
-  (bazel-test--with-temp-directory dir "defun-navigation.org"
-    (bazel-test--with-file-buffer (expand-file-name "BUILD" dir)
-      (search-forward "bazel.el")
-      (beginning-of-defun)
-      (should (looking-at-p (rx bol "elisp_library(" ?\n
-                                "    name = \"bazel\","))))))
-
-(ert-deftest bazel-build-mode/end-of-defun ()
-  "Check that ‘end-of-defun’ moves to the end of the definition."
-  (bazel-test--with-temp-directory dir "defun-navigation.org"
-    (bazel-test--with-file-buffer (expand-file-name "BUILD" dir)
-      (search-forward "bazel.el")
-      (end-of-defun)
-      (should (looking-back (rx "\n)\n") nil)))))
 
 (ert-deftest bazel-mode/compile ()
   "Check that \\[next-error] jumps to the correct places."

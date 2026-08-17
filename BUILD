@@ -45,7 +45,7 @@ elisp_test(
         # due to https://github.com/bazelbuild/bazel/issues/10560.
         "test.el",
     ],
-    data = glob(["testdata/*"]),
+    data = glob(["testdata/*"]) + ["test.erts"],
     deps = [":bazel"],
 )
 
