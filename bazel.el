@@ -263,11 +263,11 @@ mentioned in the Buildifier source code at URL
     ;; Only include file directives.  See Info node ‘(elisp) Levels of Font
     ;; Lock’.
     (eval-when-compile
-      `((,(rx symbol-start
+      `((,(rx line-start
               (or "include" "module" "repo" "visibility" "workspace")
               symbol-end)
          . 'font-lock-builtin-face)
-        (,(rx symbol-start "load" symbol-end) . 'font-lock-keyword-face)))
+        (,(rx line-start "load" symbol-end) . 'font-lock-keyword-face)))
     "Value of ‘font-lock-keywords’ in ‘bazel-mode’ at font lock level 1.")
 
   (defconst bazel-font-lock-keywords-2
@@ -301,9 +301,9 @@ mentioned in the Buildifier source code at URL
         ;; Include builtin functions.  Some Starlark functions are exposed to
         ;; BUILD files as builtins.  For details see
         ;; https://github.com/bazelbuild/starlark/blob/master/spec.md.
-        (,(rx symbol-start
-              (or "exports_files" "glob" "licenses" "package" "package_group"
-                  "select" "workspace")
+        (,(rx (or (seq line-start (or "exports_files" "licenses" "package"
+                                      "package_group" "workspace"))
+                  (seq symbol-start (or "glob" "select" )))
               symbol-end)
          . 'font-lock-builtin-face)
         ;; Target names
