@@ -263,10 +263,11 @@ mentioned in the Buildifier source code at URL
     ;; Only include file directives.  See Info node ‘(elisp) Levels of Font
     ;; Lock’.
     (eval-when-compile
-      `((,(regexp-opt '("include" "module" "repo" "visibility" "workspace")
-                      'symbols)
+      `((,(rx symbol-start
+              (or "include" "module" "repo" "visibility" "workspace")
+              symbol-end)
          . 'font-lock-builtin-face)
-        (,(regexp-opt '("load") 'symbols) . 'font-lock-keyword-face)))
+        (,(rx symbol-start "load" symbol-end) . 'font-lock-keyword-face)))
     "Value of ‘font-lock-keywords’ in ‘bazel-mode’ at font lock level 1.")
 
   (defconst bazel-font-lock-keywords-2
@@ -277,19 +278,20 @@ mentioned in the Buildifier source code at URL
         ;; files, they should be highlighted.  See
         ;; https://github.com/bazelbuild/starlark/blob/master/spec.md.  “load”
         ;; is already included in level 1.
-        (,(regexp-opt '("and" "break" "continue" "def" "elif" "else" "for" "if"
-                        "in" "lambda" "not" "or" "pass" "return")
-                      'symbols)
+        (,(rx symbol-start
+              (or "and" "break" "continue" "def" "elif" "else" "for" "if" "in"
+                  "lambda" "not" "or" "pass" "return")
+              symbol-end)
          . 'font-lock-keyword-face)
         ;; Reserved keywords
-        (,(regexp-opt '("as" "assert" "async" "await" "class" "del" "except"
-                        "finally" "from" "global" "import" "is" "nonlocal"
-                        "raise" "try" "while" "with" "yield")
-                      'symbols)
+        (,(rx symbol-start
+              (or "as" "assert" "async" "await" "class" "del" "except" "finally"
+                  "from" "global" "import" "is" "nonlocal" "raise" "try" "while"
+                  "with" "yield")
+              symbol-end)
          . 'font-lock-warning-face)
         ;; Constants
-        (,(regexp-opt '("True" "False" "None")
-                      'symbols)
+        (,(rx symbol-start (or "True" "False" "None") symbol-end)
          . 'font-lock-constant-face)))
     "Value of ‘font-lock-keywords’ in ‘bazel-mode’ at font lock level 2.")
 
@@ -299,9 +301,10 @@ mentioned in the Buildifier source code at URL
         ;; Include builtin functions.  Some Starlark functions are exposed to
         ;; BUILD files as builtins.  For details see
         ;; https://github.com/bazelbuild/starlark/blob/master/spec.md.
-        (,(regexp-opt '("exports_files" "glob" "licenses" "package"
-                        "package_group" "select" "workspace")
-                      'symbols)
+        (,(rx symbol-start
+              (or "exports_files" "glob" "licenses" "package" "package_group"
+                  "select" "workspace")
+              symbol-end)
          . 'font-lock-builtin-face)
         ;; Target names
         (bazel--find-target-name 2 'font-lock-variable-name-face prepend)
