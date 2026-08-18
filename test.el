@@ -803,50 +803,6 @@ gets killed early."
     (bazel-run "//foo:bar")
     (should (equal commands '("bazel run --tool_tag\\=emacs -- //foo\\:bar")))))
 
-(ert-deftest bazel-build-mode/font-lock ()
-  "Test Font Locking in ‘bazel-build-mode’."
-  (let ((text (ert-propertized-string
-               '(face font-lock-comment-delimiter-face) "# "
-               '(face font-lock-comment-face) "comment\n" nil "\n"
-               '(face font-lock-keyword-face) "load" nil "("
-               '(face font-lock-string-face) "\"foo.bzl\"" nil ", "
-               '(face font-lock-string-face) "\"\"\"foo\"\"\"" nil ")\n\n"
-               nil "cc_library(\n"
-               nil "    name = " '(face font-lock-string-face) "\""
-               '(face (font-lock-variable-name-face font-lock-string-face))
-               "foo"
-               '(face font-lock-string-face) "\"" nil ",\n"
-               nil "    "
-               '(face font-lock-comment-delimiter-face) "# "
-               '(face (font-lock-preprocessor-face font-lock-comment-face))
-               "keep sorted" '(face font-lock-comment-face) "\n"
-               nil "    srcs = "
-               '(face font-lock-builtin-face) "glob" nil "(["
-               '(face font-lock-string-face) "\"*.cc\"" nil "]),\n"
-               nil "    alwayslink = "
-               '(face font-lock-constant-face) "True" nil ",\n"
-               nil "    linkstatic="
-               '(face font-lock-constant-face) "True" nil ",\n"
-               nil")\n\n"
-               nil "some_rule(name = "
-               '(face font-lock-string-face) "\"foo\"" nil " + SUFFIX)\n\n"
-               nil "name_only(name = " '(face font-lock-string-face) "\""
-               '(face (font-lock-variable-name-face font-lock-string-face))
-               "foo"
-               '(face font-lock-string-face) "\"" nil ")\n\n"
-               nil "some_rule(\n"
-               nil "    filename = "
-               '(face font-lock-string-face) "\"file.txt\"" nil ",\n"
-               nil ")\n\n")))
-    (with-temp-buffer
-      (bazel-build-mode)
-      (insert (substring-no-properties text))
-      (font-lock-flush)
-      (font-lock-ensure)
-      ;; Emacs adds a ‘syntax-table’ text property, which we don’t care about.
-      (remove-list-of-text-properties (point-min) (point-max) '(syntax-table))
-      (should (equal-including-properties (buffer-string) text)))))
-
 (ert-deftest bazel-compile-current-file ()
   "Test for ‘bazel-compile-current-file’."
   (bazel-test--with-workspace dir nil
@@ -1513,5 +1469,28 @@ This relies on the variable ‘bazel-buildifier-command’"
                   (file-equal-p (car (process-command process))
                                 bazel-buildifier-command)))
            (process-list)))
+
+(defun bazel-test--font-lock ()
+  "Fontify the current buffer, and convert face properties to markup.
+After fontification, search for text ranges with the same face, and
+convert them to markup of the form {face text}."
+  (font-lock-flush)
+  (font-lock-ensure)
+  (cl-flet* ((abbreviate (face)
+               (string-remove-prefix "font-lock-"
+                                     (string-remove-suffix "-face"
+                                                           (face-name face))))
+            (markup (text faces)
+              (if faces
+                  (format "{%s %s}"
+                          (mapconcat #'abbreviate (ensure-list faces) "+")
+                          text)
+                text)))
+    (cl-loop for (begin . end) being the intervals property 'face
+             for faces = (get-text-property begin 'face)
+             for text = (buffer-substring-no-properties begin end)
+             concat (markup text faces) into result
+             finally (delete-region (point-min) (point-max)) (insert result)))
+  nil)
 
 ;;; test.el ends here
