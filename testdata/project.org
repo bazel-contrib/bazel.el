@@ -20,10 +20,6 @@
 bazel_dep(name = "rules_cc", version = "0.2.17")
 #+END_SRC
 
-#+BEGIN_SRC fundamental :tangle bazel-out
-Dummy symbolic link
-#+END_SRC
-
 #+BEGIN_SRC bazelignore :tangle .bazelignore
 ignored-directory/
 # comment
