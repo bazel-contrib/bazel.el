@@ -91,3 +91,48 @@ elisp_library(
 )
 |
 =-=-=
+
+Name: Font Locking
+Code: (lambda () (bazel-build-mode) (bazel-test--font-lock))
+
+=-=
+# comment
+
+load("foo.bzl", """foo""")
+
+cc_library(
+    name = "foo",
+    # keep sorted
+    srcs = glob(["*.cc"]),
+    alwayslink = True,
+    linkstatic=True,
+)
+
+some_rule(name = "foo" + SUFFIX)
+
+name_only(name = "foo")
+
+some_rule(
+    filename = "file.txt",
+)
+=-=
+{comment-delimiter # }{comment comment
+}
+{keyword load}({string "foo.bzl"}, {string """foo"""})
+
+cc_library(
+    name = {string "}{variable-name+string foo}{string "},
+    {comment-delimiter # }{preprocessor+comment keep sorted}{comment 
+}    srcs = {builtin glob}([{string "*.cc"}]),
+    alwayslink = {constant True},
+    linkstatic={constant True},
+)
+
+some_rule(name = {string "foo"} + SUFFIX)
+
+name_only(name = {string "}{variable-name+string foo}{string "})
+
+some_rule(
+    filename = {string "file.txt"},
+)
+=-=-=
