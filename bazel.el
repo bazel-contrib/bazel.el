@@ -2142,10 +2142,9 @@ directory name."
   "Return non-nil if DIRECTORY is a Bazel repository root directory.
 DIRECTORY can be a directory or file name."
   (cl-check-type directory string)
-  (and (file-directory-p directory)
-       (or (bazel--locate-workspace-file directory)
-           (bazel--locate-file "MODULE.bazel" (list directory))
-           (bazel--locate-file "REPO.bazel" (list directory)))))
+  (cl-loop
+   for marker in '("MODULE.bazel" "REPO.bazel" "WORKSPACE" "WORKSPACE.bazel")
+   thereis (file-exists-p (expand-file-name marker directory))))
 
 (defvar bazel--repository-relative-name (make-hash-table :test #'equal)
   "Cache for the function ‘bazel--repository-relative-name’.
