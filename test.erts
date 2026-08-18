@@ -114,6 +114,7 @@ name_only(name = "foo")
 
 some_rule(
     filename = "file.txt",
+    load=0
 )
 =-=
 {comment-delimiter # }{comment comment
@@ -134,5 +135,6 @@ name_only(name = {string "}{variable-name+string foo}{string "})
 
 some_rule(
     filename = {string "file.txt"},
+    load=0
 )
 =-=-=
