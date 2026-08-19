@@ -296,11 +296,12 @@ mentioned in the Buildifier source code at URL
     ;; Include builtin functions.  Some Starlark functions are exposed to BUILD
     ;; files as builtins.  For details see
     ;; https://github.com/bazelbuild/starlark/blob/master/spec.md.
-    (,(rx (or (seq line-start (or "exports_files" "licenses" "package"
-                                  "package_group" "workspace"))
-              (seq symbol-start (or "glob" "select" )))
+    (,(rx line-start
+          (or "exports_files" "licenses" "package" "package_group" "workspace")
           symbol-end)
      . 'font-lock-builtin-face)
+    (,(rx symbol-start (group (or "glob" "select")) (* blank) ?\()
+     1 font-lock-builtin-face)
     ;; Target names
     (bazel--find-target-name 2 'font-lock-variable-name-face prepend)
     ;; Magic comments
