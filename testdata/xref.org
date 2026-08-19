@@ -14,11 +14,11 @@
 
 #+PROPERTY: header-args :mkdirp yes :main no
 
-#+BEGIN_SRC bazel-module :tangle root/MODULE.bazel
+#+BEGIN_SRC bazel-module :tangle MODULE.bazel
 bazel_dep(name = "rules_cc", version = "0.2.17")
 #+END_SRC
 
-#+BEGIN_SRC bazel-build :tangle root/BUILD
+#+BEGIN_SRC bazel-build :tangle BUILD
 load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 
@@ -53,28 +53,28 @@ cc_binary(
 
 Create empty files that the labels in the test BUILD file refer to.
 
-#+BEGIN_SRC C++ :tangle root/aaa.cc
+#+BEGIN_SRC C++ :tangle aaa.cc
 // empty
 #+END_SRC
 
-#+BEGIN_SRC C++ :tangle root/dir/bbb.cc
+#+BEGIN_SRC C++ :tangle dir/bbb.cc
 // empty
 #+END_SRC
 
-#+BEGIN_SRC bazel-build :tangle root/pkg/BUILD
+#+BEGIN_SRC bazel-build :tangle pkg/BUILD
 # empty
 #+END_SRC
 
-#+BEGIN_SRC C++ :tangle root/pkg/ccc.cc
+#+BEGIN_SRC C++ :tangle pkg/ccc.cc
 // empty
 #+END_SRC
 
 Files in an external repository:
 
-#+BEGIN_SRC bazel-module :tangle root/bazel-root/external/ws/MODULE.bazel
+#+BEGIN_SRC bazel-module :tangle bazel-workspace/external/ws/MODULE.bazel
 # empty
 #+END_SRC
 
-#+BEGIN_SRC C++ :tangle root/bazel-root/external/ws/pkg/ddd.cc
+#+BEGIN_SRC C++ :tangle bazel-workspace/external/ws/pkg/ddd.cc
 // empty
 #+END_SRC

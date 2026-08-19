@@ -206,7 +206,7 @@ gets killed early."
   "Unit test for XRef support."
   (let ((definitions ()))
     (bazel-test--with-workspace dir "xref.org"
-      (bazel-test--with-file-buffer (expand-file-name "root/BUILD" dir)
+      (bazel-test--with-file-buffer (expand-file-name "BUILD" dir)
         (let ((case-fold-search nil)
               (search-spaces-regexp nil))
           (forward-comment (point-max))
@@ -214,7 +214,7 @@ gets killed early."
           ;; stand on their own in a line.
           (while (re-search-forward (rx bol (* blank) ?\") nil t)
             (let ((backend (xref-find-backend))
-                  (root (expand-file-name "root" dir)))
+                  (root dir))
               (should (eq backend 'bazel-mode))
               (ert-info ((format "line %d, %s" (line-number-at-pos)
                                  (buffer-substring-no-properties
@@ -259,22 +259,23 @@ gets killed early."
         (let* ((build-buffer (current-buffer))
                (jumps 0)
                (xref-after-jump-hook (list (lambda () (cl-incf jumps)))))
-          (bazel-test--with-file-buffer (expand-file-name "root/aaa.cc" dir)
+          (bazel-test--with-file-buffer (expand-file-name "aaa.cc" dir)
             (ert-simulate-command '(bazel-show-consuming-target)))
           (should (eql jumps 1))
           (should (eq (current-buffer) build-buffer))
           (should (looking-at-p (rx "lib"))))))
-    (should (equal (nreverse definitions)
-                   '(("//:aaa.cc" "aaa.cc")
-                     ("//:dir/bbb.cc" "dir/bbb.cc")
-                     ("//:aaa.cc" "aaa.cc")
-                     ("//:aaa.cc" "aaa.cc")
-                     ("//pkg:ccc.cc" "pkg/ccc.cc")
-                     ("@ws//pkg:ddd.cc" "bazel-root/external/ws/pkg/ddd.cc")
-                     ("//:lib" "BUILD")
-                     ("//:lib" "BUILD")
-                     ("//pkg:pkg" "pkg/BUILD")
-                     ("//pkg:lib" "pkg/BUILD"))))))
+    (should (equal
+             (nreverse definitions)
+             '(("//:aaa.cc" "aaa.cc")
+               ("//:dir/bbb.cc" "dir/bbb.cc")
+               ("//:aaa.cc" "aaa.cc")
+               ("//:aaa.cc" "aaa.cc")
+               ("//pkg:ccc.cc" "pkg/ccc.cc")
+               ("@ws//pkg:ddd.cc" "bazel-workspace/external/ws/pkg/ddd.cc")
+               ("//:lib" "BUILD")
+               ("//:lib" "BUILD")
+               ("//pkg:pkg" "pkg/BUILD")
+               ("//pkg:lib" "pkg/BUILD"))))))
 
 (ert-deftest bazel-mode/ffap ()
   "Unit test for ‘find-file-at-point’ support."
@@ -351,7 +352,7 @@ gets killed early."
   "Check that ‘imenu’ finds BUILD rule targets."
   (bazel-test--with-workspace dir "xref.org"
     (with-temp-buffer
-      (insert-file-contents (expand-file-name "root/BUILD" dir))
+      (insert-file-contents (expand-file-name "BUILD" dir))
       (bazel-build-mode)
       (let ((imenu-use-markers nil))
         (should (equal (funcall imenu-create-index-function)
