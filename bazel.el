@@ -1172,7 +1172,7 @@ directories and BUILD files."
       (and (not (directory-name-p filename))
            (not (member filename '("BUILD" "BUILD.bazel"
                                    "WORKSPACE" "WORKSPACE.bazel"
-                                   "MODULE.bazel" "REPO.bazel")))
+                                   "MODULE.bazel" "REPO.bazel" "VENDOR.bazel")))
            (not (equal (file-name-extension filename) "BUILD"))
            (not (string-prefix-p "bazel-" filename))
            (file-regular-p filename)
