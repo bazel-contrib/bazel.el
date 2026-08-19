@@ -819,8 +819,7 @@ backends."
                                 :sentinel sentinel
                                 :stderr error-buffer)))
     (setq bazel--flymake-process process)
-    (save-restriction
-      (widen)
+    (without-restriction
       (process-send-region process (point-min) (point-max)))
     (process-send-eof process))
   nil)
@@ -851,8 +850,7 @@ details."
   (cl-check-type output-buffer buffer)
   (cl-loop with report = (with-current-buffer output-buffer
                            (save-excursion
-                             (save-restriction
-                               (widen)
+                             (without-restriction
                                (goto-char (point-min))
                                ;; Skip over standard error messages if possible.
                                (let ((case-fold-search nil)
@@ -1198,8 +1196,7 @@ return nil."
   (let ((case-fold-search nil)
         (search-spaces-regexp nil))
     (save-excursion
-      (save-restriction
-        (widen)
+      (without-restriction
         (goto-char (point-min))
         ;; Heuristic: we search for a “name” attribute as it would show up
         ;; in typical BUILD files.  That’s not 100% correct, but doesn’t
@@ -1602,8 +1599,7 @@ structures.  Remove existing coverage overlays first."
     (cl-callf nreverse runs)
     (with-current-buffer buffer
       (save-excursion
-        (save-restriction
-          (widen)
+        (without-restriction
           ;; ‘line-beginning-position’ and ‘line-end-position’ below count lines
           ;; starting from the current line, so to be able to use absolute line
           ;; numbers from ‘coverage.dat’, we need to go to the very beginning of
@@ -1787,8 +1783,7 @@ This function is useful as ‘imenu-create-index-function’ for
 ‘bazel-build-mode’, ‘bazel-workspace-mode’, and
 ‘bazel-module-mode’.  See Info node ‘(elisp) Imenu’ for details."
   (save-excursion
-    (save-restriction
-      (widen)
+    (without-restriction
       (goto-char (point-min))
       (let ((case-fold-search nil)
             (search-spaces-regexp nil)
@@ -2785,8 +2780,7 @@ columns."
   (cl-check-type line natnum)
   (cl-check-type column natnum)
   (save-excursion
-    (save-restriction
-      (widen)
+    (without-restriction
       (goto-char (point-min))
       (forward-line (1- line))
       (min (line-end-position) (+ (point) column)))))
