@@ -806,7 +806,6 @@ gets killed early."
 (ert-deftest bazel-compile-current-file ()
   "Test for ‘bazel-compile-current-file’."
   (bazel-test--with-workspace dir nil
-    (write-region "" nil (expand-file-name "WORKSPACE" dir))
     (write-region "" nil (expand-file-name "BUILD" dir))
     (make-directory (expand-file-name "package" dir))
     (write-region "" nil (expand-file-name "package/BUILD" dir))
@@ -1305,7 +1304,7 @@ Process buildifier exited abnormally with code 1
 
 (ert-deftest bazel-find-module-file ()
   (bazel-test--with-workspace dir nil
-    (dolist (file '("WORKSPACE" "MODULE.bazel"))
+    (dolist (file '("MODULE.bazel"))
       (write-region "" nil (expand-file-name file dir) nil nil nil 'excl))
     (let ((expected (expand-file-name "MODULE.bazel" dir)))
       (dolist (parent '("" "dir"))
