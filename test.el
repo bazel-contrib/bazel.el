@@ -244,11 +244,11 @@ gets killed early."
                                      (marker-buffer
                                       (xref-location-marker
                                        (xref-item-location def))))))
-                      ;; Work around https://bugs.gnu.org/46219.
-                      (cl-callf file-name-unquote root)
-                      (cl-callf file-name-unquote ref-file)
                       (push (list (substring-no-properties identifier)
-                                  (file-relative-name ref-file root))
+                                  (file-relative-name
+                                   ;; Work around https://bugs.gnu.org/46219.
+                                   (file-name-unquote ref-file)
+                                   (file-name-unquote root)))
                             definitions))))))))
         ;; Test completions.
         (let ((table (xref-backend-identifier-completion-table 'bazel-mode)))
