@@ -1416,20 +1416,19 @@ This function is suitable for ‘compilation-finish-functions’."
           ;; First collect potential coverage files.  If there are none (typical
           ;; case), we don’t have to hit the filesystem.
           (save-excursion
-            (save-restriction
-              (goto-char (point-min))
-              ;; Parse Bazel output.  It’s supposed to be stable and easy to
-              ;; parse, cf. https://bazel.build/run/scripts#parsing-output.  We
-              ;; assume that coverage instrumentation files are always called
-              ;; “coverage.dat”.
-              (while (re-search-forward
-                      (rx bol "  " (group ?/ (+ nonl) "/coverage.dat") eol)
-                      nil t)
-                (let ((file (match-string-no-properties 1)))
-                  ;; The coverage files are external filenames, so quote them
-                  ;; (to avoid clashes with filename handlers) and make them
-                  ;; remote if necessary.
-                  (push (concat remote (file-name-quote file)) files))))))
+            (goto-char (point-min))
+            ;; Parse Bazel output.  It’s supposed to be stable and easy to
+            ;; parse, cf. https://bazel.build/run/scripts#parsing-output.  We
+            ;; assume that coverage instrumentation files are always called
+            ;; “coverage.dat”.
+            (while (re-search-forward
+                    (rx bol "  " (group ?/ (+ nonl) "/coverage.dat") eol)
+                    nil t)
+              (let ((file (match-string-no-properties 1)))
+                ;; The coverage files are external filenames, so quote them (to
+                ;; avoid clashes with filename handlers) and make them remote if
+                ;; necessary.
+                (push (concat remote (file-name-quote file)) files)))))
         (when files
           ;; Only continue if we’re in a Bazel repository.
           (when-let ((root (bazel--repository-root default-directory)))
