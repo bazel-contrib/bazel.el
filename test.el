@@ -213,8 +213,7 @@ gets killed early."
           ;; Search for all sources and dependencies.  These are strings that
           ;; stand on their own in a line.
           (while (re-search-forward (rx bol (* blank) ?\") nil t)
-            (let ((backend (xref-find-backend))
-                  (root dir))
+            (let ((backend (xref-find-backend)))
               (should (eq backend 'bazel-mode))
               (ert-info ((format "line %d, %s" (line-number-at-pos)
                                  (buffer-substring-no-properties
@@ -224,7 +223,7 @@ gets killed early."
                   (should (equal (expand-file-name
                                   (get-text-property 0 'bazel-mode-workspace
                                                      identifier))
-                                 (file-name-as-directory root)))
+                                 (file-name-as-directory dir)))
                   (let* ((defs (xref-backend-definitions backend identifier))
                          (def (car-safe defs)))
                     (should (consp defs))
@@ -248,7 +247,7 @@ gets killed early."
                                   (file-relative-name
                                    ;; Work around https://bugs.gnu.org/46219.
                                    (file-name-unquote ref-file)
-                                   (file-name-unquote root)))
+                                   (file-name-unquote dir)))
                             definitions))))))))
         ;; Test completions.
         (let ((table (xref-backend-identifier-completion-table 'bazel-mode)))
