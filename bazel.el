@@ -295,12 +295,10 @@ mentioned in the Buildifier source code at URL
   `(,@bazel-font-lock-keywords-2
     ;; Include builtin functions.  Some Starlark functions are exposed to BUILD
     ;; files as builtins.  For details see
-    ;; https://github.com/bazelbuild/starlark/blob/master/spec.md.
-    (,(rx line-start
-          (or "exports_files" "licenses" "package" "package_group" "workspace")
-          symbol-end)
+    ;; https://bazel.build/reference/be/functions.
+    (,(rx line-start (or "package" "package_group" "exports_files") symbol-end)
      . 'font-lock-builtin-face)
-    (,(rx symbol-start (group (or "glob" "select")) (* blank) ?\()
+    (,(rx symbol-start (group (or "glob" "select" "subpackages")) (* blank) ?\()
      1 font-lock-builtin-face)
     ;; Target names
     (bazel--find-target-name 2 'font-lock-variable-name-face prepend)
