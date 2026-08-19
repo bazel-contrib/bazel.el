@@ -1231,9 +1231,9 @@ Process buildifier exited abnormally with code 1
 
 (ert-deftest bazel-find-build-file ()
   (bazel-test--with-workspace dir nil
-    (dolist (file '("WORKSPACE"
+    (dolist (file '("MODULE.bazel"
                     "BUILD"
-                    "a/WORKSPACE"
+                    "a/MODULE.bazel"
                     "a/b/BUILD.bazel"
                     "a/b/BUILD"
                     "a/b/c/BUILD"
