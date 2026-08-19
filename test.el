@@ -60,7 +60,7 @@ Bind the name of the workspace directory to NAME and execute BODY while
 the directory exists.  Remove the directory and all its contents once
 BODY finishes successfully.  NAME will be a directory name, not a
 directory file name; see Info node ‘(elisp) Directory Names’.
-Initially, the directory will contain an empty REPO.bazel file as
+Initially, the directory will contain an empty MODULE.bazel file as
 boundary sentinel, a symbolic link ‘.output-base’ to an output base
 tree, and a symbolic link ‘bazel-out’ to an empty output directory; see
 URL ‘https://bazel.build/remote/output-directories’.  If ORG-FILE is
@@ -412,7 +412,7 @@ gets killed early."
   "Test that we find all known workspace sentinels."
   (bazel-test--with-workspace dir nil
     ;; Delete existing sentinel so we can test for the others.
-    (delete-file (file-name-concat dir "REPO.bazel"))
+    (delete-file (file-name-concat dir "MODULE.bazel"))
     (let ((subdir (expand-file-name "subdir" dir))
           (coding-system-for-write 'us-ascii-unix)
           (write-region-annotate-functions nil)
@@ -447,8 +447,7 @@ gets killed early."
       (should (equal (sort (cl-loop for file in files
                                     collect (file-relative-name file dir))
                            #'string-lessp)
-                     '(".bazelignore" "MODULE.bazel" "REPO.bazel"
-                       "package/BUILD"))))))
+                     '(".bazelignore" "MODULE.bazel" "package/BUILD"))))))
 
 (ert-deftest bazel-test/coverage ()
   "Test coverage parsing and display."
@@ -1230,8 +1229,7 @@ Process buildifier exited abnormally with code 1
 
 (ert-deftest bazel-find-build-file ()
   (bazel-test--with-workspace dir nil
-    (dolist (file '("MODULE.bazel"
-                    "BUILD"
+    (dolist (file '("BUILD"
                     "a/MODULE.bazel"
                     "a/b/BUILD.bazel"
                     "a/b/BUILD"
@@ -1304,8 +1302,6 @@ Process buildifier exited abnormally with code 1
 
 (ert-deftest bazel-find-module-file ()
   (bazel-test--with-workspace dir nil
-    (dolist (file '("MODULE.bazel"))
-      (write-region "" nil (expand-file-name file dir) nil nil nil 'excl))
     (let ((expected (expand-file-name "MODULE.bazel" dir)))
       (dolist (parent '("" "dir"))
         (ert-info (parent :prefix "Parent directory: ")
@@ -1417,11 +1413,11 @@ the expected regular expression."
 
 (defun bazel-test--set-up-workspace (workspace output-base)
   "Set up a fake workspace in WORKSPACE.
-Create an empty REPO.bazel file and an output base tree as described in
+Create an empty MODULE.bazel file and an output base tree as described in
 URL ‘https://bazel.build/remote/output-directories’.  The symbolic link
 ‘bazel-out’ in WORKSPACE will point to the output directory within
 OUTPUT-BASE.  WORKSPACE and OUTPUT-BASE can be directory or file names."
-  (make-empty-file (file-name-concat workspace "REPO.bazel") :parents)
+  (make-empty-file (file-name-concat workspace "MODULE.bazel") :parents)
   (let ((out-dir (file-name-concat output-base "execroot" "_main" "bazel-out")))
     (make-directory out-dir :parents)
     (make-symbolic-link out-dir (file-name-as-directory workspace)))
