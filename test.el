@@ -61,7 +61,7 @@ the directory exists.  Remove the directory and all its contents once
 BODY finishes successfully.  NAME will be a directory name, not a
 directory file name; see Info node ‘(elisp) Directory Names’.
 Initially, the directory will contain an empty MODULE.bazel file as
-boundary sentinel, a symbolic link ‘.output-base’ to an output base
+boundary sentinel, a subdirectory ‘.output-base’ to serve as output base
 tree, and a symbolic link ‘bazel-out’ to an empty output directory; see
 URL ‘https://bazel.build/remote/output-directories’.  If ORG-FILE is
 non-nil, tangle code blocks in ORG-FILE into the workspace directory
@@ -71,7 +71,7 @@ first using ‘bazel-test--tangle’."
     (cl-with-gensyms (directory workspace output-base file)
       `(let* ((,directory (make-temp-file "bazel-mode-test-" :dir-flag))
               (,workspace (file-name-concat ,directory "workspace"))
-              (,output-base (file-name-concat ,directory "output-base")))
+              (,output-base (file-name-concat ,workspace ".output-base")))
          (ert-info (,workspace :prefix "Workspace: ")
            (bazel-test--set-up-workspace ,workspace ,output-base)
            (prog2 (when-let ((,file ,org-file))
@@ -1422,7 +1422,6 @@ OUTPUT-BASE.  WORKSPACE and OUTPUT-BASE can be directory or file names."
     (make-directory out-dir :parents)
     (make-symbolic-link out-dir (file-name-as-directory workspace)))
   (make-directory (file-name-concat output-base "external"))
-  (make-symbolic-link output-base (file-name-concat workspace ".output-base"))
   nil)
 
 (defun bazel-test--tangle (directory org-file)
