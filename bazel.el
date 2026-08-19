@@ -258,59 +258,54 @@ The magic comments \"keep sorted\", \"do not sort\", and
 mentioned in the Buildifier source code at URL
 `https://git.io/JOuVL' and have tests.")
 
-(eval-and-compile
-  (defconst bazel-font-lock-keywords-1
-    ;; Only include file directives.  See Info node ‘(elisp) Levels of Font
-    ;; Lock’.
-    (eval-when-compile
-      `((,(rx line-start
-              (or "include" "module" "repo" "visibility" "workspace")
-              symbol-end)
-         . 'font-lock-builtin-face)
-        (,(rx line-start "load" symbol-end) . 'font-lock-keyword-face)))
-    "Value of ‘font-lock-keywords’ in ‘bazel-mode’ at font lock level 1.")
+(defconst bazel-font-lock-keywords-1
+  ;; Only include file directives.  See Info node ‘(elisp) Levels of Font Lock’.
+  `((,(rx line-start
+          (or "include" "module" "repo" "visibility" "workspace")
+          symbol-end)
+     . 'font-lock-builtin-face)
+    (,(rx line-start "load" symbol-end) . 'font-lock-keyword-face))
+  "Value of ‘font-lock-keywords’ in ‘bazel-mode’ at font lock level 1.")
 
-  (defconst bazel-font-lock-keywords-2
-    (eval-when-compile
-      `(,@bazel-font-lock-keywords-1
-        ;; Include keywords and constants.  Keywords for BUILD files are the
-        ;; same as Starlark files.  Even if some of them are forbidden in BUILD
-        ;; files, they should be highlighted.  See
-        ;; https://github.com/bazelbuild/starlark/blob/master/spec.md.  “load”
-        ;; is already included in level 1.
-        (,(rx symbol-start
-              (or "and" "break" "continue" "def" "elif" "else" "for" "if" "in"
-                  "lambda" "not" "or" "pass" "return")
-              symbol-end)
-         . 'font-lock-keyword-face)
-        ;; Reserved keywords
-        (,(rx symbol-start
-              (or "as" "assert" "async" "await" "class" "del" "except" "finally"
-                  "from" "global" "import" "is" "nonlocal" "raise" "try" "while"
-                  "with" "yield")
-              symbol-end)
-         . 'font-lock-warning-face)
-        ;; Constants
-        (,(rx symbol-start (or "True" "False" "None") symbol-end)
-         . 'font-lock-constant-face)))
-    "Value of ‘font-lock-keywords’ in ‘bazel-mode’ at font lock level 2.")
+(defconst bazel-font-lock-keywords-2
+  `(,@bazel-font-lock-keywords-1
+    ;; Include keywords and constants.  Keywords for BUILD files are the same as
+    ;; Starlark files.  Even if some of them are forbidden in BUILD files, they
+    ;; should be highlighted.  See
+    ;; https://github.com/bazelbuild/starlark/blob/master/spec.md.  “load” is
+    ;; already included in level 1.
+    (,(rx symbol-start
+          (or "and" "break" "continue" "def" "elif" "else" "for" "if" "in"
+              "lambda" "not" "or" "pass" "return")
+          symbol-end)
+     . 'font-lock-keyword-face)
+    ;; Reserved keywords
+    (,(rx symbol-start
+          (or "as" "assert" "async" "await" "class" "del" "except" "finally"
+              "from" "global" "import" "is" "nonlocal" "raise" "try" "while"
+              "with" "yield")
+          symbol-end)
+     . 'font-lock-warning-face)
+    ;; Constants
+    (,(rx symbol-start (or "True" "False" "None") symbol-end)
+     . 'font-lock-constant-face))
+  "Value of ‘font-lock-keywords’ in ‘bazel-mode’ at font lock level 2.")
 
-  (defconst bazel-font-lock-keywords-3
-    (eval-when-compile
-      `(,@bazel-font-lock-keywords-2
-        ;; Include builtin functions.  Some Starlark functions are exposed to
-        ;; BUILD files as builtins.  For details see
-        ;; https://github.com/bazelbuild/starlark/blob/master/spec.md.
-        (,(rx (or (seq line-start (or "exports_files" "licenses" "package"
-                                      "package_group" "workspace"))
-                  (seq symbol-start (or "glob" "select" )))
-              symbol-end)
-         . 'font-lock-builtin-face)
-        ;; Target names
-        (bazel--find-target-name 2 'font-lock-variable-name-face prepend)
-        ;; Magic comments
-        (bazel--find-magic-comment 0 'font-lock-preprocessor-face prepend)))
-    "Value of ‘font-lock-keywords’ in ‘bazel-mode’ at font lock level 3."))
+(defconst bazel-font-lock-keywords-3
+  `(,@bazel-font-lock-keywords-2
+    ;; Include builtin functions.  Some Starlark functions are exposed to BUILD
+    ;; files as builtins.  For details see
+    ;; https://github.com/bazelbuild/starlark/blob/master/spec.md.
+    (,(rx (or (seq line-start (or "exports_files" "licenses" "package"
+                                  "package_group" "workspace"))
+              (seq symbol-start (or "glob" "select" )))
+          symbol-end)
+     . 'font-lock-builtin-face)
+    ;; Target names
+    (bazel--find-target-name 2 'font-lock-variable-name-face prepend)
+    ;; Magic comments
+    (bazel--find-magic-comment 0 'font-lock-preprocessor-face prepend))
+  "Value of ‘font-lock-keywords’ in ‘bazel-mode’ at font lock level 3.")
 
 (defconst bazel-font-lock-keywords bazel-font-lock-keywords-1
   "Default value of ‘font-lock-keywords’ in ‘bazel-mode’.")
