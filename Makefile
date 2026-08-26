@@ -33,10 +33,10 @@ all:
 check:
 	$(BAZEL) test $(BAZELFLAGS) -- //...
 	$(BAZEL) test \
-	  --extra_toolchains=@rules_elisp//elisp:emacs_29_toolchain \
+	  --extra_toolchains=@rules_elisp//elisp:emacs_30_toolchain \
 	  $(BAZELFLAGS) -- //...
 	$(BAZEL) test \
-	  --extra_toolchains=@rules_elisp//elisp:emacs_30_toolchain \
+	  --extra_toolchains=@rules_elisp//elisp:emacs_31_toolchain \
 	  $(BAZELFLAGS) -- //...
 
 COVERAGE_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off

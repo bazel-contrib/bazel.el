@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-bazel_dep(name = "rules_elisp", version = "0.0.2")
+bazel_dep(name = "rules_elisp", version = "0.1.0")
 bazel_dep(name = "rules_license", version = "1.0.0")
 
 include("//:dev.MODULE.bazel")
