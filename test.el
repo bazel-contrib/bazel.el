@@ -1419,6 +1419,8 @@ URL ‘https://bazel.build/remote/output-directories’.  The symbolic link
 ‘bazel-out’ in WORKSPACE will point to the output directory within
 OUTPUT-BASE.  WORKSPACE and OUTPUT-BASE can be directory or file names."
   (declare (ftype (function (string string) null)))
+  (cl-check-type workspace string)
+  (cl-check-type output-base string)
   (make-empty-file (file-name-concat workspace "MODULE.bazel") :parents)
   (let ((out-dir (file-name-concat output-base "execroot" "_main" "bazel-out")))
     (make-directory out-dir :parents)
