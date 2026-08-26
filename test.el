@@ -74,7 +74,7 @@ first using ‘bazel-test--tangle’."
               (,output-base (file-name-concat ,workspace ".output-base")))
          (ert-info (,workspace :prefix "Workspace: ")
            (bazel-test--set-up-workspace ,workspace ,output-base)
-           (prog2 (when-let ((,file ,org-file))
+           (prog2 (when-let* ((,file ,org-file))
                     (bazel-test--tangle ,workspace ,file))
                (let ((,name (file-name-as-directory ,workspace)))
                  ,@body)
