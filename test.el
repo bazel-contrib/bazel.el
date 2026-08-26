@@ -67,7 +67,8 @@ URL ‘https://bazel.build/remote/output-directories’.  If ORG-FILE is
 non-nil, tangle code blocks in ORG-FILE into the workspace directory
 first using ‘bazel-test--tangle’."
     (declare (ftype (function (symbol t &rest t) t))
-             (indent 2) (debug (symbolp form body)))
+             (debug (symbolp form body))
+             (indent 2))
     (cl-check-type name symbol)
     (cl-with-gensyms (directory workspace output-base file)
       `(let* ((,directory (make-temp-file "bazel-mode-test-" :dir-flag))
@@ -85,7 +86,7 @@ first using ‘bazel-test--tangle’."
     "Visit FILENAME in a temporary buffer.
 Execute BODY with the buffer that visits FILENAME current.  Kill
 that buffer once BODY finishes."
-    (declare (ftype (function (t &rest t) t)) (indent 1) (debug t))
+    (declare (ftype (function (t &rest t) t)) (debug t) (indent 1))
     (cl-with-gensyms (previous-buffers buffer)
       (cl-once-only (filename)
         `(ert-info (,filename :prefix "Visited test file: ")
@@ -102,7 +103,7 @@ that buffer once BODY finishes."
 
   (defmacro bazel-test--with-buffers (&rest body)
     "Evaluate BODY and kill all buffers that it created."
-    (declare (ftype (function (&rest t) t)) (indent 0) (debug t))
+    (declare (ftype (function (&rest t) t)) (debug t) (indent 0))
     (cl-with-gensyms (buffers)
       `(let ((,buffers (buffer-list)))
          (unwind-protect
@@ -113,7 +114,7 @@ that buffer once BODY finishes."
   (defmacro bazel-test--wait-for (message condition)
     "Busy wait for CONDITION to become non-nil.
 MESSAGE is a message for ‘ert-info’."
-    (declare (ftype (function (t t) t)) (indent 1) (debug t))
+    (declare (ftype (function (t t) t)) (debug t) (indent 1))
     `(ert-info (,message)
        (ert-info (,(prin1-to-string condition) :prefix "Condition: ")
          (with-timeout (10 (ert-fail "Timed out waiting for condition"))
