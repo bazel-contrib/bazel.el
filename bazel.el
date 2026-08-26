@@ -2497,8 +2497,8 @@ conjunction of PREDICATE and BODY.  Within BODY, ARG is bound to
 the candidate to be tested.  The value of PREDICATE can also be
 nil, which is interpreted as an always-true predicate."
     (declare (ftype (function (symbol symbol &rest t) t))
-             (indent 2)
-             (debug (symbolp symbolp def-body)))
+             (debug (symbolp symbolp def-body))
+             (indent 2))
     (cl-check-type predicate symbol)
     (cl-check-type arg symbol)
     (cl-with-gensyms (original)
