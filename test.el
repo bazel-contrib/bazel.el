@@ -1073,16 +1073,14 @@ Process buildifier exited abnormally with code 1
   (bazel-test--with-workspace dir "http-archive.org"
     (should (set-file-times (expand-file-name "prefix" dir)
                             (encode-time '(0 0 0 2 5 2019 nil nil t))))
-    (let* ((archive (file-name-unquote
-                     (expand-file-name "archive.tar.gz" dir)))
+    (let* ((archive (expand-file-name "archive.tar.gz" dir))
+           (unquoted-archive (file-name-unquote archive))
            (url-unreserved-chars (cons ?/ url-unreserved-chars))
-           (url (concat "file://" (url-hexify-string archive)))
+           (url (concat "file://" (url-hexify-string unquoted-archive)))
            (tar (executable-find "tar"))
-           (sha256sum (executable-find "sha256sum"))
            (default-directory dir))
       (skip-unless tar)
-      (skip-unless sha256sum)
-      (ignore (process-lines tar "-c" "-z" "-f" archive "--" "prefix"))
+      (ignore (process-lines tar "-c" "-z" "-f" unquoted-archive "--" "prefix"))
       (let ((actual
              (with-temp-buffer
                (bazel-workspace-mode)
@@ -1093,28 +1091,16 @@ Process buildifier exited abnormally with code 1
                (insert-file-contents
                 (expand-file-name "WORKSPACE.expected" dir))
                (let ((case-fold-search nil)
-                     (search-spaces-regexp nil))
-                 (pcase (process-lines sha256sum "-b" "--" archive)
-                   ;; “sha256sum” should print exactly one line, the hash
-                   ;; followed by a space and the filename.
-                   ;; See Info node ‘(coreutils) sha2 utilities’
-                   ;; and Info node ‘(coreutils) md5sum invocation’.
-                   (`(,(rx bos (let hash (+ xdigit)) ?\s))
-                    ;; Replace variables in expected snippet with their values.
-                    (setq hash (base64-encode-string
-                                (replace-regexp-in-string
-                                 (rx xdigit xdigit)
-                                 (lambda (match)
-                                   (unibyte-string (string-to-number match 16)))
-                                 hash :fixedcase :literal)
-                                :no-line-break))
-                    (dolist (pair `(("%sha256%" . ,hash)
-                                    ("%url%" . ,url)))
-                      (cl-destructuring-bind (variable . value) pair
-                        (goto-char (point-min))
-                        (while (search-forward variable nil t)
-                          (replace-match value :fixedcase :literal)))))
-                   (o (ert-fail (format "Invalid sha256sum output: %S" o)))))
+                     (search-spaces-regexp nil)
+                     (hash (bazel-test--sha256 archive)))
+                 ;; Replace variables in expected snippet with their values.
+                 (setq hash (base64-encode-string hash :no-line-break))
+                 (dolist (pair `(("%sha256%" . ,hash)
+                                 ("%url%" . ,url)))
+                   (cl-destructuring-bind (variable . value) pair
+                     (goto-char (point-min))
+                     (while (search-forward variable nil t)
+                       (replace-match value :fixedcase :literal)))))
                ;; We don’t expect a trailing newline.
                (goto-char (point-max))
                (skip-chars-backward "\n")
@@ -1493,5 +1479,19 @@ convert them to markup of the form {face text}."
              concat (markup text faces) into result
              finally (delete-region (point-min) (point-max)) (insert result)))
   nil)
+
+(defun bazel-test--sha256 (file)
+  "Return the SHA-256 sum of FILE as a binary string."
+  (declare (ftype (function (string) string)))
+  (cl-check-type file string)
+  (with-temp-buffer
+    (let ((format-alist nil)
+          (after-insert-file-functions nil)
+          (coding-system-for-read 'no-conversion)
+          (coding-system-for-write 'no-conversion)
+          (jka-compr-inhibit t))
+      (set-buffer-multibyte nil)
+      (insert-file-contents file)
+      (secure-hash 'sha256 (current-buffer) nil nil :binary))))
 
 ;;; test.el ends here
