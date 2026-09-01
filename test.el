@@ -1485,13 +1485,8 @@ convert them to markup of the form {face text}."
   (declare (ftype (function (string) string)))
   (cl-check-type file string)
   (with-temp-buffer
-    (let ((format-alist nil)
-          (after-insert-file-functions nil)
-          (coding-system-for-read 'no-conversion)
-          (coding-system-for-write 'no-conversion)
-          (jka-compr-inhibit t))
-      (set-buffer-multibyte nil)
-      (insert-file-contents file)
-      (secure-hash 'sha256 (current-buffer) nil nil :binary))))
+    (set-buffer-multibyte nil)
+    (insert-file-contents-literally file)
+    (secure-hash 'sha256 (current-buffer) nil nil :binary)))
 
 ;;; test.el ends here
