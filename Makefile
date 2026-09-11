@@ -23,6 +23,7 @@ BAZELFLAGS =
 INSTALL ?= install
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL) -m 644
+INSTALL_BAZELFLAGS = --config=release $(BAZELFLAGS)
 GIT = git
 GH = gh
 
@@ -59,10 +60,13 @@ datarootdir = $(prefix)/share
 lispdir = $(datarootdir)/emacs/site-lisp
 infodir = $(datarootdir)/info
 
-install: all info
+install:
 	$(INSTALL) -d -- '$(DESTDIR)$(lispdir)' '$(DESTDIR)$(infodir)'
 	$(INSTALL_DATA) -- bazel.el '$(DESTDIR)$(lispdir)/bazel.el'
+	$(BAZEL) build $(INSTALL_BAZELFLAGS) -- //:bazel
 	$(INSTALL_DATA) -- bazel-bin/bazel.elc '$(DESTDIR)$(lispdir)/bazel.elc'
+	$(BAZEL) build --action_env='MAKEINFO=$(MAKEINFO)' \
+	  $(INSTALL_BAZELFLAGS) -- //:bazel.el.info
 	$(INSTALL_DATA) -- bazel-bin/bazel.el.info \
 	  '$(DESTDIR)$(infodir)/bazel.el.info'
 	$(POST_INSTALL)
