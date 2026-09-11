@@ -40,7 +40,7 @@ jobs:
         shell: bash
         run: |
           make check
-          bazel build -- //dev:release.tar
+          bazel build --config=release -- //dev:release.tar
           cp -- bazel-bin/dev/release.tar 'bazel-${{github.ref_name}}.tar'
       - name: Create release
         uses: softprops/action-gh-release@v3

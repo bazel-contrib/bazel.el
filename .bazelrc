@@ -25,3 +25,8 @@ build:ci --experimental_repository_cache_hardlinks
 build:ci --toolchain_resolution_debug=//:bazel
 test:ci --test_output=errors
 run:ci --noomit_run_args
+
+# Release configuration
+build:release --experimental_convenience_symlinks=normal
+build:release --compilation_mode=opt
+build:release --stamp
