@@ -28,14 +28,24 @@
 # Dummy BUILD file
 #+END_SRC
 
-#+BEGIN_SRC bazel-module :tangle .output-base/external/ext/MODULE.bazel
+#+BEGIN_SRC bazel-module :tangle .output-base/external/ext+/MODULE.bazel
 # empty
 #+END_SRC
 
-#+BEGIN_SRC bazel-build :tangle .output-base/external/ext/BUILD
+#+BEGIN_SRC bazel-build :tangle .output-base/external/ext+/BUILD
 # Dummy BUILD file
 #+END_SRC
 
-#+BEGIN_SRC bazel-build :tangle .output-base/external/ext/ext-pkg/BUILD
+#+BEGIN_SRC bazel-build :tangle .output-base/external/ext+/ext-pkg/BUILD
 # Dummy BUILD file
+#+END_SRC
+
+** Mock for the Bazel program
+
+This only prints a fake repository mapping.
+
+#+BEGIN_SRC sh :tangle bazel.mock :shebang #!/bin/sh
+set -Cefu
+test "$*" = '--quiet mod --lockfile_mode=off dump_repo_mapping '
+echo '{"":"","ext":"ext+"}'
 #+END_SRC

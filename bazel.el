@@ -30,6 +30,7 @@
 (require 'compile)
 (require 'easymenu)
 (require 'ffap)
+(require 'filenotify)
 (require 'imenu)
 (require 'json)
 (require 'multisession)
@@ -2512,15 +2513,18 @@ determined for any reason."
       ;; See https://bazel.build/remote/output-directories for some overview of
       ;; the Bazel directory layout.  Empirically, the directory
       ;; $(readlink ROOT/bazel-out)/../../../external/REPOSITORY is a symlink to
-      ;; the repository root of the external repository REPOSITORY; see
+      ;; the repository root of the external repository with canonical name
+      ;; REPOSITORY; see
       ;; https://bazel.build/remote/output-directories#layout-diagram.  Again,
       ;; this is a heuristic, and should work for the common case.  In
       ;; particular, we don’t want to shell out to “bazel info workspace” here,
       ;; because that might block indefinitely if another Bazel instance holds
       ;; the lock.  We don’t check whether the directory exists, because it’s
       ;; generated and cached when needed.
-      (when-let* ((dir (bazel--external-repository-dir this-repository-root)))
-        (file-name-as-directory (expand-file-name repository-name dir)))
+      (when-let* ((dir (bazel--external-repository-dir this-repository-root))
+                  (canonical (bazel--map-repo this-repository-root
+                                              repository-name)))
+        (file-name-as-directory (expand-file-name canonical dir)))
     (file-name-as-directory this-repository-root)))
 
 (defun bazel--external-repository-dir (root)
@@ -2560,6 +2564,107 @@ root directory as returned by ‘bazel--repository-root’."
           ;; of canonical repository names.
           (rx bos (any ?+ "A-Z" "a-z") (* (any ?+ ?- ?. ?_ "A-Z" "a-z" "0-9"))
               eos)))))))
+
+(defun bazel--map-repo (workspace apparent-name)
+  "Map apparent to canonical repository name.
+WORKSPACE is the directory name or directory file name of a Bazel
+workspace, and APPARENT-NAME is the name of a repository as it appears
+to the main repository in the workspace.  Return a heuristic for the
+canonical repository name.  Neither the apparent nor the canonical name
+start with ‘@’ signs."
+  (declare (ftype (function (string string) string)))
+  (cl-check-type workspace string)
+  (cl-check-type apparent-name string)
+  (cl-assert (not (string-empty-p apparent-name)))
+  (if-let* ((mapping (bazel--repo-mapping workspace)))
+      (gethash apparent-name mapping)
+    ;; Normally, we shouldn’t get here.  Display a warning and try some
+    ;; best-effort heuristics.
+    (lwarn '(bazel map-repo) (if non-essential :debug :warning)
+           "No mapping for repository %s found" apparent-name)
+    ;; The magic ‘bazel_tools’ repository typically maps to itself.
+    (if (string-equal apparent-name "bazel_tools") "bazel_tools"
+      ;; If all else fails, try the typical mapping: the canonical name is the
+      ;; apparent name with a plus sign appended.
+      (concat apparent-name "+"))))
+
+(defvar bazel--repo-mappings (make-hash-table :test #'equal)
+  "Cached repository mappings.
+This is a two-level hashtable that maps repository root directory names
+to hashtables mapping apparent repository names to canonical repository
+names.  The mappings are always for the main repository.")
+
+(defun bazel--repo-mapping (workspace)
+  "Obtain the repository mapping for the main repository in WORKSPACE.
+WORKSPACE is the directory name or directory file name of a Bazel
+workspace.  Return a hashtable mapping apparent to canonical repository
+names, or nil if the repository mapping can’t be determined."
+  (declare (ftype (function (string) (or hash-table null))))
+  (cl-check-type workspace string)
+  ;; Canonicalize the workspace directory to an absolute directory name.
+  (let ((directory (file-name-as-directory (expand-file-name workspace))))
+    (or (gethash directory bazel--repo-mappings)  ; try the cache first
+        ;; If we’re performing an essential task, ask Bazel for the mapping.
+        ;; Note that ‘bazel--fetch-repo-mapping’ will store the mapping in the
+        ;; cache.
+        (unless non-essential (bazel--fetch-repo-mapping directory))
+        ;; If we got here, at least display a warning.
+        (ignore (lwarn '(bazel repo-mapping) (if non-essential :debug :warning)
+                       "Couldn’t determine repository mapping for workspace %s"
+                       (abbreviate-file-name workspace))))))
+
+(define-error 'bazel--process-failed "Process failed")
+
+(defun bazel--fetch-repo-mapping (workspace)
+  "Obtain the repository mapping for the main repository in WORKSPACE.
+WORKSPACE is the directory name or directory file name of a Bazel
+workspace.  Return a hashtable mapping apparent to canonical repository
+names, or nil if the repository mapping can’t be determined.  Unlike
+‘bazel--repo-mapping’, this function always queries Bazel for the
+repository mapping."
+  (declare (ftype (function (string) (or hash-table null))))
+  (cl-check-type workspace string)
+  ;; Canonicalize the workspace directory to an absolute directory name.
+  (let ((directory (file-name-as-directory (expand-file-name workspace)))
+        (command `(,@bazel-command
+                   ,@(when non-essential
+                       '("--noblock_for_lock" "--preemptible"))
+                   "--quiet" "mod" "--lockfile_mode=off" "dump_repo_mapping"
+                   "")))  ; "" denotes the main repository
+    (condition-case error
+        (with-temp-buffer
+          (let* ((coding-system-for-read 'utf-8-unix)
+                 (coding-system-for-write 'utf-8-unix)
+                 (default-directory directory)  ; run Bazel on the correct host
+                 (status (apply #'process-file (car command) nil '(t nil) nil
+                                (cdr command))))
+            (unless (eql status 0)
+              (signal 'bazel--process-failed (list status)))
+            ;; If possible, invalidate the cache entry whenever the MODULE.bazel
+            ;; file changes.
+            (ignore-error file-notify-error
+              (file-notify-add-watch (expand-file-name "MODULE.bazel" directory)
+                                     '(change)
+                                     #'bazel--invalidate-repo-mapping))
+            (goto-char (point-min))
+            (puthash directory (cl-the hash-table (bazel--json-parse-buffer))
+                     bazel--repo-mappings)))
+      ((file-error bazel--process-failed)
+       (lwarn '(bazel repo-mapping) (if non-essential :debug :warning)
+              "Command %S failed: %s" command (error-message-string error))
+       nil))))
+
+(defun bazel--invalidate-repo-mapping (event)
+  "Invalidate a repository mapping.
+This is a file notification handler that gets called when a MODULE.bazel
+file changes.  EVENT is a file notification event.
+See Info node ‘(elisp) File Notifications’."
+  (declare (ftype (function (cons) null)))
+  (when-let* ((workspace (file-name-directory (caddr event))))
+    ;; Canonicalize the workspace directory to an absolute directory name.
+    (remhash (file-name-as-directory (expand-file-name workspace))
+             bazel--repo-mappings))
+  nil)
 
 ;;;; Utility functions for target completion
 
@@ -2633,8 +2738,7 @@ completion to test targets.  This is a helper function for
      ;; repository here.
      (bazel--completion-table-with-prefix prefix
        (completion-table-merge
-        (when-let* ((dir (bazel--external-repository-dir root)))
-          (bazel--target-repository-completion-table dir))
+        (bazel--target-repository-completion-table root)
         '("//"))))
     ((rx bos (let prefix (* (not (any ?:))) "/...:"))
      ;; Combination of package wildcard and target wildcard.
@@ -2753,48 +2857,32 @@ nil, which is interpreted as an always-true predicate."
 
 (defun bazel--target-repository-completion-table (root)
   "Return a target completion table for external repository names.
-ROOT is the parent directory of the external repositories as
-returned by ‘bazel--external-repository-dir’.  This is a helper
-function for ‘bazel--target-completion-table’."
+ROOT is the main repository root directory.  This is a helper function
+for ‘bazel--target-completion-table’."
   (declare (ftype (function (string) t)))
   (cl-check-type root string)
   (lambda (string predicate action)
     (cl-check-type string string)
     (cl-check-type predicate (or null function))
-    ;; Restrict completions to valid repository names.
-    (let ((completion-regexp-list
-           (cons (rx bos (+ (any "A-Z" "a-z" "0-9" ?_ ?- ?.)) eos)
-                 completion-regexp-list)))
-      (bazel--make-conjunction predicate candidate
-        (bazel--target-completion-directory-p candidate))
-      ;; The file name completion functions return directory names for
-      ;; directories, so we turn them back into directory filenames, otherwise
-      ;; the target syntax ‘@foo’ wouldn’t work.
-      (ignore-error file-error
-        (pcase action
-          ('nil
-           (when-let* ((name (file-name-completion string root predicate)))
-             (let ((result (directory-file-name name)))
-               ;; Fulfill the contract of ‘try-completion’.
-               (if (string-equal result string) t result))))
-          ('t
-           (pcase (cl-loop for cand in (file-name-all-completions string root)
-                           if (funcall predicate cand)
-                           collect (directory-file-name cand))
-             (`(,(and candidate (pred (string-equal string))))
-              ;; A single exact match; offer root package as well.
-              (list candidate (concat candidate "//")))
-             (candidates candidates)))
-          ('lambda
-            ;; The target ‘@foo’ is a shorthand for ‘@foo//:foo’.  We don’t
-            ;; check for the existence of the ‘foo’ target here.
-            (and (not (string-empty-p string))
-                 (not (directory-name-p string))
-                 (file-accessible-directory-p
-                  (expand-file-name string root))
-                 (funcall predicate (file-name-as-directory string))))
-          (`(boundaries . ,suffix)
-           `(boundaries 0 . ,(string-match-p (rx (any ?/ ?:)) suffix))))))))
+    (let ((mapping (bazel--repo-mapping root))
+          ;; Filter out empty (main) repository.
+          (completion-regexp-list (cons (rx anychar) completion-regexp-list)))
+      (pcase action
+        ('nil
+         (try-completion string mapping predicate))
+        ('t
+         (pcase (all-completions string mapping predicate)
+           (`(,(and candidate (pred (string-equal string))))
+            ;; A single exact match; offer root package as well.
+            (list candidate (concat candidate "//")))
+           (candidates candidates)))
+        ('lambda
+          ;; The target ‘@foo’ is a shorthand for ‘@foo//:foo’.  We don’t
+          ;; check for the existence of the ‘foo’ target here.
+          (and (not (string-empty-p string))
+               (test-completion string mapping predicate)))
+        (`(boundaries . ,suffix)
+         `(boundaries 0 . ,(string-match-p (rx (any ?/ ?:)) suffix)))))))
 
 (defun bazel--target-package-completion-table (root repository package pattern)
   "Return a completion table for package patterns.
@@ -2919,7 +3007,7 @@ the wildcards with a colon.  This is a helper function for
            '("all" "all-targets" "*")))))))
 
 (defun bazel--target-completion-directory-p (string)
-  "Return whether STRING is a valid repository or package name.
+  "Return whether STRING is a valid package name.
 Assume that STRING comes from ‘file-name-completion’ or
 ‘file-name-all-completions’.  This is a helper function for
 ‘bazel--target-completion-table’."
