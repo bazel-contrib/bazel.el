@@ -217,7 +217,9 @@ gets killed early."
     (bazel-test--with-workspace dir "xref.org"
       (bazel-test--with-file-buffer (expand-file-name "BUILD" dir)
         (let ((case-fold-search nil)
-              (search-spaces-regexp nil))
+              (search-spaces-regexp nil)
+              (exec-path (list dir))
+              (bazel-command '("bazel.mock")))
           (forward-comment (point-max))
           ;; Search for all sources and dependencies.  These are strings that
           ;; stand on their own in a line.
@@ -261,7 +263,8 @@ gets killed early."
         ;; Test completions.
         (let ((table (xref-backend-identifier-completion-table 'bazel-mode)))
           (should (equal (try-completion ":" table) ":"))
-          (should (equal (all-completions ":" table) '("lib" "bin" "aaa.cc")))
+          (should (equal (all-completions ":" table)
+                         '("lib" "bin" "aaa.cc" "bazel.mock")))
           (should (equal (completion-boundaries ":" table nil "") '(1 . 0))))
         ;; Test ‘bazel-show-consuming-target’.
         (let* ((build-buffer (current-buffer))
@@ -278,7 +281,7 @@ gets killed early."
                      ("//:aaa.cc" "aaa.cc")
                      ("//:aaa.cc" "aaa.cc")
                      ("//pkg:ccc.cc" "pkg/ccc.cc")
-                     ("@ws//pkg:ddd.cc" ".output-base/external/ws/pkg/ddd.cc")
+                     ("@ws//pkg:ddd.cc" ".output-base/external/ws+/pkg/ddd.cc")
                      ("//:lib" "BUILD")
                      ("//:lib" "BUILD")
                      ("//pkg:pkg" "pkg/BUILD")
@@ -749,7 +752,11 @@ gets killed early."
            ("@qux//:" nil () nil 7)
            ("@qux//p" nil () nil 6)))
       (ert-info ((prin1-to-string string) :prefix "Input: ")
-        (let* ((default-directory dir)
+        (let* ((warning-minimum-level :debug)
+               (warning-minimum-log-level :debug)
+               (exec-path (list dir))
+               (bazel-command '("bazel.mock"))
+               (default-directory dir)
                (table (bazel--target-completion-table :pattern nil)))
           (should (equal (try-completion string table) try))
           (should (equal (all-completions string table) all))

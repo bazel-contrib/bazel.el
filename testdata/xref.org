@@ -71,10 +71,20 @@ Create empty files that the labels in the test BUILD file refer to.
 
 Files in an external repository:
 
-#+BEGIN_SRC bazel-module :tangle .output-base/external/ws/MODULE.bazel
+#+BEGIN_SRC bazel-module :tangle .output-base/external/ws+/MODULE.bazel
 # empty
 #+END_SRC
 
-#+BEGIN_SRC C++ :tangle .output-base/external/ws/pkg/ddd.cc
+#+BEGIN_SRC C++ :tangle .output-base/external/ws+/pkg/ddd.cc
 // empty
+#+END_SRC
+
+** Mock for the Bazel program
+
+This only prints a fake repository mapping.
+
+#+BEGIN_SRC sh :tangle bazel.mock :shebang #!/bin/sh
+set -Cefu
+test "$*" = '--quiet mod --lockfile_mode=off dump_repo_mapping '
+echo '{"":"","ws":"ws+"}'
 #+END_SRC
