@@ -93,7 +93,7 @@ elisp_library(
 =-=-=
 
 Name: Font Locking
-Code: (lambda () (bazel-build-mode) (bazel-test--font-lock))
+Code: (lambda () (bazel-build-mode) (htmlfontify-buffer))
 
 =-=
 # comment
@@ -117,24 +117,24 @@ some_rule(
     load=0, glob=1
 )
 =-=
-{comment-delimiter # }{comment comment
-}
-{keyword load}({string "foo.bzl"}, {string """foo"""})
+<span class="comment-delimiter"># </span><span class="comment">comment
+</span>
+<span class="keyword">load</span>(<span class="string">&quot;foo.bzl&quot;</span>, <span class="string">&quot;&quot;&quot;foo&quot;&quot;&quot;</span>)
 
 cc_library(
-    name = {string "}{variable-name+string foo}{string "},
-    {comment-delimiter # }{preprocessor+comment keep sorted}{comment 
-}    srcs = {builtin glob}([{string "*.cc"}]),
-    alwayslink = {constant True},
-    linkstatic={constant True},
+    name = <span class="string">&quot;</span><span class="variable-name">foo</span><span class="string">&quot;</span>,
+    <span class="comment-delimiter"># </span><span class="preprocessor">keep sorted</span><span class="comment">
+</span>    srcs = <span class="builtin">glob</span>([<span class="string">&quot;*.cc&quot;</span>]),
+    alwayslink = <span class="constant">True</span>,
+    linkstatic=<span class="constant">True</span>,
 )
 
-some_rule(name = {string "foo"} + SUFFIX)
+some_rule(name = <span class="string">&quot;foo&quot;</span> + SUFFIX)
 
-name_only(name = {string "}{variable-name+string foo}{string "})
+name_only(name = <span class="string">&quot;</span><span class="variable-name">foo</span><span class="string">&quot;</span>)
 
 some_rule(
-    filename = {string "file.txt"},
+    filename = <span class="string">&quot;file.txt&quot;</span>,
     load=0, glob=1
 )
 =-=-=

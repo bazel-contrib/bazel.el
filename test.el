@@ -32,6 +32,7 @@
 (require 'ffap)
 (require 'flymake)
 (require 'font-lock)
+(require 'htmlfontify)
 (require 'imenu)
 (require 'org)
 (require 'ob-shell)
@@ -127,7 +128,8 @@ MESSAGE is a message for ‘ert-info’."
 (ert-deftest bazel/erts ()
   "Run ERTS tests.
 See Info node ‘(ert) erts files’."
-  (ert-test-erts-file (expand-file-name "test.erts" bazel-test--directory)))
+  (let ((hfy-optimizations '(merge-adjacent-tags body-text-only)))
+    (ert-test-erts-file (expand-file-name "test.erts" bazel-test--directory))))
 
 ;;;; Unit tests
 
@@ -1459,30 +1461,6 @@ This relies on the variable ‘bazel-buildifier-command’"
                   (file-equal-p (car (process-command process))
                                 bazel-buildifier-command)))
            (process-list)))
-
-(defun bazel-test--font-lock ()
-  "Fontify the current buffer, and convert face properties to markup.
-After fontification, search for text ranges with the same face, and
-convert them to markup of the form {face text}."
-  (declare (ftype (function () null)))
-  (font-lock-flush)
-  (font-lock-ensure)
-  (cl-flet* ((abbreviate (face)
-               (string-remove-prefix "font-lock-"
-                                     (string-remove-suffix "-face"
-                                                           (face-name face))))
-            (markup (text faces)
-              (if faces
-                  (format "{%s %s}"
-                          (mapconcat #'abbreviate (ensure-list faces) "+")
-                          text)
-                text)))
-    (cl-loop for (begin . end) being the intervals property 'face
-             for faces = (get-text-property begin 'face)
-             for text = (buffer-substring-no-properties begin end)
-             concat (markup text faces) into result
-             finally (delete-region (point-min) (point-max)) (insert result)))
-  nil)
 
 (defun bazel-test--sha256 (file)
   "Return the SHA-256 sum of FILE as a binary string."
