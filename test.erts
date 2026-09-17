@@ -98,43 +98,43 @@ Code: (lambda () (bazel-build-mode) (htmlfontify-buffer))
 =-=
 # comment
 
-load("foo.bzl", """foo""")
+load('foo.bzl', '''foo''')
 
 cc_library(
-    name = "foo",
+    name = 'foo',
     # keep sorted
-    srcs = glob(["*.cc"]),
+    srcs = glob(['*.cc']),
     alwayslink = True,
     linkstatic=True,
 )
 
-some_rule(name = "foo" + SUFFIX)
+some_rule(name = 'foo' + SUFFIX)
 
-name_only(name = "foo")
+name_only(name = 'foo')
 
 some_rule(
-    filename = "file.txt",
+    filename = 'file.txt',
     load=0, glob=1
 )
 =-=
 <span class="comment-delimiter"># </span><span class="comment">comment
 </span>
-<span class="keyword">load</span>(<span class="string">&quot;foo.bzl&quot;</span>, <span class="string">&quot;&quot;&quot;foo&quot;&quot;&quot;</span>)
+<span class="keyword">load</span>(<span class="string">'foo.bzl'</span>, <span class="string">'''foo'''</span>)
 
 cc_library(
-    name = <span class="string">&quot;</span><span class="variable-name">foo</span><span class="string">&quot;</span>,
+    name = <span class="string">'</span><span class="variable-name">foo</span><span class="string">'</span>,
     <span class="comment-delimiter"># </span><span class="preprocessor">keep sorted</span><span class="comment">
-</span>    srcs = <span class="builtin">glob</span>([<span class="string">&quot;*.cc&quot;</span>]),
+</span>    srcs = <span class="builtin">glob</span>([<span class="string">'*.cc'</span>]),
     alwayslink = <span class="constant">True</span>,
     linkstatic=<span class="constant">True</span>,
 )
 
-some_rule(name = <span class="string">&quot;foo&quot;</span> + SUFFIX)
+some_rule(name = <span class="string">'foo'</span> + SUFFIX)
 
-name_only(name = <span class="string">&quot;</span><span class="variable-name">foo</span><span class="string">&quot;</span>)
+name_only(name = <span class="string">'</span><span class="variable-name">foo</span><span class="string">'</span>)
 
 some_rule(
-    filename = <span class="string">&quot;file.txt&quot;</span>,
+    filename = <span class="string">'file.txt'</span>,
     load=0, glob=1
 )
 =-=-=
