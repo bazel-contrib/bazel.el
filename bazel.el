@@ -1975,7 +1975,7 @@ Return nil if no .bazelignore file exists."
 (defun bazel-build (target)
   "Build a Bazel TARGET."
   (declare (ftype (function (string) null)))
-  (interactive (list (bazel--read-target-pattern "build" nil)))
+  (interactive (list (bazel--read-target-pattern "Build target" nil)))
   (cl-check-type target string)
   (bazel--run-bazel-command "build" target)
   nil)
@@ -1995,7 +1995,7 @@ Return nil if no .bazelignore file exists."
 (defun bazel-run (target)
   "Build and run a Bazel TARGET."
   (declare (ftype (function (string) null)))
-  (interactive (list (bazel--read-target-pattern "run" nil)))
+  (interactive (list (bazel--read-target-pattern "Run target" nil)))
   (cl-check-type target string)
   (bazel--run-bazel-command "run" target)
   nil)
@@ -2003,7 +2003,7 @@ Return nil if no .bazelignore file exists."
 (defun bazel-test (target)
   "Build and run a Bazel test TARGET."
   (declare (ftype (function (string) null)))
-  (interactive (list (bazel--read-target-pattern "test" :only-tests)))
+  (interactive (list (bazel--read-target-pattern "Test target" :only-tests)))
   (cl-check-type target string)
   (bazel--run-bazel-command "test" target)
   nil)
@@ -2039,7 +2039,7 @@ Return nil if no .bazelignore file exists."
 (defun bazel-coverage (target)
   "Run Bazel test TARGET with coverage instrumentation enabled."
   (declare (ftype (function (string) null)))
-  (interactive (list (bazel--read-target-pattern "coverage" :only-tests)))
+  (interactive (list (bazel--read-target-pattern "Test target" :only-tests)))
   (cl-check-type target string)
   (bazel--run-bazel-command "coverage" target)
   nil)
@@ -2068,12 +2068,13 @@ COMMAND and ARGS."
   "History for Bazel target pattern completion.
 See Info node ‘(elisp) Minibuffer History’.")
 
-(defun bazel--read-target-pattern (command only-tests)
+(defun bazel--read-target-pattern (prompt only-tests)
   "Read a Bazel build target pattern from the minibuffer.
-COMMAND is a Bazel command to be included in the minibuffer
-prompt.  If ONLY-TESTS is non-nil, look only for test targets."
+PROMPT is the minibuffer prompt without trailing colon; it is run
+through ‘format-prompt’.  If ONLY-TESTS is non-nil, look only for test
+targets."
   (declare (ftype (function (string t) string)))
-  (cl-check-type command string)
+  (cl-check-type prompt string)
   (let* ((file-name
           (or buffer-file-name default-directory
               (user-error "Buffer doesn’t visit a file or directory")))
@@ -2083,12 +2084,11 @@ prompt.  If ONLY-TESTS is non-nil, look only for test targets."
                         (user-error "File is not in a Bazel package")))
          (package-name (or (bazel--package-name directory repository-root)
                            (user-error "File is not in a Bazel package")))
-         (prompt (combine-and-quote-strings
-                  `(,@bazel-command ,command "--" "")))
          (table (bazel--target-completion-table :pattern only-tests))
          (default (bazel--target-completion-default
                    buffer-file-name repository-root package-name only-tests)))
-    (completing-read prompt table nil nil nil 'bazel-target-history default)))
+    (completing-read (format-prompt prompt default) table nil nil nil
+                     'bazel-target-history default)))
 
 (defun bazel--target-completion-default (source-file root package only-tests)
   "Return default completion target for SOURCE-FILE.

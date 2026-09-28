@@ -1338,8 +1338,8 @@ Process buildifier exited abnormally with code 1
                     (push command compile-commands))))
         (call-interactively #'bazel-test)
         (pcase completing-read-args
-          (`(("bazel test -- " ,_ nil nil nil bazel-target-history
-              "//:foo_test" nil)))
+          (`(("Test target (default //:foo_test): " ,_ nil nil nil
+              bazel-target-history "//:foo_test" nil)))
           (_ (ert-fail (list "Invalid arguments to ‘completing-read’"
                              completing-read-args))))
         (should (equal compile-commands '("bazel test -- \\:test")))))))
