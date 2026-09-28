@@ -861,8 +861,12 @@ gets killed early."
                         (completion-boundaries string collection nil suffix)
                         '(3 . 1)))
                (pcase-exhaustive (completion-metadata string collection nil)
-                 (`(metadata . ,(map category))
-                  (should (eq category 'bazel-target)))))
+                 (`(metadata . ,(map category annotation-function))
+                  (should (eq category 'bazel-target))
+                  (should (functionp annotation-function))
+                  (should (equal (funcall annotation-function
+                                          (try-completion string collection))
+                                 " (cc_library)")))))
               (_ (ert-fail (format "Unexpected arguments %S" got-args))))))))))
 
 (ert-deftest bazel-test-at-point ()
