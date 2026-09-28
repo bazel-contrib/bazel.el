@@ -1179,7 +1179,10 @@ only complete rule targets defined within the current buffer."
 (defun bazel--complete-files (prefix)
   "Return file names in the current directory starting with PREFIX.
 Exclude files that are normally not Bazel targets, such as
-directories and BUILD files."
+directories and BUILD files.
+
+The returned file names have a ‘bazel-target-kind’ property of
+\"source file\"."
   (declare (ftype (function (string) list)))
   (cl-check-type prefix string)
   (let ((files ()))
@@ -1191,7 +1194,7 @@ directories and BUILD files."
            (not (equal (file-name-extension filename) "BUILD"))
            (not (string-prefix-p "bazel-" filename))
            (file-regular-p filename)
-           (push filename files)))
+           (push (propertize filename 'bazel-target-kind "source file") files)))
     (sort files #'string-lessp)))
 
 (defun bazel--rule-target-location (build-file name)
@@ -1256,7 +1259,10 @@ or change the buffer state permanently."
   "Find all rule targets starting with the given PREFIX in the current buffer.
 The current buffer should visit a BUILD file.  Return a list of
 target names that start with PREFIX.  If ONLY-TESTS is non-nil,
-restrict the returned targets to test targets."
+restrict the returned targets to test targets.
+
+The returned target name strings have a ‘bazel-target-kind’ property
+that specifies the rule kind if the target, if it can be determined."
   (declare (ftype (function (string t) list)))
   (cl-check-type prefix string)
   (when (derived-mode-p 'bazel-mode)
@@ -1274,23 +1280,40 @@ restrict the returned targets to test targets."
                     (backref 1))
                 nil t)
           (let ((name (match-string-no-properties 2)))
-            (and (not (python-syntax-comment-or-string-p))
-                 (or (not only-tests) (bazel--in-test-target-p))
-                 (push name targets)))))
+            (unless (python-syntax-comment-or-string-p)
+              (let ((kind (bazel--target-kind)))
+                (when (or (not only-tests) (bazel--is-test-target-p kind))
+                  (push (if kind (propertize name 'bazel-target-kind kind) name)
+                        targets)))))))
       (nreverse targets))))
+
+(defun bazel--target-kind ()
+  "Return the rule kind of the rule target at point.
+This is a heuristic.  Return nil if the rule kind can’t be determined."
+  (declare (ftype (function () (or null string))))
+  (save-excursion
+    (let ((case-fold-search nil)
+          (search-spaces-regexp nil))
+      (python-nav-beginning-of-statement)
+      (when (looking-at (rx symbol-start
+                            (group (+ (or (syntax word) (syntax symbol))))
+                            (* blank) ?\())
+        (match-string-no-properties 1)))))
+
+(defun bazel--is-test-target-p (kind)
+  "Return non-nil if KIND is a test rule kind."
+  (declare (ftype (function ((or null string)) t))
+           (side-effect-free t))
+  (cl-check-type kind (or null string))
+  ;; A rule target is a test target if and only if its rule name ends in
+  ;; “_test”.  See
+  ;; https://bazel.build/extending/rules#executable_rules_and_test_rules.
+  (and kind (string-suffix-p "_test" kind)))
 
 (defun bazel--in-test-target-p ()
   "Return non-nil if point is probably in a test rule target definition."
   (declare (ftype (function () t)))
-  (save-excursion
-    (let ((case-fold-search nil)
-          (search-spaces-regexp nil))
-      ;; A rule target is a test target if and only if its rule name ends in
-      ;; “_test”.  See
-      ;; https://bazel.build/extending/rules#executable_rules_and_test_rules.
-      (python-nav-beginning-of-statement)
-      (looking-at-p (rx symbol-start (+ (or (syntax word) (syntax symbol)))
-                        "_test" (* blank) ?\()))))
+  (bazel--is-test-target-p (bazel--target-kind)))
 
 ;;;; Finding BUILD and WORKSPACE files
 
@@ -2694,6 +2717,24 @@ Assume that STRING comes from ‘file-name-completion’ or
   (and (directory-name-p string)
        (not (string-prefix-p "." string))))
 
+(defun bazel--annotate (target)
+  "Annotate Bazel TARGET for completion.
+TARGET should be a completion candidate returned by
+‘bazel--target-completion-table’.  Return a string specifying the target
+kind of TARGET, or nil if TARGET is not a Bazel target or its kind can’t
+be determined.  This function is meant to be used as completion
+annotation function; see Info node ‘(elisp) Programmed Completion’."
+  (declare (ftype (function (string) (or string null)))
+           (side-effect-free t))
+  (cl-check-type target string)
+  ;; Note that ‘bazel--complete-targets’ and ‘bazel--complete-files’ add the
+  ;; ‘bazel-target-kind’ property to the last component of the target label, so
+  ;; we check the last instead of the first character.
+  (let ((n (length target)))
+    (unless (eql n 0)
+      (when-let* ((kind (get-text-property (1- n) 'bazel-target-kind target)))
+        (format " (%s)" kind)))))
+
 (defun bazel--locate-workspace-file (directory)
   "Return the file name of the Bazel WORKSPACE file in DIRECTORY.
 Return nil if DIRECTORY doesn’t contain a WORKSPACE file.
@@ -2889,7 +2930,9 @@ The returned completion table completes strings of the form
   "Return a completion table based on TABLE with some Bazel-specific metadata.
 TABLE should provide completion for Bazel targets or target patterns."
   (declare (ftype (function (t) t)))
-  (bazel--completion-table-with-metadata table '((category . bazel-target))))
+  (bazel--completion-table-with-metadata
+   table '((category . bazel-target)
+           (annotation-function . bazel--annotate))))
 
 (defun bazel--locate-file (filename path &optional suffixes)
   "Variant of ‘locate-file’ that returns quoted filenames.
