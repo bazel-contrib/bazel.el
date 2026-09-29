@@ -2345,17 +2345,19 @@ the returned completion table can access the filesystem."
     (lambda (string predicate action)
       (cl-check-type string string)
       (cl-check-type predicate (or function null))
-      (when-let* ((root (bazel--repository-root directory))
-                  (package (bazel--package-name directory root)))
-        (let ((case-fold-search completion-ignore-case)
-              (search-spaces-regexp nil))
-          ;; We dynamically generate and use a helper completion table based on
-          ;; the provided prefix pattern.
-          (complete-with-action
-           action
-           (bazel--target-completion-table-1 root package pattern only-tests
-                                             string)
-           string predicate))))))
+      (if (eq action 'metadata)
+          '(metadata (category . bazel-target))
+        (when-let* ((root (bazel--repository-root directory))
+                    (package (bazel--package-name directory root)))
+          (let ((case-fold-search completion-ignore-case)
+                (search-spaces-regexp nil))
+            ;; We dynamically generate and use a helper completion table based
+            ;; on the provided prefix pattern.
+            (complete-with-action
+             action
+             (bazel--target-completion-table-1 root package pattern only-tests
+                                               string)
+             string predicate)))))))
 
 (defun bazel--target-completion-table-1
     (root package pattern only-tests string)
