@@ -2341,23 +2341,22 @@ the returned completion table can access the filesystem."
   (declare (ftype (function (string t) t)))
   ;; We return a completion function so that we don’t have to find all targets
   ;; eagerly.  See Info node ‘(elisp) Programmed Completion’.
-  (when-let* ((directory default-directory))
-    (lambda (string predicate action)
-      (cl-check-type string string)
-      (cl-check-type predicate (or function null))
-      (if (eq action 'metadata)
-          '(metadata (category . bazel-target))
-        (when-let* ((root (bazel--repository-root directory))
-                    (package (bazel--package-name directory root)))
-          (let ((case-fold-search completion-ignore-case)
-                (search-spaces-regexp nil))
-            ;; We dynamically generate and use a helper completion table based
-            ;; on the provided prefix pattern.
-            (complete-with-action
-             action
-             (bazel--target-completion-table-1 root package pattern only-tests
-                                               string)
-             string predicate)))))))
+  (bazel--target-completion-table-with-metadata
+   (when-let* ((directory default-directory))
+     (lambda (string predicate action)
+       (cl-check-type string string)
+       (cl-check-type predicate (or function null))
+       (when-let* ((root (bazel--repository-root directory))
+                   (package (bazel--package-name directory root)))
+         (let ((case-fold-search completion-ignore-case)
+               (search-spaces-regexp nil))
+           ;; We dynamically generate and use a helper completion table based on
+           ;; the provided prefix pattern.
+           (complete-with-action
+            action
+            (bazel--target-completion-table-1 root package pattern only-tests
+                                              string)
+            string predicate)))))))
 
 (defun bazel--target-completion-table-1
     (root package pattern only-tests string)
@@ -2885,6 +2884,12 @@ The returned completion table completes strings of the form
       table  ; small optimization
     (completion-table-subvert table prefix "")))
 
+(defun bazel--target-completion-table-with-metadata (table)
+  "Return a completion table based on TABLE with some Bazel-specific metadata.
+TABLE should provide completion for Bazel targets or target patterns."
+  (declare (ftype (function (t) t)))
+  (bazel--completion-table-with-metadata table '((category . bazel-target))))
+
 (defun bazel--locate-file (filename path &optional suffixes)
   "Variant of ‘locate-file’ that returns quoted filenames.
 See Info node ‘(elisp) Locating Files’ for a description of the
@@ -2911,6 +2916,17 @@ function does if the first directory in PATH is quoted."
             (json-pre-element-read-function nil)
             (json-post-element-read-function nil))
         (json-read)))))
+
+(defalias 'bazel--completion-table-with-metadata
+  (if (fboundp 'completion-table-with-metadata)
+      #'completion-table-with-metadata
+    (lambda (table metadata)
+      "Polyfill for ‘completion-table-with-metadata’."
+      (cl-check-type metadata list)
+      (lambda (string predicate action)
+        (if (eq action 'metadata)
+            `(metadata . ,metadata)
+          (complete-with-action action table string predicate))))))
 
 (provide 'bazel)
 ;;; bazel.el ends here
