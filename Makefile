@@ -35,7 +35,7 @@ MODULE.bazel.lock:
 	$(BAZEL) mod graph > /dev/null
 
 # Test both default toolchain and versioned toolchains.
-check:
+check: all
 	$(BAZEL) test $(BAZELFLAGS) -- //...
 	$(BAZEL) test \
 	  --extra_toolchains=@rules_elisp//elisp:emacs_30_toolchain \
