@@ -857,7 +857,10 @@ gets killed early."
                (should (equal (all-completions string collection) '("lib")))
                (should (equal
                         (completion-boundaries string collection nil suffix)
-                        '(3 . 1))))
+                        '(3 . 1)))
+               (pcase-exhaustive (completion-metadata string collection nil)
+                 (`(metadata . ,(map category))
+                  (should (eq category 'bazel-target)))))
               (_ (ert-fail (format "Unexpected arguments %S" got-args))))))))))
 
 (ert-deftest bazel-test-at-point ()
