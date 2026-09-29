@@ -14,6 +14,7 @@
 
 .POSIX:
 .PHONY: all check coverage info install
+.PHONY: MODULE.bazel.lock
 .SUFFIXES:
 
 SHELL = /bin/sh
@@ -27,8 +28,11 @@ INSTALL_BAZELFLAGS = --config=release $(BAZELFLAGS)
 GIT = git
 GH = gh
 
-all:
+all: MODULE.bazel.lock
 	$(BAZEL) build $(BAZELFLAGS) -- //...
+
+MODULE.bazel.lock:
+	$(BAZEL) mod graph > /dev/null
 
 # Test both default toolchain and versioned toolchains.
 check:
