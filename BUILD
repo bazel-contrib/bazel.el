@@ -15,7 +15,9 @@
 # Note: all files starting with "bazel-" have to be in a subdirectory due to
 # https://github.com/bazelbuild/bazel/issues/10560.
 
-load("@rules_elisp//elisp:defs.bzl", "elisp_library", "elisp_manual", "elisp_test")
+load("@rules_elisp//elisp:elisp_library.bzl", "elisp_library")
+load("@rules_elisp//elisp:elisp_manual.bzl", "elisp_manual")
+load("@rules_elisp//elisp:elisp_test.bzl", "elisp_test")
 load("@rules_license//rules:license.bzl", "license")
 
 package(
