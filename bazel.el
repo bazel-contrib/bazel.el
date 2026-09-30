@@ -2678,8 +2678,8 @@ the wildcards with a colon.  This is a helper function for
                            (expand-file-name package external-root))))
     (let ((completion-regexp-list
            (cons (rx bos (+ (any "a-z" "A-Z" "0-9" ?-
-                                 "!%@^_` \"#$&'()*+,;<=>?[]{|}~/.")
-                            eos))
+                                 "!%@^_` \"#$&'()*+,;<=>?[]{|}~/."))
+                     eos)
                  completion-regexp-list)))
       (completion-table-merge
        (completion-table-with-cache
