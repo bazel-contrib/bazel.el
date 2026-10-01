@@ -138,3 +138,42 @@ some_rule(
     load=0, glob=1
 )
 =-=-=
+
+Name: Font locking for .bazelrc files
+Code: (lambda () (bazelrc-mode) (htmlfontify-buffer))
+
+=-=
+import %workspace%/other.bazelrc
+# Comment
+build --verbose_failures
+=-=
+<span class="keyword">import</span> %workspace%/other.bazelrc
+<span class="comment-delimiter"># </span><span class="comment">Comment
+</span><span class="variable-name">build</span> --verbose_failures
+=-=-=
+
+Name: Font locking for .bazelignore files
+Code: (lambda () (bazelignore-mode) (htmlfontify-buffer))
+No-Before-Newline: t
+No-After-Newline: t
+
+Comments in .bazelignore files must cover an entire line,
+cf. https://github.com/bazelbuild/bazel/blob/09c621e4cf5b968f4c6cdf905ab142d5961f9ddc/src/main/java/com/google/devtools/build/lib/skyframe/IgnoredPackagePrefixesFunction.java#L123.
+
+=-=
+# comment
+
+directory
+
+directory/subdirectory
+directory # with number sign
+# comment at end of buffer
+=-=
+<span class="comment-delimiter"># </span><span class="comment">comment
+</span>
+directory
+
+directory/subdirectory
+directory # with number sign
+<span class="comment-delimiter"># </span><span class="comment">comment at end of buffer</span>
+=-=-=
