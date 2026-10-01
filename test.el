@@ -163,21 +163,22 @@ See Info node ‘(ert) erts files’."
                          (flymake-diagnostic-end diag))
                         (flymake-diagnostic-text diag))
                   diagnostics)))
-        (should (equal (seq-sort-by #'car #'string-lessp diagnostics)
-                       `(("\"\"\" \"\"\""
-                          ,(concat "The docstring for the function \"foo\" "
-                                   "should start with a one-line summary. "
-                                   "[function-docstring-header] "
-                                   "(https://github.com/bazelbuild/buildtools/blob/master/WARNINGS.md#function-docstring-header)"))
-                         ("1 / 2"
-                          ,(concat "The \"/\" operator for integer division "
-                                   "is deprecated in favor of \"//\". "
-                                   "[integer-division] "
-                                   "(https://github.com/bazelbuild/buildtools/blob/master/WARNINGS.md#integer-division)"))
-                         ("def foo(bar):"
-                          ,(concat "The file has no module docstring. "
-                                   "[module-docstring] "
-                                   "(https://github.com/bazelbuild/buildtools/blob/master/WARNINGS.md#module-docstring)")))))))))
+        (should (seq-set-equal-p
+                 diagnostics
+                 `(("\"\"\" \"\"\""
+                    ,(concat "The docstring for the function \"foo\" "
+                             "should start with a one-line summary. "
+                             "[function-docstring-header] "
+                             "(https://github.com/bazelbuild/buildtools/blob/master/WARNINGS.md#function-docstring-header)"))
+                   ("1 / 2"
+                    ,(concat "The \"/\" operator for integer division "
+                             "is deprecated in favor of \"//\". "
+                             "[integer-division] "
+                             "(https://github.com/bazelbuild/buildtools/blob/master/WARNINGS.md#integer-division)"))
+                   ("def foo(bar):"
+                    ,(concat "The file has no module docstring. "
+                             "[module-docstring] "
+                             "(https://github.com/bazelbuild/buildtools/blob/master/WARNINGS.md#module-docstring)")))))))))
 
 (ert-deftest bazel-mode-flymake/source-buffer-killed ()
   "Unit test for the ‘bazel-mode-flymake’ Flymake backend.
@@ -447,10 +448,9 @@ gets killed early."
       (should project)
       (should (bazel-workspace-p project))
       (should files)
-      (should (equal (sort (cl-loop for file in files
-                                    collect (file-relative-name file dir))
-                           #'string-lessp)
-                     '(".bazelignore" "MODULE.bazel" "package/BUILD"))))))
+      (should (seq-set-equal-p
+               (cl-loop for file in files collect (file-relative-name file dir))
+               '(".bazelignore" "MODULE.bazel" "package/BUILD"))))))
 
 (ert-deftest bazel-test/coverage ()
   "Test coverage parsing and display."
@@ -1158,8 +1158,7 @@ Process buildifier exited abnormally with code 1
         (goto-char (point-min))
         (pcase-exhaustive completing-read-collections
           (`(,collection)
-           (should (equal (seq-sort #'string-lessp collection)
-                          '("prefix-1/" "prefix-2/")))))
+           (should (seq-set-equal-p collection '("prefix-1/" "prefix-2/")))))
         (should (looking-at-p (rx bot "http_archive(" eol)))
         (search-forward "    strip_prefix = \"prefix-1/\",")))))
 
