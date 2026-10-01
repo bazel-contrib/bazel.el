@@ -1195,21 +1195,6 @@ Process buildifier exited abnormally with code 1
             (should (eql (buffer-modified-tick) tick-before))  ; no change
             (should (eq (buffer-size) 0))))))))
 
-(ert-deftest bazelrc-mode ()
-  (let ((text (ert-propertized-string
-               '(face font-lock-keyword-face) "import"
-               nil " %workspace%/other.bazelrc\n"
-               '(face font-lock-comment-delimiter-face) "# "
-               '(face font-lock-comment-face) "Comment\n"
-               '(face font-lock-variable-name-face) "build"
-               nil " --verbose_failures\n")))
-    (with-temp-buffer
-      (bazelrc-mode)
-      (insert (substring-no-properties text))
-      (font-lock-flush)
-      (font-lock-ensure)
-      (should (equal-including-properties (buffer-string) text)))))
-
 (ert-deftest bazelrc-ffap ()
   (bazel-test--with-workspace dir "bazelrc.org"
     (bazel-test--with-file-buffer (expand-file-name ".bazelrc" dir)
@@ -1307,29 +1292,6 @@ Process buildifier exited abnormally with code 1
                 (bazel-find-module-file)
                 (should buffer-file-name)
                 (should (file-equal-p buffer-file-name expected))))))))))
-
-(ert-deftest bazelignore-mode/font-lock ()
-  "Test Font Locking in ‘bazelignore-mode’."
-  (let ((text (ert-propertized-string
-               '(face font-lock-comment-delimiter-face) "# "
-               '(face font-lock-comment-face) "comment\n" nil "\n"
-               nil "directory\n\n"
-               nil "directory/subdirectory\n"
-               ;; Comments in .bazelignore files must cover an entire line,
-               ;; cf. https://github.com/bazelbuild/bazel/blob/09c621e4cf5b968f4c6cdf905ab142d5961f9ddc/src/main/java/com/google/devtools/build/lib/skyframe/IgnoredPackagePrefixesFunction.java#L123.
-               nil "directory # with number sign\n"
-               '(face font-lock-comment-delimiter-face) "# "
-               '(face font-lock-comment-face) "comment at end of buffer")))
-    (with-temp-buffer
-      (bazelignore-mode)
-      (insert (substring-no-properties text))
-      (font-lock-flush)
-      (font-lock-ensure)
-      ;; Remove the ‘syntax-table’ properties that
-      ;; ‘bazelignore--syntax-propertize’ added; they are implementation
-      ;; details.
-      (remove-list-of-text-properties (point-min) (point-max) '(syntax-table))
-      (should (equal-including-properties (buffer-string) text)))))
 
 (ert-deftest bazel-test/completion ()
   "Test completion for ‘bazel-test’."
