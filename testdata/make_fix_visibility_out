@@ -21,7 +21,7 @@ set -eu
 # Bazel formats output differently when invoked from Emacs.
 export INSIDE_EMACS='28.1,compile'
 
-workspace="$(bazel info workspace)" || exit
+workspace="$(bazel --quiet info workspace)" || exit
 testdata="${workspace:?}/testdata"
 org="${testdata:?}/fix-visibility.org"
 
@@ -38,7 +38,7 @@ emacs --quick --batch --visit="${dir:?}/.tangle.org" \
   --funcall='org-babel-tangle' || exit
 rm -- "${dir:?}/.tangle.org" || exit
 
-execroot="$(cd "${dir:?}" && bazel --nohome_rc info execution_root)"
+execroot="$(cd "${dir:?}" && bazel --nohome_rc --quiet info execution_root)"
 
 # We explicitly compile with the current directory set to a subdirectory to
 # ensure that repository-relative filenames still work as expected.  Invert the
