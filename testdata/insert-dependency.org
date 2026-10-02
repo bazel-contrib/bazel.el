@@ -54,7 +54,7 @@ See https://bazel.build/external/registry for the expected layout.
 }
 #+END_SRC
 
-#+BEGIN_SRC js-json :tangle bcr/modules/abseil-py/2.4.0/source.json
+#+BEGIN_SRC js-json :tangle bcr/modules/abseil-py/2.1.0/source.json
 {
     "url": "https://invalid/archive.tar"
 }
@@ -63,5 +63,5 @@ See https://bazel.build/external/registry for the expected layout.
 ** Expected ~bazel_dep~ snippet
 
 #+BEGIN_SRC bazel-module :tangle MODULE.bazel.expected
-bazel_dep(name = "abseil-py", version = "2.4.0")
+bazel_dep(name = "abseil-py", version = "2.1.0")
 #+END_SRC
