@@ -322,32 +322,32 @@ gets killed early."
                             (line-beginning-position) (line-end-position)))))
              (case-fold-search nil)
              (search-spaces-regexp nil)
-             (compilation-skip-to-next-location nil))
+             (compilation-skip-to-next-location nil)
+             ;; We set the compilation directory to a subdirectory.  Bazel still
+             ;; prints filenames relative to the workspace root.
+             (compilation-directory (expand-file-name "package/" dir)))
         (insert-file-contents (expand-file-name "bazel.out" dir))
         (compilation-minor-mode)
         (ert-info ("Deprecation warning")
           (compilation-next-error 1)
           (should (looking-at-p
-                   (rx bol "WARNING: " (+ nonl) "/package/BUILD:3:11: target "
+                   (rx bol "WARNING: package/BUILD:3:11: target "
                        "'//package:test' is deprecated: Deprecated!" eol)))
           (save-current-buffer (compile-goto-error))
-          (should (equal file (file-name-unquote
-                               (expand-file-name "package/BUILD" dir))))
+          (should (equal file (expand-file-name "package/BUILD" dir)))
           (should (equal line "cc_library(")))
         (ert-info ("Target failure")
           (compilation-next-error 1)
           (should (looking-at-p
-                   (rx bol "ERROR: " (+ nonl) "/package/BUILD:3:11: "
+                   (rx bol "ERROR: package/BUILD:3:11: "
                        "Compiling package/test.cc failed: ")))
           (save-current-buffer (compile-goto-error))
-          (should (equal file (file-name-unquote
-                               (expand-file-name "package/BUILD" dir))))
+          (should (equal file (expand-file-name "package/BUILD" dir)))
           (should (equal line "cc_library(")))
         (ert-info ("Compiler error")
           (compilation-next-error 1)
           (save-current-buffer (compile-goto-error))
-          (should (equal file (file-name-unquote
-                               (expand-file-name "package/test.cc" dir))))
+          (should (equal file (expand-file-name "package/test.cc" dir)))
           (should (equal line "UnknownType foo;")))
         (ert-info ("No more errors")
           (should-error (compilation-next-error 1)))))))

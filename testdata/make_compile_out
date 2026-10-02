@@ -41,7 +41,7 @@ execroot="$(cd "${dir:?}" && bazel --nohome_rc --quiet info execution_root)"
 # ensure that repository-relative filenames still work as expected.  Invert the
 # exit status of “bazel build” because we expect it to fail.  We can’t use
 # --quiet here because that would also suppress the deprecation warning.
-out="$(cd "${dir:?}/package" && ! bazel --nohome_rc build --emacs --noshow_progress --noshow_loading_progress //... 2>&1)"
+out="$(cd "${dir:?}/package" && ! bazel --nohome_rc build --emacs --attempt_to_print_relative_paths --noshow_progress --noshow_loading_progress //... 2>&1)"
 
 # Replace the arbitrary temporary directory in the output with placeholders.
 out="${out//${dir}/%ROOTDIR%}"

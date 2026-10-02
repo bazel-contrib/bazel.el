@@ -37,10 +37,10 @@ Merged standard output and error from Bazel:
 #+BEGIN_SRC fundamental :tangle bazel.out
 WARNING: The following rc files are no longer being read, please transfer their contents or import their path into one of the standard rc files:
 /Users/p/.bazelrc
-WARNING: %ROOTDIR%/package/BUILD:3:11: target '//package:test' is deprecated: Deprecated!
+WARNING: package/BUILD:3:11: target '//package:test' is deprecated: Deprecated!
 bazel: Entering directory `%ROOTDIR%/'
 INFO: Analyzed target //package:test (86 packages loaded, 466 targets configured).
-ERROR: %ROOTDIR%/package/BUILD:3:11: Compiling package/test.cc failed: (Exit 1): cc_wrapper.sh failed: error executing CppCompile command (from cc_library rule target //package:test) external/rules_cc++cc_configure_extension+local_config_cc/cc_wrapper.sh -U_FORTIFY_SOURCE -fstack-protector -Wall -Wthread-safety -Wself-assign -Wunused-but-set-parameter -Wno-free-nonheap-object ... (remaining 21 arguments skipped)
+ERROR: package/BUILD:3:11: Compiling package/test.cc failed: (Exit 1): cc_wrapper.sh failed: error executing CppCompile command (from cc_library rule target //package:test) external/rules_cc++cc_configure_extension+local_config_cc/cc_wrapper.sh -U_FORTIFY_SOURCE -fstack-protector -Wall -Wthread-safety -Wself-assign -Wunused-but-set-parameter -Wno-free-nonheap-object ... (remaining 21 arguments skipped)
 
 Use --sandbox_debug to see verbose messages from the sandbox and retain the sandbox build root for debugging
 package/test.cc:1:1: error: unknown type name 'UnknownType'
