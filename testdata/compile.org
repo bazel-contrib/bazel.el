@@ -35,29 +35,11 @@ UnknownType foo;
 Merged standard output and error from Bazel:
 
 #+BEGIN_SRC fundamental :tangle bazel.out
-INFO: Invocation ID: 106c722c-f5b5-47a7-8a68-7c6ea5680d95
-Computing main repo mapping: 
-Computing main repo mapping: 
-Computing main repo mapping: 
-Computing main repo mapping: 
-Computing main repo mapping: 
-Loading: 
-Loading: 1 packages loaded
+WARNING: The following rc files are no longer being read, please transfer their contents or import their path into one of the standard rc files:
+/Users/p/.bazelrc
 WARNING: %ROOTDIR%/package/BUILD:3:11: target '//package:test' is deprecated: Deprecated!
 bazel: Entering directory `%ROOTDIR%/'
-Analyzing: target //package:test (6 packages loaded, 6 targets configured)
-Analyzing: target //package:test (6 packages loaded, 6 targets configured)
-
-Analyzing: target //package:test (58 packages loaded, 7 targets configured)
-
-Analyzing: target //package:test (76 packages loaded, 429 targets configured)
-
-Analyzing: target //package:test (76 packages loaded, 429 targets configured)
-
-Analyzing: target //package:test (80 packages loaded, 444 targets configured)
-
-INFO: Analyzed target //package:test (84 packages loaded, 465 targets configured).
-[2 / 4] Compiling package/test.cc; 0s disk-cache, darwin-sandbox
+INFO: Analyzed target //package:test (86 packages loaded, 466 targets configured).
 ERROR: %ROOTDIR%/package/BUILD:3:11: Compiling package/test.cc failed: (Exit 1): cc_wrapper.sh failed: error executing CppCompile command (from cc_library rule target //package:test) external/rules_cc++cc_configure_extension+local_config_cc/cc_wrapper.sh -U_FORTIFY_SOURCE -fstack-protector -Wall -Wthread-safety -Wself-assign -Wunused-but-set-parameter -Wno-free-nonheap-object ... (remaining 21 arguments skipped)
 
 Use --sandbox_debug to see verbose messages from the sandbox and retain the sandbox build root for debugging
@@ -68,7 +50,7 @@ package/test.cc:1:1: error: unknown type name 'UnknownType'
 bazel: Leaving directory `%ROOTDIR%/'
 Target //package:test failed to build
 Use --verbose_failures to see the command lines of failed build steps.
-INFO: Elapsed time: 12.217s, Critical Path: 0.40s
+INFO: Elapsed time: 11.861s, Critical Path: 0.26s
 INFO: 3 processes: 3 internal.
 ERROR: Build did NOT complete successfully
 #+END_SRC
