@@ -1379,6 +1379,30 @@ Process buildifier exited abnormally with code 1
           (set-auto-mode)
           (should (eq major-mode mode)))))))
 
+(ert-deftest bazel-central-registry-mode ()
+  (skip-unless (executable-find vc-git-program))
+  (bazel-test--with-workspace dir nil
+    (let ((bazel--central-registry-url (bazel-test--fake-registry dir)))
+      (with-temp-buffer
+        (bazel-central-registry-mode)
+        (tabulated-list-print)
+        (pcase-dolist (`(,id ,entry ,url)
+                       '(("abseil-cpp"
+                          ["abseil-cpp" "20260526.0"]
+                          "https://registry.bazel.build/modules/abseil-cpp")
+                         ("abseil-py"
+                          ["abseil-py" "2.1.0"]
+                          "https://registry.bazel.build/modules/abseil-py")))
+          (ert-info ((number-to-string (line-number-at-pos)) :prefix "Line: ")
+            (should (equal (tabulated-list-get-id) id))
+            (should (equal (tabulated-list-get-entry) entry))
+            (let* ((urls ())
+                   (browse-url-browser-function (lambda (url &rest _args)
+                                                  (push url urls))))
+              (ert-simulate-command '(bazel-central-registry-visit-module))
+              (should (equal urls (list url))))
+            (forward-line)))))))
+
 ;;;; Test helpers
 
 (put #'looking-at-p 'ert-explainer #'bazel-test--explain-looking-at-p)
