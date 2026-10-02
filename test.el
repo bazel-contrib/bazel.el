@@ -1083,26 +1083,17 @@ Process buildifier exited abnormally with code 1
 (ert-deftest bazel-insert-dependency ()
   (skip-unless (executable-find vc-git-program))
   (bazel-test--with-workspace dir "insert-dependency.org"
-    (let* ((bcr-dir (file-name-as-directory (expand-file-name "bcr" dir)))
-           (expected (with-temp-buffer
-                       (insert-file-contents
-                        (expand-file-name "MODULE.bazel.expected" dir))
-                       (buffer-string)))
-           (vc-command-messages 'log)
-           (completing-read-function
-            (lambda (_prompt collection &rest _args)
-              (should (seq-set-equal-p (hash-table-keys collection)
-                                       '("abseil-cpp" "abseil-py")))
-              ;; Pretend that the user has typed ‘abseil-py’.
-              "abseil-py"))
-           (bazel--central-registry-url
-            (concat "file://" (file-name-unquote bcr-dir))))
-      (let ((default-directory bcr-dir))
-        (vc-git-command nil 0 nil "init")
-        (vc-git-command nil 0 nil "config" "set" "user.email" "test@test.test")
-        (vc-git-command nil 0 nil "config" "set" "user.name" "Test")
-        (vc-git-command nil 0 nil "add" ".")
-        (vc-git-command nil 0 nil "commit" "--message=Initial commit"))
+    (let ((expected (with-temp-buffer
+                      (insert-file-contents
+                       (expand-file-name "MODULE.bazel.expected" dir))
+                      (buffer-string)))
+          (completing-read-function
+           (lambda (_prompt collection &rest _args)
+             (should (seq-set-equal-p (hash-table-keys collection)
+                                      '("abseil-cpp" "abseil-py")))
+             ;; Pretend that the user has typed ‘abseil-py’.
+             "abseil-py"))
+          (bazel--central-registry-url (bazel-test--fake-registry dir)))
       ;; Test with and without prompting.
       (dolist (command '((bazel-insert-dependency)
                          (bazel-insert-dependency "abseil-py")))
@@ -1449,6 +1440,24 @@ See Info node ‘(org) Extracting Source Code’."
       (org-babel-tangle))
     (delete-file temp-file))
   nil)
+
+(defun bazel-test--fake-registry (directory)
+  "Install a fake index registry in a subdirectory of DIRECTORY.
+Return a URL for the registry directory that can be used
+with ‘git clone’."
+  (declare (ftype (function (string) string)))
+  (cl-check-type directory string)
+  (let ((dir (file-name-as-directory (expand-file-name "bcr" directory))))
+    (make-directory dir)
+    (bazel-test--tangle dir "registry.org")
+    (let ((vc-command-messages 'log)
+          (default-directory dir))
+      (vc-git-command nil 0 nil "init")
+      (vc-git-command nil 0 nil "config" "set" "user.email" "test@test.test")
+      (vc-git-command nil 0 nil "config" "set" "user.name" "Test")
+      (vc-git-command nil 0 nil "add" ".")
+      (vc-git-command nil 0 nil "commit" "--message=Initial commit"))
+    (concat "file://" (file-name-unquote dir))))
 
 (defun bazel-test--buildifier-running-p ()
   "Return whether we have a running Buildifier process.
