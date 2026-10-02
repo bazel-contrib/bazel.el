@@ -18,9 +18,6 @@
 
 set -eu
 
-# Bazel formats output differently when invoked from Emacs.
-export INSIDE_EMACS='28.1,compile'
-
 workspace="$(bazel --quiet info workspace)" || exit
 testdata="${workspace:?}/testdata"
 org="${testdata:?}/fix-visibility.org"
@@ -43,7 +40,7 @@ execroot="$(cd "${dir:?}" && bazel --nohome_rc --quiet info execution_root)"
 # We explicitly compile with the current directory set to a subdirectory to
 # ensure that repository-relative filenames still work as expected.  Invert the
 # exit status of “bazel build” because we expect it to fail.
-out="$(cd "${dir:?}/lib" && ! bazel --nohome_rc --quiet build --nobuild //... 2>&1)"
+out="$(cd "${dir:?}/lib" && ! bazel --nohome_rc --quiet build --emacs --nobuild //... 2>&1)"
 
 # Replace the arbitrary temporary directory in the output with placeholders.
 out="${out//${dir}/%ROOTDIR%}"
