@@ -2412,6 +2412,22 @@ See URL ‘https://pkg.go.dev/testing’."
            ;; aren’t compatible.
            (concat "^\\Q" (match-string-no-properties 1) "\\E$")))))
 
+;;;; Debugging functions
+
+(defun bazel-clear-caches ()
+  "Clear all caches used by the ‘bazel’ library.
+You can run this command if the ‘bazel’ library misbehaves due to stale
+caches."
+  (declare (ftype (function () null)))
+  (interactive)
+  (defvar bazel--repository-relative-name)  ; defined below
+  (clrhash bazel--repository-relative-name)
+  (setf (multisession-value bazel--central-registry) nil)
+  (multisession-delete bazel--central-registry)
+  (defvar bazel--repo-mappings)  ; defined below
+  (clrhash bazel--repo-mappings)
+  nil)
+
 ;;;; Utility functions to work with Bazel repositories
 
 (defun bazel--repository-root (file-name)

@@ -237,6 +237,13 @@ a value suitable for Bazel’s =--test_filter= option.
 
 * Known issues
 
+#+FINDEX: bazel-clear-caches
+To speed up typical commands, ~bazel.el~ caches some data that typically takes
+long to obtain, such as the contents of the Bazel Central Registry.  Sometimes
+these caches can get out of sync with reality; in that case you can run the
+command ~bazel-clear-caches~ to invalidate all internal caches and force the
+~bazel.el~ functions to re-fetch any data from the source of truth.
+
 Target pattern completion is
 [[https://github.com/abo-abo/swiper/issues/2872][incompatible with the Ivy
 completion framework]].  To disable Ivy for the affected commands, add
