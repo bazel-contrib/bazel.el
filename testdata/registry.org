@@ -1,0 +1,59 @@
+# Copyright 2021-2024, 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#+PROPERTY: header-args :mkdirp yes :main no
+
+* Contents of the faked Bazel Central Registry
+
+See https://bazel.build/external/registry for the expected layout.
+
+** Abseil-C++
+
+#+BEGIN_SRC js-json :tangle modules/abseil-cpp/metadata.json
+{
+    "versions": ["20240722.0.bcr.1", "20260526.0"]
+}
+#+END_SRC
+
+#+BEGIN_SRC js-json :tangle modules/abseil-cpp/20240722.0.bcr.1/source.json
+{
+    "url": "https://invalid/archive.tar"
+}
+#+END_SRC
+
+#+BEGIN_SRC js-json :tangle modules/abseil-cpp/20260526.0/source.json
+{
+    "url": "https://invalid/archive.tar"
+}
+#+END_SRC
+
+** Abseil-Python
+
+#+BEGIN_SRC js-json :tangle modules/abseil-py/metadata.json
+{
+    "versions": ["1.4.0", "2.1.0"]
+}
+#+END_SRC
+
+#+BEGIN_SRC js-json :tangle modules/abseil-py/1.4.0/source.json
+{
+    "url": "https://invalid/archive.tar"
+}
+#+END_SRC
+
+#+BEGIN_SRC js-json :tangle modules/abseil-py/2.1.0/source.json
+{
+    "url": "https://invalid/archive.tar"
+}
+#+END_SRC

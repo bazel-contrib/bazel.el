@@ -16,50 +16,6 @@
 
 #+PROPERTY: header-args :mkdirp yes :main no
 
-** Contents of the faked Bazel Central Registry
-
-See https://bazel.build/external/registry for the expected layout.
-
-*** Abseil-C++
-
-#+BEGIN_SRC js-json :tangle bcr/modules/abseil-cpp/metadata.json
-{
-    "versions": ["20240722.0.bcr.1", "20260526.0"]
-}
-#+END_SRC
-
-#+BEGIN_SRC js-json :tangle bcr/modules/abseil-cpp/20240722.0.bcr.1/source.json
-{
-    "url": "https://invalid/archive.tar"
-}
-#+END_SRC
-
-#+BEGIN_SRC js-json :tangle bcr/modules/abseil-cpp/20260526.0/source.json
-{
-    "url": "https://invalid/archive.tar"
-}
-#+END_SRC
-
-*** Abseil-Python
-
-#+BEGIN_SRC js-json :tangle bcr/modules/abseil-py/metadata.json
-{
-    "versions": ["1.4.0", "2.1.0"]
-}
-#+END_SRC
-
-#+BEGIN_SRC js-json :tangle bcr/modules/abseil-py/1.4.0/source.json
-{
-    "url": "https://invalid/archive.tar"
-}
-#+END_SRC
-
-#+BEGIN_SRC js-json :tangle bcr/modules/abseil-py/2.1.0/source.json
-{
-    "url": "https://invalid/archive.tar"
-}
-#+END_SRC
-
 ** Expected ~bazel_dep~ snippet
 
 #+BEGIN_SRC bazel-module :tangle MODULE.bazel.expected
