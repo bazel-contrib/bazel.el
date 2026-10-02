@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+* Test data for parsing Bazel compilation output
+
 #+PROPERTY: header-args :mkdirp yes :main no
 
 #+BEGIN_SRC bazel-module :tangle MODULE.bazel
@@ -32,7 +34,7 @@ cc_library(
 UnknownType foo;
 #+END_SRC
 
-Merged standard output and error from Bazel:
+** Merged standard output and error from Bazel
 
 #+BEGIN_SRC fundamental :tangle bazel.out
 WARNING: The following rc files are no longer being read, please transfer their contents or import their path into one of the standard rc files:

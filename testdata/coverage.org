@@ -102,7 +102,7 @@ LF:4
 end_of_record
 #+END_SRC
 
-Merged standard output and error from Bazel:
+** Merged standard output and error from Bazel
 
 #+BEGIN_SRC fundamental :tangle bazel.out
 bazel: Entering directory `%ROOTDIR%/'
