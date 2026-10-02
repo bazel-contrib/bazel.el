@@ -28,8 +28,8 @@ def foo(bar):
 #+END_SRC
 
 To make the Flymake test hermetic, we generate Buildifier output statically and
-tangle the output when running the test.  Execute this code block to regenerate
-the Buildifier output:
+tangle the output when running the test.  Execute this code block with
+=C-c C-v C-e= to regenerate the Buildifier output:
 
 #+BEGIN_SRC sh :noweb yes :results output scalar :wrap "src js :tangle buildifier.json"
 buildifier -mode=check -lint=warn -format=json -v -path=buildifier.bzl <<'EOF'
