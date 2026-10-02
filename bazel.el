@@ -1623,6 +1623,21 @@ Look for an imported file with the given NAME."
                       ?: (group (+ digit)) ?: (group (+ digit)) ": ")
                  3 4 5 (1 . 2))))
 
+(add-hook 'compilation-mode-hook #'bazel-set-up-compilation)
+(add-hook 'compilation-minor-mode-hook #'bazel-set-up-compilation)
+
+(defun bazel-set-up-compilation ()
+  "Set up compilation mode for Bazel output.
+Add support for --attempt_to_print_relative_paths by adding the
+repository root to ‘compilation-search-path’.  This function gets added
+to ‘compilation-mode-hook’ and ‘compilation-minor-mode-hook’.
+See Info node ‘(emacs) Compilation Mode’."
+  (declare (ftype (function () null)))
+  (when-let* ((dir (or compilation-directory default-directory))
+              (root (bazel--repository-root dir)))
+    (setq-local compilation-search-path (cons root compilation-search-path)))
+  nil)
+
 (add-hook 'compilation-finish-functions #'bazel-finish-compilation)
 
 (defun bazel-finish-compilation (buffer message)
