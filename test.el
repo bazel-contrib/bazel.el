@@ -1467,6 +1467,11 @@ Process buildifier exited abnormally with code 1
               (should (equal urls (list url))))
             (forward-line)))))))
 
+(ert-deftest bazel-clear-caches ()
+  ;; Normally, the results of ‘bazel-clear-caches’ are unobservable.  We only
+  ;; call it here to ensure that calling it doesn’t signal an error.
+  (bazel-clear-caches))
+
 ;;;; Test helpers
 
 (put #'looking-at-p 'ert-explainer #'bazel-test--explain-looking-at-p)
