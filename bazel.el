@@ -2947,6 +2947,8 @@ function does if the first directory in PATH is quoted."
   (when-let* ((result (locate-file filename path suffixes)))
     (if (file-name-quoted-p (car path)) (file-name-quote result) result)))
 
+;;;; Polyfills
+
 (defalias 'bazel--json-parse-buffer
   (if (and (fboundp 'json-parse-buffer) (json-available-p))
       #'json-parse-buffer
