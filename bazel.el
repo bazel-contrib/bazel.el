@@ -867,6 +867,59 @@ and Info node ‘(elisp) Syntax Table Internals’."
              ;; https://github.com/bazelbuild/bazelisk#bazeliskrc-configuration-file
              (cons (rx "/.bazeliskrc" eos) #'bazeliskrc-mode))
 
+;;;; Bazel Central Registry browser
+
+;;;###autoload
+(defun bazel-central-registry ()
+  "Browse the Bazel Central Registry.
+This displays a buffer that lists the modules in the Bazel Central
+Registry together with their most recent version.  See URL
+‘https://bazel.build/external/registry#bazel-central-registry’.
+
+The buffer uses the major mode ‘bazel-central-registry-mode’.  In the
+buffer, you can use the following keys:
+
+\\{bazel-central-registry-mode-map}"
+  (declare (ftype (function () null))
+           (interactive-only t))
+  (interactive)
+  (let ((buffer (get-buffer-create "*Bazel Central Registry*")))
+    (with-current-buffer buffer
+      (bazel-central-registry-mode)
+      (tabulated-list-print))
+    (pop-to-buffer buffer)
+    nil))
+
+(defvar-keymap bazel-central-registry-mode-map
+  "v" #'bazel-central-registry-visit-module)
+
+(defun bazel-central-registry-visit-module ()
+  "Visit the Bazel module at point in the default web browser."
+  (declare (ftype (function () null))
+           (interactive-only t))
+  (interactive nil bazel-central-registry-mode)
+  (let ((module (tabulated-list-get-id)))
+    (unless module (user-error "No module at point"))
+    (browse-url (concat "https://registry.bazel.build/modules/"
+                        (url-hexify-string module))))
+  nil)
+
+(define-derived-mode bazel-central-registry-mode tabulated-list-mode "BCR"
+  (setq-local tabulated-list-format [("Module" 50 t) ("Version" 30 nil)]
+              tabulated-list-sort-key '("Module" . nil)
+              tabulated-list-entries #'bazel--central-registry-entries)
+  (tabulated-list-init-header)
+  nil)
+
+(defun bazel--central-registry-entries ()
+  "Return entries for ‘bazel-central-registry-mode’.
+This function (or its return value) can be used for the value
+‘tabulated-list-entries’ in ‘bazel-central-registry-mode’."
+  (declare (ftype (function () list)))
+  (cl-loop for module being the hash-keys of (bazel--central-registry)
+           using (hash-values version)
+           collect `(,module [,module ,version])))
+
 ;;;; Menu item
 
 (easy-menu-add-item
@@ -889,7 +942,8 @@ and Info node ‘(elisp) Syntax Table Internals’."
    ["Insert bazel_dep statement..." bazel-insert-dependency
     (derived-mode-p 'bazel-module-mode)]
    ["Insert http_archive statement..." bazel-insert-http-archive
-    (derived-mode-p 'bazel-workspace-mode 'bazel-starlark-mode)])
+    (derived-mode-p 'bazel-workspace-mode 'bazel-starlark-mode)]
+   ["Browse the Bazel Central Registry..." bazel-central-registry])
  "Debugger (GDB)...")
 
 ;;;; Flymake support using Buildifier

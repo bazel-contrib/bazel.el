@@ -69,6 +69,12 @@ statement.  The command uses the modules registered in the
 [[https://bazel.build/external/registry#bazel-central-registry][Bazel Central
 Registry]] to suggest modules to insert.
 
+#+FINDEX: bazel-central-registry
+To quickly browse the modules in the Bazel Central Registry, you can use the
+command ~bazel-central-registry~.  It displays the known modules along with
+their most recent versions in a table.  If you hit =v= on a module line, the
+homepage of the module will open in your default browser.
+
 #+FINDEX: bazel-insert-http-archive
 When editing a WORKSPACE file, you can use the command
 ~bazel-insert-http-archive~ to quickly insert an
