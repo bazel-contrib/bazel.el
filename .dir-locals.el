@@ -4,4 +4,4 @@
 ((nil . ((fill-column . 80)))
  (emacs-lisp-mode . ((page-delimiter . "^;;;+")))
  (org-mode . ((org-adapt-indentation . nil)
-              (org-edit-src-content-indentation . 0))))
+              (org-src-content-indentation . 0))))
