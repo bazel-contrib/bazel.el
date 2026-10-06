@@ -54,7 +54,26 @@ output when running the test.  Execute this code block with =C-c C-v C-e= to
 regenerate the Bazel output:
 
 #+BEGIN_SRC sh :noweb yes :results output scalar :wrap "src fundamental :tangle bazel.out"
-./make_fix_visibility_out
+set -eu
+
+org="$(bazel --quiet info workspace)/testdata/fix-visibility.org" || exit
+dir="$(mktemp -d)" || exit
+
+# Set up a basic repository layout in the temporary directory.
+cp -- "${org:?}" "${dir:?}/.tangle.org" || exit
+emacs --quick --batch --visit="${dir:?}/.tangle.org" \
+  --funcall='org-babel-tangle' || exit
+
+(
+  set -eu
+  # We explicitly compile with the current directory set to a subdirectory to
+  # ensure that repository-relative filenames still work as expected.
+  cd "${dir:?}/lib" || exit
+  # Invert the exit status of “bazel build” because we expect it to fail.
+  ! bazel --nohome_rc --quiet build --attempt_to_print_relative_paths --nobuild //... 2>&1
+) || exit
+
+rm -r -f -- "${dir}"
 #+END_SRC
 
 #+RESULTS:
