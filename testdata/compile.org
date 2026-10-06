@@ -36,6 +36,7 @@ UnknownType foo;
 
 ** Merged standard output and error from Bazel
 
+#+NAME: bazel.out
 #+BEGIN_SRC fundamental :tangle bazel.out
 WARNING: The following rc files are no longer being read, please transfer their contents or import their path into one of the standard rc files:
 /Users/p/.bazelrc

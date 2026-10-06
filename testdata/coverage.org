@@ -81,6 +81,7 @@ public class ExampleTest {
 }
 #+END_SRC
 
+#+NAME: coverage.dat
 #+BEGIN_SRC fundamental :tangle bazel-out/k8-fastbuild/testlogs/src/test/java/example/example_test/coverage.dat
 SF:src/main/java/example/Example.java
 FN:3,example/Example::<init> ()V
@@ -104,6 +105,7 @@ end_of_record
 
 ** Merged standard output and error from Bazel
 
+#+NAME: bazel.out
 #+BEGIN_SRC fundamental :tangle bazel.out
 bazel: Entering directory `%ROOTDIR%/'
 bazel: Leaving directory `%ROOTDIR%/'

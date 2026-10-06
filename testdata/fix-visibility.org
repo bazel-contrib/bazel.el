@@ -49,6 +49,7 @@ cc_library(
 
 ** Merged standard output and error from Bazel
 
+#+NAME: bazel.out
 #+BEGIN_SRC fundamental :tangle bazel.out
 ERROR: BUILD:3:10: in cc_binary rule //:bin: Visibility error:
 target '//lib:lib' is not visible from
