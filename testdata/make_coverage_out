@@ -19,10 +19,7 @@
 
 set -eu
 
-workspace="$(bazel --quiet info workspace)" || exit
-testdata="${workspace:?}/testdata"
-org="${testdata:?}/coverage.org"
-
+org="$(bazel --quiet info workspace)/testdata/coverage.org" || exit
 dir="$(mktemp -d)" || exit
 
 # Set up a basic repository layout in the temporary directory.
