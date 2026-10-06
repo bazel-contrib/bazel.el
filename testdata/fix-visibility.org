@@ -53,7 +53,7 @@ To make the test hermetic, we generate Bazel output statically and tangle the
 output when running the test.  Execute this code block with =C-c C-v C-e= to
 regenerate the Bazel output:
 
-#+BEGIN_SRC elisp :var org=(buffer-file-name) dir=(make-temp-file "t" t) :noweb yes :wrap "src fundamental :tangle bazel.out"
+#+BEGIN_SRC elisp :var org=(buffer-file-name) dir=(make-temp-file "t" t) :wrap "src fundamental :tangle bazel.out"
 ;; Set up a basic repository layout in the temporary directory.
 (let ((temp (expand-file-name ".tangle.org" dir)))
   (copy-file org temp)
