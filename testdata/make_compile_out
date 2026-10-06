@@ -35,16 +35,19 @@ emacs --quick --batch --visit="${dir:?}/.tangle.org" \
   --funcall='org-babel-tangle' || exit
 rm -- "${dir:?}/.tangle.org" || exit
 
-# We explicitly compile with the current directory set to a subdirectory to
-# ensure that repository-relative filenames still work as expected.  Invert the
-# exit status of “bazel build” because we expect it to fail.  We can’t use
-# --quiet here because that would also suppress the deprecation warning.
-out="$(cd "${dir:?}/package" && ! bazel --nohome_rc build --attempt_to_print_relative_paths --noshow_progress --noshow_loading_progress //... 2>&1)"
-
-# Generate fake tangled file with links so we can use ‘org-babel-detangle’.
-echo '# [[file:detangle.org::bazel.out][bazel.out]]' > "${dir:?}/bazel.out"
-echo "${out:?}" >> "${dir:?}/bazel.out"
-echo '# bazel.out ends here' >> "${dir:?}/bazel.out"
+(
+  set -eu
+  # Generate fake tangled file with links so we can use ‘org-babel-detangle’.
+  echo '# [[file:detangle.org::bazel.out][bazel.out]]'
+  # We explicitly compile with the current directory set to a subdirectory to
+  # ensure that repository-relative filenames still work as expected.
+  cd "${dir:?}/package" || exit
+  # Invert the exit status of “bazel build” because we expect it to fail.  We
+  # can’t use --quiet here because that would also suppress the deprecation
+  # warning.
+  ! bazel --nohome_rc build --attempt_to_print_relative_paths --noshow_progress --noshow_loading_progress //... 2>&1
+  echo '# bazel.out ends here'
+) > "${dir:?}/bazel.out" || exit
 
 cp -- "${org:?}" "${dir:?}/detangle.org" || exit
 emacs --quick --batch --load='ob-tangle' --visit="${dir:?}/bazel.out" \
