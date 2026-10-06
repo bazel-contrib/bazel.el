@@ -23,7 +23,6 @@ testdata="${workspace:?}/testdata"
 org="${testdata:?}/fix-visibility.org"
 
 dir="$(mktemp -d)" || exit
-trap 'rm -r -f -- "${dir}"' EXIT
 
 # Set up a basic repository layout in the temporary directory.
 cp -- "${org:?}" "${dir:?}/.tangle.org" || exit
@@ -39,3 +38,5 @@ rm -- "${dir:?}/.tangle.org" || exit
   # Invert the exit status of “bazel build” because we expect it to fail.
   ! bazel --nohome_rc --quiet build --attempt_to_print_relative_paths --nobuild //... 2>&1
 ) || exit
+
+rm -r -f -- "${dir}"

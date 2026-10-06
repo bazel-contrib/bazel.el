@@ -23,7 +23,6 @@ testdata="${workspace:?}/testdata"
 org="${testdata:?}/compile.org"
 
 dir="$(mktemp -d)" || exit
-trap 'rm -r -f -- "${dir}"' EXIT
 
 # Set up a basic repository layout in the temporary directory.
 cp -- "${org:?}" "${dir:?}/.tangle.org" || exit
@@ -41,3 +40,5 @@ rm -- "${dir:?}/.tangle.org" || exit
   # warning.
   ! bazel --nohome_rc build --attempt_to_print_relative_paths --noshow_progress --noshow_loading_progress //... 2>&1
 ) || exit
+
+rm -r -f -- "${dir}"

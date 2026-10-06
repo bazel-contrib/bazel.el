@@ -24,7 +24,6 @@ testdata="${workspace:?}/testdata"
 org="${testdata:?}/coverage.org"
 
 dir="$(mktemp -d)" || exit
-trap 'rm -r -f -- "${dir}"' EXIT
 
 # Set up a basic repository layout in the temporary directory.
 cp -- "${org:?}" "${dir:?}/.tangle.org" || exit
@@ -75,3 +74,5 @@ emacs --quick --batch --load='ob-tangle' --visit="${dir:?}/coverage.dat" \
 cp -- "${dir:?}/detangle.org" "${org:?}" || exit
 
 echo 'Successfully refreshed coverage.org.'
+
+rm -r -f -- "${dir}"
