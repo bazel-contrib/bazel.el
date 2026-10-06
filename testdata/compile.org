@@ -36,10 +36,19 @@ UnknownType foo;
 
 ** Merged standard output and error from Bazel
 
-#+NAME: bazel.out
-#+BEGIN_SRC fundamental :tangle bazel.out
+To make the test hermetic, we generate Bazel output statically and tangle the
+output when running the test.  Execute this code block with =C-c C-v C-e= to
+regenerate the Bazel output:
+
+#+BEGIN_SRC sh :noweb yes :results output scalar :wrap "src fundamental :tangle bazel.out"
+./make_compile_out
+#+END_SRC
+
+#+RESULTS:
+#+begin_src fundamental :tangle bazel.out
 WARNING: The following rc files are no longer being read, please transfer their contents or import their path into one of the standard rc files:
 /Users/p/.bazelrc
+Starting local Bazel server (9.2.0) and connecting to it...
 WARNING: package/BUILD:3:11: target '//package:test' is deprecated: Deprecated!
 INFO: Analyzed target //package:test (86 packages loaded, 466 targets configured).
 ERROR: package/BUILD:3:11: Compiling package/test.cc failed: (Exit 1): cc_wrapper.sh failed: error executing CppCompile command (from cc_library rule target //package:test) external/rules_cc++cc_configure_extension+local_config_cc/cc_wrapper.sh -U_FORTIFY_SOURCE -fstack-protector -Wall -Wthread-safety -Wself-assign -Wunused-but-set-parameter -Wno-free-nonheap-object ... (remaining 21 arguments skipped)
@@ -51,7 +60,7 @@ package/test.cc:1:1: error: unknown type name 'UnknownType'
 1 error generated.
 Target //package:test failed to build
 Use --verbose_failures to see the command lines of failed build steps.
-INFO: Elapsed time: 12.379s, Critical Path: 0.38s
+INFO: Elapsed time: 12.221s, Critical Path: 0.23s
 INFO: 3 processes: 3 internal.
 ERROR: Build did NOT complete successfully
-#+END_SRC
+#+end_src

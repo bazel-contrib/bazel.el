@@ -49,8 +49,16 @@ cc_library(
 
 ** Merged standard output and error from Bazel
 
-#+NAME: bazel.out
-#+BEGIN_SRC fundamental :tangle bazel.out
+To make the test hermetic, we generate Bazel output statically and tangle the
+output when running the test.  Execute this code block with =C-c C-v C-e= to
+regenerate the Bazel output:
+
+#+BEGIN_SRC sh :noweb yes :results output scalar :wrap "src fundamental :tangle bazel.out"
+./make_fix_visibility_out
+#+END_SRC
+
+#+RESULTS:
+#+begin_src fundamental :tangle bazel.out
 ERROR: BUILD:3:10: in cc_binary rule //:bin: Visibility error:
 target '//lib:lib' is not visible from
 target '//:bin'
@@ -58,4 +66,4 @@ Recommendation: modify the visibility declaration if you think the dependency is
 ERROR: BUILD:3:10: Analysis of target '//:bin' (config: 2d89340) failed
 ERROR: Analysis of target '//:bin' failed; build aborted
 ERROR: Build did NOT complete successfully
-#+END_SRC
+#+end_src
