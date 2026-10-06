@@ -26,7 +26,6 @@ dir="$(mktemp -d)" || exit
 cp -- "${org:?}" "${dir:?}/.tangle.org" || exit
 emacs --quick --batch --visit="${dir:?}/.tangle.org" \
   --funcall='org-babel-tangle' || exit
-rm -- "${dir:?}/.tangle.org" || exit
 
 # Remove tangled “bazel-out” directory containing the previous coverage data.
 # This would interfere with the Bazel run below.
