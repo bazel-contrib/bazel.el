@@ -36,6 +36,7 @@ emacs --quick --batch --visit="${dir:?}/.tangle.org" \
 rm -- "${dir:?}/.tangle.org" || exit
 
 (
+  set -eu
   # Generate fake tangled file with links so we can use ‘org-babel-detangle’.
   echo '# [[file:detangle.org::bazel.out][bazel.out]]'
   # We explicitly compile with the current directory set to a subdirectory to
