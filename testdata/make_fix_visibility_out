@@ -49,12 +49,15 @@ out="${out//${dir}/%ROOTDIR%}"
 # we can virtually merge it with the repository root.
 out="${out//${execroot}/%ROOTDIR%}"
 
-# We can’t use ‘org-babel-detangle’ because there are no links in the tangled
-# files.
-awk -v out=bazel.out -v src=<(echo "${out:?}") \
-  -f "${testdata:?}/detangle.awk" \
-  -- "${org:?}" > "${dir:?}/org.tmp" || exit
+# Generate fake tangled file with links so we can use ‘org-babel-detangle’.
+echo '# [[file:detangle.org::bazel.out][bazel.out]]' > "${dir:?}/bazel.out"
+echo "${out:?}" >> "${dir:?}/bazel.out"
+echo '# bazel.out ends here' >> "${dir:?}/bazel.out"
 
-cp -- "${dir:?}/org.tmp" "${org:?}" || exit
+cp -- "${org:?}" "${dir:?}/detangle.org" || exit
+emacs --quick --batch --load='ob-tangle' --visit="${dir:?}/bazel.out" \
+  --eval='(setq org-src-content-indentation 0)' --funcall='org-babel-detangle' \
+  --eval='(save-some-buffers t)' || exit
+cp -- "${dir:?}/detangle.org" "${org:?}" || exit
 
 echo 'Successfully refreshed fix-visibility.org'

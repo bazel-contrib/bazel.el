@@ -62,15 +62,22 @@ out="${out//${testlogs}/%ROOTDIR%/bazel-out/k8-fastbuild/testlogs}"
 # Replace the execution root in the output with a placeholder.
 out="${out//${execroot}/%ROOTDIR%}"
 
-# We can’t use ‘org-babel-detangle’ because there are no links in the tangled
-# files.
-awk -v out=bazel.out -v src=<(echo "${out:?}") \
-  -f "${testdata:?}/detangle.awk" \
-  -- "${org:?}" > "${dir:?}/org.tmp" || exit
+# Generate fake tangled files with links so we can use ‘org-babel-detangle’.
+echo '# [[file:detangle.org::bazel.out][bazel.out]]' > "${dir:?}/bazel.out"
+echo "${out:?}" >> "${dir:?}/bazel.out"
+echo '# bazel.out ends here' >> "${dir:?}/bazel.out"
 
-awk -v out=bazel-out/k8-fastbuild/testlogs/src/test/java/example/example_test/coverage.dat \
-  -v src="${dat:?}" \
-  -f "${testdata:?}/detangle.awk" \
-  -- "${dir:?}/org.tmp" > "${org:?}" || exit
+echo '# [[file:detangle.org::coverage.dat][coverage.dat]]' > "${dir:?}/coverage.dat"
+cat "${dat:?}" >> "${dir:?}/coverage.dat"
+echo '# coverage.dat ends here' >> "${dir:?}/coverage.dat"
+
+cp -- "${org:?}" "${dir:?}/detangle.org" || exit
+emacs --quick --batch --load='ob-tangle' --visit="${dir:?}/bazel.out" \
+  --eval='(setq org-src-content-indentation 0)' --funcall='org-babel-detangle' \
+  --eval='(save-some-buffers t)' || exit
+emacs --quick --batch --load='ob-tangle' --visit="${dir:?}/coverage.dat" \
+  --eval='(setq org-src-content-indentation 0)' --funcall='org-babel-detangle' \
+  --eval='(save-some-buffers t)' || exit
+cp -- "${dir:?}/detangle.org" "${org:?}" || exit
 
 echo 'Successfully refreshed coverage.org.'
