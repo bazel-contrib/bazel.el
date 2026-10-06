@@ -35,7 +35,6 @@ emacs --quick --batch --visit="${dir:?}/.tangle.org" \
   --funcall='org-babel-tangle' || exit
 rm -- "${dir:?}/.tangle.org" || exit
 
-
 (
   # Generate fake tangled file with links so we can use ‘org-babel-detangle’.
   echo '# [[file:detangle.org::bazel.out][bazel.out]]'
