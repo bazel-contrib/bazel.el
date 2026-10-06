@@ -107,8 +107,6 @@ end_of_record
 
 #+NAME: bazel.out
 #+BEGIN_SRC fundamental :tangle bazel.out
-bazel: Entering directory `%ROOTDIR%/'
-bazel: Leaving directory `%ROOTDIR%/'
 //src/test/java/example:example_test                                     PASSED in 1.0s
   %ROOTDIR%/bazel-out/k8-fastbuild/testlogs/src/test/java/example/example_test/coverage.dat
 
