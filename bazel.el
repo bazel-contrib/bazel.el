@@ -1173,6 +1173,8 @@ IDENTIFIER should be an XRef identifier returned by
   "Return a completion table for Bazel targets."
   (bazel--target-completion-table nil nil))
 
+;;;; Jumping from a source file to its consuming target
+
 (defun bazel-show-consuming-target ()
   "Find the definition of the rule target consuming the current file.
 The current buffer must visit a file, and the file must be in a
@@ -2547,6 +2549,8 @@ root directory as returned by ‘bazel--repository-root’."
           (rx bos (any ?+ "A-Z" "a-z") (* (any ?+ ?- ?. ?_ "A-Z" "a-z" "0-9"))
               eos)))))))
 
+;;;; Utility functions for target completion
+
 (defun bazel--target-completion-table (pattern only-tests)
   "Return a completion table for Bazel targets and target patterns.
 See URL ‘https://bazel.build/run/build#specifying-build-targets’
@@ -2933,6 +2937,8 @@ annotation function; see Info node ‘(elisp) Programmed Completion’."
     (unless (eql n 0)
       (when-let* ((kind (get-text-property (1- n) 'bazel-target-kind target)))
         (format " (%s)" kind)))))
+
+;;;; Miscellaneous helper functions
 
 (defun bazel--locate-workspace-file (directory)
   "Return the file name of the Bazel WORKSPACE file in DIRECTORY.
