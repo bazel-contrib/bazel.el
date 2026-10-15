@@ -2796,7 +2796,7 @@ for ‘bazel--target-completion-table’."
   (cl-check-type repository string)
   (cl-check-type package string)
   (when-let* ((root (if (string-empty-p repository) root
-                     (bazel--external-repository repository root)))
+                      (bazel--external-repository repository root)))
               (directory (file-name-as-directory
                           (expand-file-name package root))))
     (lambda (string predicate action)
