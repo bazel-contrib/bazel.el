@@ -175,7 +175,7 @@ fix them by calling Buildozer via ‘bazel-buildozer-command’.  If
   "Type of the file that the current buffer visits.
 This must be a symbol and a valid value for the Buildifier -type
 flag.  See URL
-‘https://github.com/bazelbuild/buildtools/blob/v6.3.3/buildifier/config/validation.go#L27’.
+‘https://github.com/bazel-contrib/buildtools/blob/v10.2.0/buildifier/config/validation.go#L29’.
 If nil, don’t pass a -type flag to Buildifier.")
 
 (eval-when-compile
@@ -461,8 +461,7 @@ This is the parent mode for the more specific modes
 ;;;###autoload
 (define-derived-mode bazel-repo-mode bazel-mode "REPO.bazel"
   "Major mode for editing REPO.bazel files."
-  ;; Buildifier doesn’t have special support for REPO.bazel files yet.
-  (setq bazel--buildifier-type 'default)
+  (setq bazel--buildifier-type 'repo)
   ;; In REPO.bazel files, we don’t have function definitions.  Instead, treat
   ;; directives (= Python statements) as functions.
   (setq-local beginning-of-defun-function #'python-nav-beginning-of-statement)
@@ -477,8 +476,7 @@ This is the parent mode for the more specific modes
 ;;;###autoload
 (define-derived-mode bazel-vendor-mode bazel-mode "VENDOR.bazel"
   "Major mode for editing VENDOR.bazel files."
-  ;; Buildifier doesn’t have special support for VENDOR.bazel files yet.
-  (setq bazel--buildifier-type 'default)
+  (setq bazel--buildifier-type 'vendor)
   ;; In VENDOR.bazel files, we don’t have function definitions.  Instead, treat
   ;; directives (= Python statements) as functions.
   (setq-local beginning-of-defun-function #'python-nav-beginning-of-statement)
