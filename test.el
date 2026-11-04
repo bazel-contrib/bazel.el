@@ -1485,7 +1485,7 @@ with ‘git clone’."
 
 (defun bazel-test--buildifier-running-p ()
   "Return whether we have a running Buildifier process.
-This relies on the variable ‘bazel-buildifier-command’"
+This relies on the variable ‘bazel-buildifier-command’."
   (declare (ftype (function () t)))
   (cl-some (lambda (process)
              (and (eq (process-type process) 'real)
