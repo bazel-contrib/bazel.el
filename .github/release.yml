@@ -21,3 +21,13 @@ changelog:
       - internal
     authors:
       - renovatebot
+  categories:
+    - title: Enhancements
+      labels:
+        - enhancement
+    - title: Bug fixes
+      labels:
+        - bug
+    - title: Other changes
+      labels:
+        - '*'
