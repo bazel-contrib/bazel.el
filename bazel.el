@@ -1536,7 +1536,8 @@ This is a heuristic.  Return nil if the rule kind can’t be determined."
 
 (defun bazel-find-module-file ()
   "Find the MODULE.bazel file for the current Bazel workspace."
-  (declare (ftype (function () null)))
+  (declare (ftype (function () null))
+           (interactive-only t))
   (interactive)
   (let* ((source-file
           (or buffer-file-name default-directory

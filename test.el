@@ -1313,7 +1313,7 @@ Process buildifier exited abnormally with code 1
             (let ((buffer-file-name
                    (expand-file-name "test.cc" (expand-file-name parent dir))))
               (bazel-test--with-buffers
-                (bazel-find-module-file)
+                (ert-simulate-command '(bazel-find-module-file))
                 (should buffer-file-name)
                 (should (file-equal-p buffer-file-name expected))))))))))
 
