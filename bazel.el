@@ -1499,7 +1499,7 @@ This is a heuristic.  Return nil if the rule kind can’t be determined."
   (declare (ftype (function () t)))
   (bazel--is-test-target-p (bazel--target-kind)))
 
-;;;; Finding BUILD and WORKSPACE files
+;;;; Finding BUILD files and repository boundary files
 
 (defun bazel-find-build-file ()
   "Find the BUILD file for the current package."
