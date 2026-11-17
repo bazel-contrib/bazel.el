@@ -13,6 +13,6 @@
 # limitations under the License.
 
 bazel_dep(name = "rules_elisp", version = "0.2.0")
-bazel_dep(name = "rules_license", version = "1.0.0")
+bazel_dep(name = "package_metadata", version = "0.0.15")
 
 include("//:dev.MODULE.bazel")
