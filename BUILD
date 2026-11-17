@@ -39,6 +39,7 @@ package_metadata(
 license(
     name = "license",
     kind = "@package_metadata//licenses/spdx:Apache-2.0",
+    text = "LICENSE",
 )
 
 exports_files(["LICENSE"])
