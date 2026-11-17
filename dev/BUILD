@@ -16,7 +16,7 @@ load("@bazel_skylib//rules:select_file.bzl", "select_file")
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 
 package(
-    default_package_metadata = ["//:license"],
+    default_package_metadata = ["//:package_metadata"],
     default_visibility = ["//visibility:private"],
 )
 

@@ -15,21 +15,30 @@
 # Note: there can’t be any file starting with "bazel-" in the repository root
 # due to https://github.com/bazelbuild/bazel/issues/10560.
 
+load("@package_metadata//licenses/rules:license.bzl", "license")
+load("@package_metadata//purl:purl.bzl", "purl")
+load("@package_metadata//rules:package_metadata.bzl", "package_metadata")
 load("@rules_elisp//elisp:elisp_library.bzl", "elisp_library")
 load("@rules_elisp//elisp:elisp_manual.bzl", "elisp_manual")
 load("@rules_elisp//elisp:elisp_test.bzl", "elisp_test")
-load("@rules_license//rules:license.bzl", "license")
 
 package(
-    default_package_metadata = [":license"],
+    default_package_metadata = [":package_metadata"],
     default_visibility = ["//visibility:private"],
 )
 
 licenses(["notice"])
 
+package_metadata(
+    name = "package_metadata",
+    attributes = [":license"],
+    purl = purl.builder().type("github").namespace("bazel-contrib").name("bazel.el").build(),
+    visibility = ["//dev:__pkg__"],
+)
+
 license(
     name = "license",
-    license_kind = "@rules_license//licenses/spdx:Apache-2.0",
+    kind = "@package_metadata//licenses/spdx:Apache-2.0",
 )
 
 exports_files(["LICENSE"])
