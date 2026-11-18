@@ -42,10 +42,10 @@ This manual describes ~bazel.el~, a GNU Emacs package to work with the
 #+FINDEX: bazeliskrc-mode
 #+FINDEX: bazel-starlark-mode
 The package provides several major modes for editing Bazel-related files:
-~bazel-build-mode~ for BUILD files, ~bazel-workspace-mode~ for WORKSPACE files,
-~bazel-module-mode~ for MODULE.bazel files as well as =*.MODULE.bazel= segment
-files pulled in with ~include~, ~bazel-repo-mode~ for REPO.bazel files,
-~bazel-vendor-mode~ for VENDOR.bazel files, ~bazelrc-mode~ for =.bazelrc=
+~bazel-build-mode~ for BUILD files, ~bazel-module-mode~ for MODULE.bazel files
+as well as =*.MODULE.bazel= segment files pulled in with ~include~,
+~bazel-repo-mode~ for REPO.bazel files, ~bazel-vendor-mode~ for VENDOR.bazel
+files, ~bazel-workspace-mode~ for WORKSPACE files, ~bazelrc-mode~ for =.bazelrc=
 configuration files, ~bazelignore-mode~ for =.bazelignore= files,
 ~bazeliskrc-mode~ for =.bazeliskrc= files, and ~bazel-starlark-mode~ for
 extension files written in the Starlark language.  These modes also extend Imenu
@@ -56,8 +56,8 @@ and the ~find-file-at-point~ to support Bazel-specific syntax.  See the
 these file types.
 
 #+FINDEX: bazel-mode
-Since the syntax for BUILD files, WORKSPACE files, MODULE.bazel files,
-REPO.bazel files, VENDOR.bazel files, and Starlark files is closely related, the
+Since the syntax for BUILD files, MODULE.bazel files, REPO.bazel files,
+VENDOR.bazel files, WORKSPACE files, and Starlark files is closely related, the
 corresponding modes derive from a parent mode, ~bazel-mode~.  Collectively,
 these modes are called “Bazel modes” in the rest of this manual.
 
@@ -189,8 +189,8 @@ information about ~find-file-at-point~, see [[info:Emacs#FFAP][FFAP]].
 #+FINDEX: bazel-find-module-file
 #+FINDEX: bazel-find-repo-file
 To visit the BUILD file that defines the package for the current file, run the
-command ~bazel-find-build-file~.  Similarly, to find the Bazel WORKSPACE,
-MODULE.bazel, or REPO.bazel files, run ~bazel-find-workspace-file~,
+command ~bazel-find-build-file~.  Similarly, to find the Bazel MODULE.bazel,
+REPO.bazel, or WORKSPACE files, run ~bazel-find-workspace-file~,
 ~bazel-find-module-file~, or ~bazel-find-repo-file~, respectively.  It is not an
 error if these files don’t exist yet: the commands will create buffers that
 visit a non-existing file in that case.

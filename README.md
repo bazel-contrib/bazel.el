@@ -5,11 +5,12 @@ a single file, `bazel.el`, which only depends on GNU Emacs and not on other
 libraries.  You can install it by dropping the file somewhere in your
 `load-path` and byte-compiling it.
 
-The library provides major modes for editing Bazel [BUILD files][], [WORKSPACE
-files][], [MODULE.bazel files][], [REPO.bazel files][], [VENDOR.bazel files][],
-[.bazelrc files][], as well as [Starlark files][].  It also provides commands to
-[run Bazel commands][] and integration with core GNU Emacs infrastructure like
-[compilation][] and [xref][].  See the [manual][] for details.
+The library provides major modes for editing Bazel [BUILD files][],
+[MODULE.bazel files][], [REPO.bazel files][], [VENDOR.bazel files][], [WORKSPACE
+files][], [.bazelrc files][], as well as [Starlark files][].  It also provides
+commands to [run Bazel commands][] and integration with core GNU Emacs
+infrastructure like [compilation][] and [xref][].  See the [manual][] for
+details.
 
 This repository is minimally maintained on a best-effort basis by volunteers in
 their spare time.
