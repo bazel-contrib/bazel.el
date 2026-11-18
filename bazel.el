@@ -3,7 +3,7 @@
 ;; URL: https://github.com/bazel-contrib/bazel.el
 ;; Keywords: build tools, languages
 ;; Package-Requires: ((emacs "30.1"))
-;; Version: 0.0.3
+;; Version: 0.1.0
 
 ;; Copyright (C) 2018-2023, 2026 Google LLC
 ;; Licensed under the Apache License, Version 2.0 (the "License");
