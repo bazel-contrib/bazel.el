@@ -2495,7 +2495,8 @@ start with ‘@’ signs."
     ;; Normally, we shouldn’t get here.  Display a warning and try some
     ;; best-effort heuristics.
     (lwarn '(bazel map-repo) (if non-essential :debug :warning)
-           "No mapping for repository %s found" apparent-name)
+           "No mapping for repository %s in workspace %s found"
+           apparent-name (abbreviate-file-name workspace))
     ;; The magic ‘bazel_tools’ repository typically maps to itself.
     (if (string-equal apparent-name "bazel_tools") "bazel_tools"
       ;; If all else fails, try the typical mapping: the canonical name is the
@@ -2568,7 +2569,9 @@ repository mapping."
                        bazel--repo-mappings))))
       ((file-error bazel--process-failed)
        (lwarn '(bazel repo-mapping) (if non-essential :debug :warning)
-              "Command %S failed: %s" command (error-message-string error))
+              "Command %S in directory %s failed: %s"
+              command (abbreviate-file-name directory)
+              (error-message-string error))
        nil))))
 
 (defun bazel--invalidate-repo-mapping (event)
