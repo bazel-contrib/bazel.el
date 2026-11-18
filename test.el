@@ -1116,122 +1116,21 @@ Process buildifier exited abnormally with code 1
 
 (ert-deftest bazel-insert-http-archive ()
   (bazel-test--with-workspace dir "http-archive.org"
-    (should (set-file-times (expand-file-name "prefix" dir)
-                            (encode-time '(0 0 0 2 5 2019 nil nil t))))
-    (let* ((archive (expand-file-name "archive.tar.gz" dir))
-           (unquoted-archive (file-name-unquote archive))
-           (url-unreserved-chars (cons ?/ url-unreserved-chars))
-           (url (concat "file://" (url-hexify-string unquoted-archive)))
-           (tar (executable-find "tar"))
-           (default-directory dir))
-      (skip-unless tar)
-      (ignore (process-lines tar "-c" "-z" "-f" unquoted-archive "--" "prefix"))
-      (let ((actual
-             (with-temp-buffer
-               (bazel-workspace-mode)
-               (ert-simulate-command `(bazel-insert-http-archive ,url))
-               (buffer-substring-no-properties (point-min) (point-max))))
-            (expected
-             (with-temp-buffer
-               (insert-file-contents
-                (expand-file-name "WORKSPACE.expected" dir))
-               (let ((case-fold-search nil)
-                     (search-spaces-regexp nil)
-                     (hash (bazel-test--sha256 archive)))
-                 ;; Replace variables in expected snippet with their values.
-                 (setq hash (base64-encode-string hash :no-line-break))
-                 (dolist (pair `(("%sha256%" . ,hash)
-                                 ("%url%" . ,url)))
-                   (cl-destructuring-bind (variable . value) pair
-                     (goto-char (point-min))
-                     (while (search-forward variable nil t)
-                       (replace-match value :fixedcase :literal)))))
-               ;; We don’t expect a trailing newline.
-               (goto-char (point-max))
-               (skip-chars-backward "\n")
-               (buffer-substring-no-properties (point-min) (point)))))
-        (should (equal actual expected))))))
-
-(ert-deftest bazel-insert-http-archive/empty ()
-  (bazel-test--with-workspace dir nil
-    (let* ((archive (file-name-unquote
-                     (expand-file-name "archive.tar.gz" dir)))
-           (url-unreserved-chars (cons ?/ url-unreserved-chars))
-           (url (concat "file://" (url-hexify-string archive)))
-           (tar (executable-find "tar"))
-           (default-directory dir))
-      (skip-unless tar)
-      ;; https://superuser.com/a/448624
-      (ignore (process-lines tar "-c" "-z" "-f" archive "-T" "/dev/null"))
-      (with-temp-buffer
-        (let ((tick-before (buffer-modified-tick)))
-          (bazel-workspace-mode)
-          (should-error
-           (ert-simulate-command `(bazel-insert-http-archive ,url))
-           :type 'user-error)
-          (should (eql (buffer-modified-tick) tick-before))  ; no change
-          (should (eq (buffer-size) 0)))))))
-
-(ert-deftest bazel-insert-http-archive/no-unique-prefix ()
-  (bazel-test--with-workspace dir "http-archive-no-unique-prefix.org"
-    (let* ((archive (file-name-unquote
-                     (expand-file-name "archive.tar.gz" dir)))
-           (url-unreserved-chars (cons ?/ url-unreserved-chars))
-           (url (concat "file://" (url-hexify-string archive)))
-           (tar (executable-find "tar"))
-           (completing-read-collections ())
-           (completing-read-function
-            (lambda (_prompt collection &rest _args)
-              (push collection completing-read-collections)
-              (car collection)))
-           (default-directory dir))
-      (skip-unless tar)
-      (ignore (process-lines tar "-c" "-z" "-f" archive
-                             "--" "prefix-1" "prefix-2"))
-      (with-temp-buffer
-        (bazel-workspace-mode)
-        (ert-simulate-command `(bazel-insert-http-archive ,url))
-        (should (eobp))
-        (goto-char (point-min))
-        (pcase-exhaustive completing-read-collections
-          (`(,collection)
-           (should (seq-set-equal-p collection '("prefix-1/" "prefix-2/")))))
-        (should (looking-at-p (rx bot "http_archive(" eol)))
-        (search-forward "    strip_prefix = \"prefix-1/\",")))))
-
-(ert-deftest bazel-insert-http-archive/no-directory ()
-  (bazel-test--with-workspace dir "http-archive-no-directory.org"
-    (let* ((archive (file-name-unquote
-                     (expand-file-name "archive.tar.gz" dir)))
-           (url-unreserved-chars (cons ?/ url-unreserved-chars))
-           (url (concat "file://" (url-hexify-string archive)))
-           (tar (executable-find "tar"))
-           (default-directory dir))
-      (skip-unless tar)
-      (ignore (process-lines tar "-c" "-z" "-f" archive "--" "WORKSPACE"))
-      (with-temp-buffer
-        (bazel-workspace-mode)
-        (ert-simulate-command `(bazel-insert-http-archive ,url))
-        (should (eobp))
-        (goto-char (point-min))
-        (should (looking-at-p (rx bot "http_archive(" eol)))
-        (should-not (search-forward "strip_prefix" nil t))))))
-
-(ert-deftest bazel-insert-http-archive/invalid-archive ()
-  ;; Don’t let ‘jka-compr’ interfere with writing the invalid archive file.
-  (let ((jka-compr-inhibit t))
-    (bazel-test--with-workspace dir "http-archive-invalid.org"
-      (let* ((archive (file-name-unquote
-                       (expand-file-name "archive.tar.gz" dir)))
-             (url-unreserved-chars (cons ?/ url-unreserved-chars))
-             (url (concat "file://" (url-hexify-string archive))))
-        (with-temp-buffer
-          (let ((tick-before (buffer-modified-tick)))
-            (bazel-workspace-mode)
-            (should-error
-             (ert-simulate-command `(bazel-insert-http-archive ,url)))
-            (should (eql (buffer-modified-tick) tick-before))  ; no change
-            (should (eq (buffer-size) 0))))))))
+    (let ((actual
+           (with-temp-buffer
+             (bazel-workspace-mode)
+             (ert-simulate-command '(bazel-insert-http-archive
+                                     "https://example.example/archive.tar"))
+             (buffer-substring-no-properties (point-min) (point-max))))
+          (expected
+           (with-temp-buffer
+             (insert-file-contents
+              (expand-file-name "WORKSPACE.expected" dir))
+             ;; We don’t expect a trailing newline.
+             (goto-char (point-max))
+             (skip-chars-backward "\n")
+             (buffer-substring-no-properties (point-min) (point)))))
+      (should (equal actual expected)))))
 
 (ert-deftest bazelrc-ffap ()
   (bazel-test--with-workspace dir "bazelrc.org"
@@ -1564,14 +1463,5 @@ This relies on the variable ‘bazel-buildifier-command’."
                   (file-equal-p (car (process-command process))
                                 bazel-buildifier-command)))
            (process-list)))
-
-(defun bazel-test--sha256 (file)
-  "Return the SHA-256 sum of FILE as a binary string."
-  (declare (ftype (function (string) string)))
-  (cl-check-type file string)
-  (with-temp-buffer
-    (set-buffer-multibyte nil)
-    (insert-file-contents-literally file)
-    (secure-hash 'sha256 (current-buffer) nil nil :binary)))
 
 ;;; test.el ends here

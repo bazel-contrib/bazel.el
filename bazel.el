@@ -643,20 +643,15 @@ Return a hashtable mapping package names to their most recent versions."
   "Insert an “http_archive” statement at point.
 See URL ‘https://bazel.build/rules/lib/repo/http#http_archive’
 for a description of “http_archive”.  Interactively, prompt for
-an archive URL.  Attempt to detect repository name and prefix.
-Also add the date when the archive was likely last modified as a
-comment."
+an archive URL."
   "Archive download URL: "
   '(eval str t)                                 ; force prompt now
-  '(setq v1 (bazel--download-http-archive str)) ; (name hash prefix time)
   "http_archive(" \n
-  "name = \"" (or (nth 0 v1) '_) "\"," \n
-  "integrity = \"" (nth 1 v1) "\"," \n
-  (let ((prefix (nth 2 v1)))
-    (unless (string-empty-p prefix)
-      `(nil "strip_prefix = \"" ,prefix "\"," \n)))
+  "name = \"" _ "\"," \n
+  "integrity = \"" _ "\"," \n
+  "strip_prefix = \"" _ "\"," \n
   "urls = [" \n
-  ?\" str "\",  # " (format-time-string "%F" (nth 3 v1) t) \n
+  ?\" str "\"," \n
   "]," > \n
   ?\) >)
 
@@ -664,132 +659,6 @@ comment."
 (function-put #'bazel-insert-http-archive 'command-modes
               '(bazel-workspace-mode bazel-starlark-mode))
 (make-obsolete #'bazel-insert-http-archive #'bazel-insert-dependency "v0.1.0")
-
-(defun bazel--download-http-archive (url)
-  "Download and interpret HTTP archive at URL.
-Return a list (NAME INTEGRITY PREFIX TIME) for
-‘bazel-insert-http-archive’."
-  (declare (ftype (function (string) cons)))
-  (cl-check-type url string)
-  (let* ((temp-dir (make-temp-file "bazel-http-archive-" :directory))
-         (name (url-file-nondirectory url))
-         (archive-file (expand-file-name
-                        (if (string-empty-p name) "archive" name) temp-dir))
-         (reporter (make-progress-reporter
-                    (format-message "Downloading %s into %s..." url temp-dir)))
-         (coding-system-for-read 'no-conversion)
-         (coding-system-for-write 'no-conversion))
-    (url-copy-file url archive-file)
-    (progress-reporter-update reporter)
-    ;; The ‘bound-and-true-p’ check below won’t load ‘tramp-archive’, so load it
-    ;; manually here.
-    (require 'tramp-archive nil :noerror)
-    (let* ((archive-dir
-            ;; Prefer TRAMP’s archive support if available.
-            (if (bound-and-true-p tramp-archive-enabled)
-                (file-name-as-directory (file-name-unquote archive-file))
-              ;; Fall back to extracting the archive locally.
-              (let ((dir (expand-file-name "extract/" temp-dir)))
-                (make-directory dir)
-                (bazel--extract-archive archive-file dir)
-                (progress-reporter-update reporter)
-                dir)))
-           (archive-entries
-            (or (prog1 (directory-files-and-attributes
-                        archive-dir nil directory-files-no-dot-files-regexp)
-                  (progress-reporter-update reporter))
-                (user-error "Empty archive")))
-           (candidates
-            ;; Find directories in the archive.  If there’s more than one,
-            ;; prompt the user which prefix to strip.
-            (cl-loop for (name . attrs) in archive-entries
-                     when (eq (file-attribute-type attrs) t)
-                     ;; Put attribute list into text property so that
-                     ;; ‘completing-read’ won’t lose it.
-                     collect (propertize (file-name-as-directory name)
-                                         'attributes attrs)))
-           (prefix (cl-case (length candidates)
-                     (0 "")               ; no directories, prefix must be empty
-                     (1 (car candidates)) ; no need to prompt user
-                     (t (completing-read "Prefix to strip: " candidates
-                                         nil nil nil nil ""))))
-           (time (file-attribute-modification-time
-                  (if (string-empty-p prefix)
-                      ;; No prefix directory selected (or archive doesn’t
-                      ;; contain any directory), pick an arbitrary file for the
-                      ;; modification time.
-                      (cdar archive-entries)
-                    (get-text-property 0 'attributes prefix))))
-           (root-dir (expand-file-name prefix archive-dir))
-           (name (when-let* ((workspace (bazel--locate-workspace-file root-dir)))
-                   (with-temp-buffer
-                     (insert-file-contents workspace)
-                     (bazel-workspace-mode)
-                     (progress-reporter-update reporter)
-                     (bazel--workspace-name))))
-           (sha256 (with-temp-buffer
-                     (insert-file-contents-literally archive-file)
-                     (progress-reporter-update reporter)
-                     (secure-hash 'sha256 (current-buffer) nil nil :binary)))
-           (integrity
-            (concat "sha256-" (base64-encode-string sha256 :no-line-break))))
-      ;; We delete the temporary directory only when successful to make
-      ;; debugging easier.
-      (delete-directory temp-dir :recursive)
-      (progress-reporter-done reporter)
-      (list name integrity prefix time))))
-
-(defun bazel--extract-archive (file directory)
-  "Extract the archive FILE into DIRECTORY."
-  (declare (ftype (function (string string) null)))
-  (cl-check-type file string)
-  (cl-check-type directory string)
-  (when (or (file-remote-p file) (file-remote-p directory))
-    (user-error "Can't extract remote file %s" file))
-  ;; Prefer BSD tar if installed, as it supports more archive types.
-  (let ((program (cl-some #'executable-find '("bsdtar" "tar"))))
-    (unless program
-      (user-error "Don’t know how to extract %s" file))
-    (with-temp-buffer
-      (let ((status (call-process program nil t nil
-                                  "-x"
-                                  "-f" (file-name-unquote file)
-                                  "-C" (file-name-unquote directory))))
-        (unless (eql status 0)
-          (error "Program %s failed with status %s, output %s"
-                 program status (buffer-string))))))
-  nil)
-
-(defun bazel--workspace-name ()
-  "Return the name of the workspace.
-The current buffer should contain the contents of a Bazel
-WORKSPACE file.  Look around for a “workspace” statement and
-return its name.  See URL
-‘https://bazel.build/rules/lib/globals#workspace’."
-  (declare (ftype (function () (or null string))))
-  (save-excursion
-    (goto-char (point-min))
-    (cl-block nil
-      (let ((case-fold-search nil)
-            (search-spaces-regexp nil))
-        (while (progn (forward-comment (buffer-size))
-                      (re-search-forward (rx symbol-start "workspace(") nil t))
-          (forward-comment (buffer-size))
-          (unless (or (eobp) (python-syntax-comment-or-string-p))
-            (let ((begin (point))
-                  (end (progn (python-nav-end-of-statement) (point))))
-              (goto-char begin)
-              (while (progn (forward-comment (buffer-size))
-                            (re-search-forward
-                             (rx symbol-start "name" (* blank) ?= (* blank)
-                                 (group (any ?\" ?\'))
-                                 (group (+ (any "a-z" "A-Z" "0-9" ?_ ?- ?.)))
-                                 (backref 1))
-                             end t))
-                (let ((name (match-string-no-properties 2)))
-                  (unless (python-syntax-comment-or-string-p)
-                    (cl-return name))))
-              (goto-char end))))))))
 
 ;;;; ‘bazelrc-mode’
 
