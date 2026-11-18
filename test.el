@@ -75,7 +75,10 @@ first using ‘bazel-test--tangle’."
     (cl-with-gensyms (directory workspace output-base file)
       `(let* ((,directory (make-temp-file "bazel-mode-test-" :dir-flag))
               (,workspace (file-name-concat ,directory "workspace"))
-              (,output-base (file-name-concat ,workspace ".output-base")))
+              (,output-base (file-name-concat ,workspace ".output-base"))
+              ;; Prevent accidentally running Bazel or Buildifier.
+              (bazel-command '("/invalid/bazel"))
+              (bazel-buildifier-command "/invalid/buildifier"))
          (ert-info (,workspace :prefix "Workspace: ")
            (bazel-test--set-up-workspace ,workspace ,output-base)
            (prog2 (when-let* ((,file ,org-file))
@@ -816,9 +819,10 @@ gets killed early."
     (bazel-test--with-file-buffer (expand-file-name "package/test.cc" dir)
       (pcase-dolist
           (`(,default-directory ,want-commands)
-           `((,dir ("bazel build --compile_one_dependency -- package/test.cc"))
+           `((,dir
+              ("/invalid/bazel build --compile_one_dependency -- package/test.cc"))
              (,(expand-file-name "package" dir)
-              ("bazel build --compile_one_dependency -- test.cc"))))
+              ("/invalid/bazel build --compile_one_dependency -- test.cc"))))
         (cl-letf* ((got-commands ())
                    ((symbol-function #'compile)
                     (lambda (command &optional _comint)
@@ -891,7 +895,7 @@ gets killed early."
         (ert-simulate-command '(bazel-test-at-point))
         (should
          (equal commands
-                '("bazel test --test_filter\\=foo/test -- //\\:foo_test")))))))
+                '("/invalid/bazel test --test_filter\\=foo/test -- //\\:foo_test")))))))
 
 (ert-deftest bazel-test-at-point/python-mode ()
   "Test ‘bazel-test-at-point’ in ‘python-mode’."
@@ -911,8 +915,8 @@ gets killed early."
         (ert-simulate-command '(bazel-test-at-point))
         (should
          (equal (reverse commands)
-                '("bazel test --test_filter\\=MyTest -- //\\:py_test"
-                  "bazel test --test_filter\\=MyTest.testFoo -- //\\:py_test")))))))
+                '("/invalid/bazel test --test_filter\\=MyTest -- //\\:py_test"
+                  "/invalid/bazel test --test_filter\\=MyTest.testFoo -- //\\:py_test")))))))
 
 (ert-deftest bazel-test-at-point/c++-mode ()
   "Test ‘bazel-test-at-point’ in ‘c++-mode’."
@@ -932,8 +936,8 @@ gets killed early."
         (ert-simulate-command '(bazel-test-at-point))
         (should
          (equal (reverse commands)
-                '("bazel test --test_filter\\=FooTest.Bar -- //\\:cc_test"
-                  "bazel test --test_filter\\=BazTest.Qux -- //\\:cc_test")))))))
+                '("/invalid/bazel test --test_filter\\=FooTest.Bar -- //\\:cc_test"
+                  "/invalid/bazel test --test_filter\\=BazTest.Qux -- //\\:cc_test")))))))
 
 (ert-deftest bazel-test-at-point/go-mode ()
   "Test ‘bazel-test-at-point’ in ‘go-mode’."
@@ -963,8 +967,8 @@ gets killed early."
         (ert-simulate-command '(bazel-test-at-point))
         (should
          (equal (reverse commands)
-                '("bazel test --test_filter\\=\\^\\\\QTest\\\\E\\$ -- //\\:go_test"
-                  "bazel test --test_filter\\=\\^\\\\QBenchmarkFoo_Bar\\\\E\\$ -- //\\:go_test")))))))
+                '("/invalid/bazel test --test_filter\\=\\^\\\\QTest\\\\E\\$ -- //\\:go_test"
+                  "/invalid/bazel test --test_filter\\=\\^\\\\QBenchmarkFoo_Bar\\\\E\\$ -- //\\:go_test")))))))
 
 (ert-deftest bazel-test-at-point-functions ()
   "Test that ‘which-function’ is at the end of ‘bazel-test-at-point-functions’."
@@ -1388,7 +1392,8 @@ Process buildifier exited abnormally with code 1
               bazel-target-history "//:foo_test" nil)))
           (_ (ert-fail (list "Invalid arguments to ‘completing-read’"
                              completing-read-args))))
-        (should (equal compile-commands '("bazel test -- \\:test")))))))
+        (should (equal compile-commands
+                       '("/invalid/bazel test -- \\:test")))))))
 
 (ert-deftest bazel-fix-visibility ()
   (bazel-test--with-workspace workspace "fix-visibility.org"
