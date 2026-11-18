@@ -1166,7 +1166,9 @@ Process buildifier exited abnormally with code 1
       (with-temp-buffer
         (let ((tick-before (buffer-modified-tick)))
           (bazel-workspace-mode)
-          (should-error (bazel-insert-http-archive url) :type 'user-error)
+          (should-error
+           (ert-simulate-command `(bazel-insert-http-archive ,url))
+           :type 'user-error)
           (should (eql (buffer-modified-tick) tick-before))  ; no change
           (should (eq (buffer-size) 0)))))))
 
@@ -1226,7 +1228,8 @@ Process buildifier exited abnormally with code 1
         (with-temp-buffer
           (let ((tick-before (buffer-modified-tick)))
             (bazel-workspace-mode)
-            (should-error (bazel-insert-http-archive url))
+            (should-error
+             (ert-simulate-command `(bazel-insert-http-archive ,url)))
             (should (eql (buffer-modified-tick) tick-before))  ; no change
             (should (eq (buffer-size) 0))))))))
 
