@@ -75,12 +75,6 @@ command ~bazel-central-registry~.  It displays the known modules along with
 their most recent versions in a table.  If you hit =v= on a module line, the
 homepage of the module will open in your default browser.
 
-#+FINDEX: bazel-insert-http-archive
-When editing a WORKSPACE file, you can use the command
-~bazel-insert-http-archive~ to quickly insert an
-[[https://bazel.build/rules/lib/repo/http#http_archive][~http_archive~ rule]]
-statement.
-
 #+CINDEX: Xref
 #+KINDEX: M-.
 The Bazel modes integrate with Xref to support basic functionality to jump to

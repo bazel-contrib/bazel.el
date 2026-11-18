@@ -663,6 +663,7 @@ comment."
 (function-put #'bazel-insert-http-archive 'interactive-only t)
 (function-put #'bazel-insert-http-archive 'command-modes
               '(bazel-workspace-mode bazel-starlark-mode))
+(make-obsolete #'bazel-insert-http-archive #'bazel-insert-dependency "v0.1.0")
 
 (defun bazel--download-http-archive (url)
   "Download and interpret HTTP archive at URL.
@@ -941,8 +942,6 @@ This function (or its return value) can be used for the value
     (derived-mode-p 'bazel-mode)]
    ["Insert bazel_dep statement..." bazel-insert-dependency
     (derived-mode-p 'bazel-module-mode)]
-   ["Insert http_archive statement..." bazel-insert-http-archive
-    (derived-mode-p 'bazel-workspace-mode 'bazel-starlark-mode)]
    ["Browse the Bazel Central Registry..." bazel-central-registry])
  "Debugger (GDB)...")
 
