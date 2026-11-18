@@ -2632,23 +2632,26 @@ repository mapping."
                    "--quiet" "mod" "--lockfile_mode=off" "dump_repo_mapping"
                    "")))  ; "" denotes the main repository
     (condition-case error
-        (with-temp-buffer
-          (let* ((coding-system-for-read 'utf-8-unix)
-                 (coding-system-for-write 'utf-8-unix)
-                 (default-directory directory)  ; run Bazel on the correct host
-                 (status (apply #'process-file (car command) nil '(t nil) nil
-                                (cdr command))))
-            (unless (eql status 0)
-              (signal 'bazel--process-failed (list status)))
-            ;; If possible, invalidate the cache entry whenever the MODULE.bazel
-            ;; file changes.
-            (ignore-error file-notify-error
-              (file-notify-add-watch (expand-file-name "MODULE.bazel" directory)
-                                     '(change)
-                                     #'bazel--invalidate-repo-mapping))
-            (goto-char (point-min))
-            (puthash directory (cl-the hash-table (bazel--json-parse-buffer))
-                     bazel--repo-mappings)))
+        (with-delayed-message
+            (0.2 (format-message "Fetching repository mapping for %s"
+                                 (abbreviate-file-name directory)))
+          (with-temp-buffer
+            (let* ((coding-system-for-read 'utf-8-unix)
+                   (coding-system-for-write 'utf-8-unix)
+                   (default-directory directory) ; run Bazel on the correct host
+                   (status (apply #'process-file (car command) nil '(t nil) nil
+                                  (cdr command))))
+              (unless (eql status 0)
+                (signal 'bazel--process-failed (list status)))
+              ;; If possible, invalidate the cache entry whenever the
+              ;; MODULE.bazel file changes.
+              (ignore-error file-notify-error
+                (file-notify-add-watch
+                 (expand-file-name "MODULE.bazel" directory)
+                 '(change) #'bazel--invalidate-repo-mapping))
+              (goto-char (point-min))
+              (puthash directory (cl-the hash-table (bazel--json-parse-buffer))
+                       bazel--repo-mappings))))
       ((file-error bazel--process-failed)
        (lwarn '(bazel repo-mapping) (if non-essential :debug :warning)
               "Command %S failed: %s" command (error-message-string error))
