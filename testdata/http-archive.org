@@ -14,38 +14,15 @@
 
 * Test data for the ~bazel-insert-http-archive~ test
 
-** Contents of the test repository archive
-
-We add a few quirks to the =WORKSPACE= file to ensure that the workspace name is
-correctly determined.
-
-#+BEGIN_SRC bazel-workspace :tangle prefix/WORKSPACE :mkdirp yes
-"""
-workspace(name = "haha")
-"""
-
-# workspace(name = "haha")
-
-workspace(foo = 'name = "no",', name = "test_repository")
-
-# workspace(name = "haha")
-#+END_SRC
-
-#+BEGIN_SRC bazel-build :tangle prefix/BUILD :mkdirp yes
-# Empty BUILD file
-#+END_SRC
-
 ** Expected ~http_archive~ snippet
-
-The ~bazel-insert-http-archive~ test fakes a date of 2019-05-02.
 
 #+BEGIN_SRC bazel-workspace :tangle WORKSPACE.expected
 http_archive(
-    name = "test_repository",
-    integrity = "sha256-%sha256%",
-    strip_prefix = "prefix/",
+    name = "",
+    integrity = "",
+    strip_prefix = "",
     urls = [
-        "%url%",  # 2019-05-02
+        "https://example.example/archive.tar",
     ],
 )
 #+END_SRC
