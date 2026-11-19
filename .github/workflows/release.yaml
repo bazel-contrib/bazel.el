@@ -39,6 +39,7 @@ jobs:
       - name: Run tests and build release archive
         shell: bash
         run: |
+          set -Cefux
           make check
           bazel build --config=release -- //dev:release.tar
           cp -- bazel-bin/dev/release.tar 'bazel-${{github.ref_name}}.tar'
