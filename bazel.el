@@ -2479,24 +2479,24 @@ root directory as returned by ‘bazel--repository-root’."
           (rx bos (any ?+ "A-Z" "a-z") (* (any ?+ ?- ?. ?_ "A-Z" "a-z" "0-9"))
               eos)))))))
 
-(defun bazel--map-repo (workspace apparent-name)
+(defun bazel--map-repo (repo-root apparent-name)
   "Map apparent to canonical repository name.
-WORKSPACE is the directory name or directory file name of a Bazel
-workspace, and APPARENT-NAME is the name of a repository as it appears
-to the main repository in the workspace.  Return a heuristic for the
+REPO-ROOT is the directory name or directory file name of a Bazel
+repository, and APPARENT-NAME is the name of a repository as it appears
+to the main repository in REPO-ROOT.  Return a heuristic for the
 canonical repository name.  Neither the apparent nor the canonical name
 start with ‘@’ signs."
   (declare (ftype (function (string string) string)))
-  (cl-check-type workspace string)
+  (cl-check-type repo-root string)
   (cl-check-type apparent-name string)
   (cl-assert (not (string-empty-p apparent-name)))
-  (if-let* ((mapping (bazel--repo-mapping workspace)))
+  (if-let* ((mapping (bazel--repo-mapping repo-root)))
       (gethash apparent-name mapping)
     ;; Normally, we shouldn’t get here.  Display a warning and try some
     ;; best-effort heuristics.
     (lwarn '(bazel map-repo) (if non-essential :debug :warning)
-           "No mapping for repository %s in workspace %s found"
-           apparent-name (abbreviate-file-name workspace))
+           "No mapping for repository %s in repository %s found"
+           apparent-name (abbreviate-file-name repo-root))
     ;; The magic ‘bazel_tools’ repository typically maps to itself.
     (if (string-equal apparent-name "bazel_tools") "bazel_tools"
       ;; If all else fails, try the typical mapping: the canonical name is the
@@ -2509,15 +2509,15 @@ This is a two-level hashtable that maps repository root directory names
 to hashtables mapping apparent repository names to canonical repository
 names.  The mappings are always for the main repository.")
 
-(defun bazel--repo-mapping (workspace)
-  "Obtain the repository mapping for the main repository in WORKSPACE.
-WORKSPACE is the directory name or directory file name of a Bazel
-workspace.  Return a hashtable mapping apparent to canonical repository
-names, or nil if the repository mapping can’t be determined."
+(defun bazel--repo-mapping (root)
+  "Obtain the repository mapping for the main repository in ROOT.
+ROOT is the directory name or directory file name of a Bazel repository.
+Return a hashtable mapping apparent to canonical repository names, or
+nil if the repository mapping can’t be determined."
   (declare (ftype (function (string) (or hash-table null))))
-  (cl-check-type workspace string)
-  ;; Canonicalize the workspace directory to an absolute directory name.
-  (let ((directory (file-name-as-directory (expand-file-name workspace))))
+  (cl-check-type root string)
+  ;; Canonicalize the directory to an absolute directory name.
+  (let ((directory (file-name-as-directory (expand-file-name root))))
     (or (gethash directory bazel--repo-mappings)  ; try the cache first
         ;; If we’re performing an essential task, ask Bazel for the mapping.
         ;; Note that ‘bazel--fetch-repo-mapping’ will store the mapping in the
@@ -2525,22 +2525,22 @@ names, or nil if the repository mapping can’t be determined."
         (unless non-essential (bazel--fetch-repo-mapping directory))
         ;; If we got here, at least display a warning.
         (ignore (lwarn '(bazel repo-mapping) (if non-essential :debug :warning)
-                       "Couldn’t determine repository mapping for workspace %s"
-                       (abbreviate-file-name workspace))))))
+                       "Couldn’t determine repository mapping for repository %s"
+                       (abbreviate-file-name root))))))
 
 (define-error 'bazel--process-failed "Process failed")
 
-(defun bazel--fetch-repo-mapping (workspace)
-  "Obtain the repository mapping for the main repository in WORKSPACE.
-WORKSPACE is the directory name or directory file name of a Bazel
-workspace.  Return a hashtable mapping apparent to canonical repository
-names, or nil if the repository mapping can’t be determined.  Unlike
+(defun bazel--fetch-repo-mapping (root)
+  "Obtain the repository mapping for the main repository in ROOT.
+ROOT is the directory name or directory file name of a Bazel repository.
+Return a hashtable mapping apparent to canonical repository names, or
+nil if the repository mapping can’t be determined.  Unlike
 ‘bazel--repo-mapping’, this function always queries Bazel for the
 repository mapping."
   (declare (ftype (function (string) (or hash-table null))))
-  (cl-check-type workspace string)
-  ;; Canonicalize the workspace directory to an absolute directory name.
-  (let ((directory (file-name-as-directory (expand-file-name workspace)))
+  (cl-check-type root string)
+  ;; Canonicalize the directory to an absolute directory name.
+  (let ((directory (file-name-as-directory (expand-file-name root)))
         (command `(,@bazel-command
                    ,@(when non-essential
                        '("--noblock_for_lock" "--preemptible"))
@@ -2549,7 +2549,7 @@ repository mapping."
     (condition-case error
         (with-delayed-message
             (0.2 (format-message "Fetching repository mapping for %s..."
-                                 (abbreviate-file-name directory)))
+                                 (abbreviate-file-name root)))
           (with-temp-buffer
             (let* ((coding-system-for-read 'utf-8-unix)
                    (coding-system-for-write 'utf-8-unix)
@@ -2580,9 +2580,9 @@ This is a file notification handler that gets called when a MODULE.bazel
 file changes.  EVENT is a file notification event.
 See Info node ‘(elisp) File Notifications’."
   (declare (ftype (function (cons) null)))
-  (when-let* ((workspace (file-name-directory (caddr event))))
-    ;; Canonicalize the workspace directory to an absolute directory name.
-    (remhash (file-name-as-directory (expand-file-name workspace))
+  (when-let* ((root (file-name-directory (caddr event))))
+    ;; Canonicalize the directory to an absolute directory name.
+    (remhash (file-name-as-directory (expand-file-name root))
              bazel--repo-mappings))
   nil)
 
