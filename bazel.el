@@ -2548,7 +2548,7 @@ repository mapping."
                    "")))  ; "" denotes the main repository
     (condition-case error
         (with-delayed-message
-            (0.2 (format-message "Fetching repository mapping for %s"
+            (0.2 (format-message "Fetching repository mapping for %s..."
                                  (abbreviate-file-name directory)))
           (with-temp-buffer
             (let* ((coding-system-for-read 'utf-8-unix)
