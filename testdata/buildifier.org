@@ -31,14 +31,27 @@ To make the Buildifier test hermetic, we generate Buildifier output statically
 and tangle the output when running the test.  Execute this code block with
 =C-c C-v C-e= to regenerate the Buildifier output:
 
-#+BEGIN_SRC sh :noweb yes :results output scalar :wrap "src fundamental :tangle buildifier.err"
+#+BEGIN_SRC sh :noweb yes :results output scalar :wrap "src fundamental"
 ! buildifier -type=build -path=pkg/BUILD 2>&1 <<'EOF'
 <<build>>
 EOF
 #+END_SRC
 
+#+NAME: buildifier.err
 #+RESULTS:
-#+BEGIN_SRC fundamental :tangle buildifier.err
+#+BEGIN_SRC fundamental
 pkg/BUILD:5:1: syntax error
 pkg/BUILD # reformat
+#+END_SRC
+
+** Mock Buildifier command
+
+#+BEGIN_SRC sh :tangle buildifier :noweb yes :shebang #!/bin/bash
+set -efu
+cat > /dev/null  # don’t exit before reading input
+echo output > "${@: -1}"
+cat <<'EOF' >&2
+<<buildifier.err>>
+EOF
+exit 1
 #+END_SRC
