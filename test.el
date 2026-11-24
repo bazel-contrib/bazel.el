@@ -988,21 +988,8 @@ gets killed early."
              "foobar"))))
 
 (ert-deftest bazel-buildifier/success ()
-  (bazel-test--with-workspace dir nil
-    (let ((bash (executable-find "bash"))
-          (bazel-buildifier-command (expand-file-name "buildifier" dir)))
-      (skip-unless bash)
-      (with-temp-file bazel-buildifier-command
-        (insert "#!" (file-name-unquote bash) ?\n
-                "set -efu\n"
-                "cd " (shell-quote-argument (file-name-unquote dir)) ?\n
-                "cat > input\n"
-                ;; We don’t care about the name of the temporary file (last
-                ;; argument).
-                "echo \"${@:1:$# - 1}\" tempfile > args\n"
-                "echo output > \"${@: -1}\"\n"
-                "echo error >&2\n"))
-      (set-file-modes bazel-buildifier-command #o0500)
+  (bazel-test--with-workspace dir "buildifier-success.org"
+    (let ((bazel-buildifier-command (expand-file-name "buildifier" dir)))
       (pcase-dolist (`(,type ,args)
                      '((nil "-type=bzl -- tempfile")
                        (workspace "-type=workspace -- tempfile")
@@ -1023,20 +1010,8 @@ gets killed early."
 
 (ert-deftest bazel-buildifier/failure ()
   (bazel-test--with-workspace dir "buildifier.org"
-    (let* ((bash (executable-find "bash"))
-           (bazel-buildifier-command (expand-file-name "buildifier" dir))
-           (error-file (expand-file-name "buildifier.err" dir))
-           (temp-buffers nil))
-      (skip-unless bash)
-      (with-temp-file bazel-buildifier-command
-        (insert "#!" (file-name-unquote bash) ?\n
-                "set -efu\n"
-                "cat > /dev/null\n"  ; don’t exit before reading input
-                "echo output > \"${@: -1}\"\n"
-                "cat -- " (shell-quote-argument (file-name-unquote error-file))
-                " >&2\n"
-                "exit 1\n"))
-      (set-file-modes bazel-buildifier-command #o0500)
+    (let ((bazel-buildifier-command (expand-file-name "buildifier" dir))
+          (temp-buffers nil))
       (with-temp-buffer
         (insert-file-contents (expand-file-name "pkg/BUILD" dir) :visit)
         (bazel-starlark-mode)
@@ -1061,21 +1036,11 @@ Process buildifier exited abnormally with code 1
 ")))))))
 
 (ert-deftest bazel-buildifier-before-save ()
-  (bazel-test--with-workspace dir nil
-    (let ((bash (executable-find "bash"))
-          (input-file (expand-file-name "input" dir))
+  (bazel-test--with-workspace dir "buildifier-before-save.org"
+    (let ((input-file (expand-file-name "input" dir))
           (marker-file (expand-file-name "ok" dir))
           (bazel-buildifier-command (expand-file-name "buildifier" dir)))
-      (skip-unless bash)
       (write-region "" nil input-file nil nil nil 'excl)
-      (with-temp-file bazel-buildifier-command
-        (insert "#!" (file-name-unquote bash) ?\n
-                "set -efu\n"
-                "cd " (shell-quote-argument (file-name-unquote dir)) ?\n
-                "cat > /dev/null\n"   ; don’t exit before reading input
-                "echo output > \"${@: -1}\"\n"
-                "touch ok\n"))
-      (set-file-modes bazel-buildifier-command #o0500)
       (pcase-dolist (`(,bazel-buildifier-before-save ,expected)
                      '((nil "input\n") (t "output\n")))
         (ert-info ((symbol-name bazel-buildifier-before-save)
