@@ -18,11 +18,11 @@
 
 ** Mock Buildifier command
 
-#+BEGIN_SRC sh :tangle buildifier :shebang #!/bin/bash :var dir=(file-name-unquote default-directory)
+#+BEGIN_SRC sh :tangle buildifier :shebang #!/bin/sh :var dir=(file-name-unquote default-directory)
 set -efu
 cd "${dir:?}"
 cat > /dev/null   # don’t exit before reading input
-# We don’t care about the name of the temporary file (last argument).
-echo output > "${@: -1}"
+for arg; do : ; done  # get last argument
+echo output > "${arg:?}"
 touch ok
 #+END_SRC

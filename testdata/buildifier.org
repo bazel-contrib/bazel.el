@@ -46,10 +46,11 @@ pkg/BUILD # reformat
 
 ** Mock Buildifier command
 
-#+BEGIN_SRC sh :tangle buildifier :noweb yes :shebang #!/bin/bash
+#+BEGIN_SRC sh :tangle buildifier :noweb yes :shebang #!/bin/sh
 set -efu
 cat > /dev/null  # don’t exit before reading input
-echo output > "${@: -1}"
+for arg; do : ; done  # get last argument
+echo output > "${arg:?}"
 cat <<'EOF' >&2
 <<buildifier.err>>
 EOF

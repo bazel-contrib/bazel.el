@@ -989,11 +989,12 @@ gets killed early."
 
 (ert-deftest bazel-buildifier/success ()
   (bazel-test--with-workspace dir "buildifier-success.org"
-    (let ((bazel-buildifier-command (expand-file-name "buildifier" dir)))
+    (let ((bazel-buildifier-command (expand-file-name "buildifier" dir))
+          (case-fold-search nil))
       (pcase-dolist (`(,type ,args)
-                     '((nil "-type=bzl -- tempfile")
-                       (workspace "-type=workspace -- tempfile")
-                       (default "-type=default -- tempfile")))
+                     '((nil "-type=bzl")
+                       (workspace "-type=workspace")
+                       (default "-type=default")))
         (ert-info ((symbol-name type) :prefix "Explicit type: ")
           (with-temp-buffer
             (insert "input")
@@ -1001,12 +1002,13 @@ gets killed early."
             (bazel-buildifier type)
             (should (equal (buffer-string) "output\n")))
           (pcase-dolist (`(,file ,expected)
-                         `(("input" "")
-                           ("args" ,(concat args "\n"))))
+                         `(("input" ,(rx bos eos))
+                           ("args" ,(rx bos (literal args) " -- " (+ nonl) ?\n
+                                        eos))))
             (ert-info (file :prefix "File: ")
               (with-temp-buffer
                 (insert-file-contents (expand-file-name file dir))
-                (should (equal (buffer-string) expected))))))))))
+                (should (looking-at-p expected))))))))))
 
 (ert-deftest bazel-buildifier/failure ()
   (bazel-test--with-workspace dir "buildifier.org"
