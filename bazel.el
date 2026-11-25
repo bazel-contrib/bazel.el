@@ -1620,10 +1620,15 @@ This function is suitable for ‘compilation-finish-functions’."
                       (+ digit) ?: (+ digit) ": "
                       (group
                        (+ nonl) "Visibility error:\n"
-                       "target '"
+                       (or "target" "alias") " '"
                        (group (+ (any "a-z" "A-Z" "0-9"
                                       ?- "!%@^_` #$&()*+,;<=>?[]{|}~/.:")))
-                       "' is not visible from\n"
+                       "' "
+                       (? "referring to target '"
+                          (+ (any "a-z" "A-Z" "0-9"
+                                  ?- "!%@^_` #$&()*+,;<=>?[]{|}~/.:"))
+                          "' ")
+                       "is not visible from\n"
                        "target '"
                        (group (+ (any "a-z" "A-Z" "0-9"
                                       ?- "!%@^_` #$&()*+,;<=>?[]{|}~/.:")))
