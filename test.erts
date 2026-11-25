@@ -139,6 +139,25 @@ some_rule(
 )
 =-=-=
 
+Name: Font Locking for Starlark files
+Code: (lambda () (bazel-starlark-mode) (htmlfontify-buffer))
+
+=-=
+# comment
+
+load('foo.bzl', '''foo''')
+
+def bar():
+    fail('error')
+=-=
+<span class="comment-delimiter"># </span><span class="comment">comment
+</span>
+<span class="keyword">load</span>(<span class="string">'foo.bzl'</span>, <span class="string">'''foo'''</span>)
+
+<span class="keyword">def</span> bar():
+    <span class="warning">fail</span>(<span class="string">'error'</span>)
+=-=-=
+
 Name: Font locking for .bazelrc files
 Code: (lambda () (bazelrc-mode) (htmlfontify-buffer))
 
