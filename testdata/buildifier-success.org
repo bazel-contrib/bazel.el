@@ -18,7 +18,7 @@
 
 ** Mock Buildifier command
 
-#+BEGIN_SRC sh :tangle buildifier :shebang #!/bin/bash :var dir=(identity default-directory)
+#+BEGIN_SRC sh :tangle buildifier :shebang #!/bin/bash :var dir=(file-name-unquote default-directory)
 set -efu
 cd "${dir:?}"
 cat > input
