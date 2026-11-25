@@ -296,6 +296,8 @@ mentioned in the Buildifier source code at URL
               "with" "yield")
           symbol-end)
      . 'font-lock-warning-face)
+    ;; Highlight “fail”, like “signal” etc. in Lisp.
+    (,(rx symbol-start (group "fail") (* blank) ?\() 1 font-lock-warning-face)
     ;; Constants
     (,(rx symbol-start (or "True" "False" "None") symbol-end)
      . 'font-lock-constant-face))
