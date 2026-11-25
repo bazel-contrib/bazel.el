@@ -1284,8 +1284,10 @@ Process buildifier exited abnormally with code 1
                               (current-buffer)
                               "exited abnormally with code 1\n")))
       (should
-       (equal commands
-              '(("buildozer" "--" "add visibility //:__pkg__" "//lib:lib")))))))
+       (equal
+        (nreverse commands)
+        '(("buildozer" "--" "add visibility //:__pkg__" "//lib:lib")
+          ("buildozer" "--" "add visibility //:__pkg__" "//lib:alias")))))))
 
 (ert-deftest bazel/set-auto-mode ()
   "Test that ‘set-auto-mode’ finds the expected modes."

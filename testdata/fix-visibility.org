@@ -26,7 +26,10 @@ load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
 cc_binary(
     name = "bin",
     srcs = ["bin.cc"],
-    deps = ["//lib"],
+    deps = [
+        "//lib",
+        "//lib:alias",
+    ],
 )
 #+END_SRC
 
@@ -40,6 +43,11 @@ load("@rules_cc//cc:cc_library.bzl", "cc_library")
 cc_library(
     name = "lib",
     srcs = ["lib.cc"],
+)
+
+alias(
+    name = "alias",
+    actual = "lib",
 )
 #+END_SRC
 
@@ -75,12 +83,16 @@ regenerate the Bazel output:
 #+END_SRC
 
 #+RESULTS:
-#+begin_src fundamental :tangle bazel.out
+#+BEGIN_SRC fundamental :tangle bazel.out
 ERROR: BUILD:3:10: in cc_binary rule //:bin: Visibility error:
 target '//lib:lib' is not visible from
+target '//:bin'
+Recommendation: modify the visibility declaration if you think the dependency is legitimate. For more info see https://bazel.build/concepts/visibility
+ERROR: BUILD:3:10: in cc_binary rule //:bin: Visibility error:
+alias '//lib:alias' referring to target '//lib:lib' is not visible from
 target '//:bin'
 Recommendation: modify the visibility declaration if you think the dependency is legitimate. For more info see https://bazel.build/concepts/visibility
 ERROR: BUILD:3:10: Analysis of target '//:bin' (config: 2d89340) failed
 ERROR: Analysis of target '//:bin' failed; build aborted
 ERROR: Build did NOT complete successfully
-#+end_src
+#+END_SRC
