@@ -1610,8 +1610,8 @@ This function is suitable for ‘compilation-finish-functions’."
                 (with-temp-buffer
                   ;; Don’t bail out if the coverage file can’t be read.  Maybe
                   ;; it has already been garbage-collected.
-                  (when (ignore-error file-missing (insert-file-contents file))
-                    (bazel--parse-coverage root coverage))))
+                  (ignore-error file-missing (insert-file-contents file))
+                  (bazel--parse-coverage root coverage)))
               (maphash #'bazel--display-coverage coverage)))))))
   (when (and bazel-fix-visibility (string-prefix-p "exited abnormally" message))
     (with-current-buffer buffer
@@ -2105,19 +2105,19 @@ Return nil if no .bazelignore file exists."
           (patterns ()))
       ;; It’s not a critical error if the .bazelignore file doesn’t exist or we
       ;; can’t read it.
-      (when (ignore-error file-error (insert-file-contents bazelignore-file))
-        ;; Replicate behavior of
-        ;; https://github.com/bazelbuild/bazel/blob/09c621e4cf5b968f4c6cdf905ab142d5961f9ddc/src/main/java/com/google/devtools/build/lib/skyframe/IgnoredPackagePrefixesFunction.java#L122-L127.
-        (while (not (eobp))
-          (unless (or (eolp) (eq (following-char) ?#))
-            ;; This glob pattern isn’t quite correct if the line contains
-            ;; wildcard characters, but we have no way to escape them.
-            (push (concat "./" (file-name-as-directory
-                                (buffer-substring-no-properties
-                                 (point) (line-end-position))))
-                  patterns))
-          (forward-line))
-        (nreverse patterns)))))
+      (ignore-error file-error (insert-file-contents bazelignore-file))
+      ;; Replicate behavior of
+      ;; https://github.com/bazelbuild/bazel/blob/09c621e4cf5b968f4c6cdf905ab142d5961f9ddc/src/main/java/com/google/devtools/build/lib/skyframe/IgnoredPackagePrefixesFunction.java#L122-L127.
+      (while (not (eobp))
+        (unless (or (eolp) (eq (following-char) ?#))
+          ;; This glob pattern isn’t quite correct if the line contains
+          ;; wildcard characters, but we have no way to escape them.
+          (push (concat "./" (file-name-as-directory
+                              (buffer-substring-no-properties
+                               (point) (line-end-position))))
+                patterns))
+        (forward-line))
+      (nreverse patterns))))
 
 ;;;; Commands to build and run code using Bazel
 
