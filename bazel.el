@@ -1261,7 +1261,6 @@ The returned file names have a ‘bazel-target-kind’ property of
                                    "MODULE.bazel" "REPO.bazel" "VENDOR.bazel")))
            (not (equal (file-name-extension filename) "BUILD"))
            (not (string-prefix-p "bazel-" filename))
-           (file-regular-p filename)
            (push (propertize filename 'bazel-target-kind "source file") files)))
     (sort files #'string-lessp)))
 
