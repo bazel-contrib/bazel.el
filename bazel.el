@@ -764,8 +764,8 @@ buffer, you can use the following keys:
     (with-current-buffer buffer
       (bazel-central-registry-mode)
       (tabulated-list-print))
-    (pop-to-buffer buffer)
-    nil))
+    (pop-to-buffer buffer))
+  nil)
 
 (defvar-keymap bazel-central-registry-mode-map
   "v" #'bazel-central-registry-visit-module)
