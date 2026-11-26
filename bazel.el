@@ -1243,17 +1243,18 @@ only complete rule targets defined within the current buffer."
   ;; that we return point.
   (bazel--xref-location filename (lambda ())))
 
-(defun bazel--complete-files (prefix)
-  "Return file names in the current directory starting with PREFIX.
+(defun bazel--complete-files (directory prefix)
+  "Return file names in DIRECTORY starting with PREFIX.
 Exclude files that are normally not Bazel targets, such as
 directories and BUILD files.
 
 The returned file names have a ‘bazel-target-kind’ property of
 \"source file\"."
-  (declare (ftype (function (string) list)))
+  (declare (ftype (function (string string) list)))
+  (cl-check-type directory string)
   (cl-check-type prefix string)
   (let ((files ()))
-    (dolist (filename (file-name-all-completions prefix default-directory))
+    (dolist (filename (file-name-all-completions prefix directory))
       (and (not (directory-name-p filename))
            (not (member filename '("BUILD" "BUILD.bazel"
                                    "WORKSPACE" "WORKSPACE.bazel"
@@ -2933,8 +2934,7 @@ the wildcards with a colon.  This is a helper function for
            (unless pattern
              ;; Include source files only if we’re not completing a target
              ;; pattern.  Building a source file makes no sense.
-             (let ((default-directory (file-name-directory build-file)))
-               (bazel--complete-files prefix)))))
+             (bazel--complete-files (file-name-directory build-file) prefix))))
         completion-ignore-case)
        ;; We only want to add the wildcards if this is indeed a package.  Do
        ;; this here so that we don’t have to check twice.
