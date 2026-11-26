@@ -63,9 +63,9 @@ the directory exists.  Remove the directory and all its contents once
 BODY finishes successfully.  NAME will be a directory name, not a
 directory file name; see Info node ‘(elisp) Directory Names’.
 Initially, the directory will contain an empty MODULE.bazel file as
-boundary sentinel, a subdirectory ‘.output-base’ to serve as output base
-tree, and a symbolic link ‘bazel-out’ to an empty output directory; see
-URL ‘https://bazel.build/remote/output-directories’.  If ORG-FILE is
+boundary sentinel, a subdirectory ‘bazel-output-base’ to serve as output
+base tree, and a symbolic link ‘bazel-out’ to an empty output directory;
+see URL ‘https://bazel.build/remote/output-directories’.  If ORG-FILE is
 non-nil, tangle code blocks in ORG-FILE into the workspace directory
 first using ‘bazel-test--tangle’."
     (declare (ftype (function (symbol t &rest t) t))
@@ -75,7 +75,7 @@ first using ‘bazel-test--tangle’."
     (cl-with-gensyms (directory workspace output-base file)
       `(let* ((,directory (make-temp-file "bazel-mode-test-" :dir-flag))
               (,workspace (file-name-concat ,directory "workspace"))
-              (,output-base (file-name-concat ,workspace ".output-base"))
+              (,output-base (file-name-concat ,workspace "bazel-output-base"))
               ;; Prevent accidentally running Bazel or Buildifier.
               (bazel-command '("/invalid/bazel"))
               (bazel-buildifier-command "/invalid/buildifier"))
@@ -281,7 +281,8 @@ gets killed early."
                      ("//:aaa.cc" "aaa.cc")
                      ("//:aaa.cc" "aaa.cc")
                      ("//pkg:ccc.cc" "pkg/ccc.cc")
-                     ("@ws//pkg:ddd.cc" ".output-base/external/ws+/pkg/ddd.cc")
+                     ("@ws//pkg:ddd.cc"
+                      "bazel-output-base/external/ws+/pkg/ddd.cc")
                      ("//:lib" "BUILD")
                      ("//:lib" "BUILD")
                      ("//pkg:pkg" "pkg/BUILD")
@@ -299,9 +300,10 @@ gets killed early."
         (forward-line)
         (search-forward "\"" (line-end-position))
         (forward-comment (point-max))
-        (should (equal (ffap-file-at-point)
-                       (expand-file-name ".output-base/external/repo+/bbb.h"
-                                         dir)))))))
+        (should (equal
+                 (ffap-file-at-point)
+                 (expand-file-name "bazel-output-base/external/repo+/bbb.h"
+                                   dir)))))))
 
 (ert-deftest bazel-build-mode/fill ()
   "Check that magic comments are left alone."
