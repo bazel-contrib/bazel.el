@@ -269,19 +269,19 @@ mentioned in the Buildifier source code at URL
 `https://git.io/JOuVL' and have tests.")
 
 (defconst bazel-font-lock-keywords-1
-  ;; Only include file directives.  See Info node ‘(elisp) Levels of Font Lock’.
   `((,(rx line-start
           (or "include" "module" "repo" "visibility" "workspace")
           symbol-end)
      . 'font-lock-builtin-face)
     (,(rx line-start "load" symbol-end) . 'font-lock-keyword-face))
-  "Value of ‘font-lock-keywords’ in ‘bazel-mode’ at font lock level 1.")
+  "Value of ‘font-lock-keywords’ in ‘bazel-mode’ at font lock level 1.
+Only includes file directives.
+See Info node ‘(elisp) Levels of Font Lock’.")
 
 (defconst bazel-font-lock-keywords-2
   `(,@bazel-font-lock-keywords-1
-    ;; Include keywords and constants.  Keywords for BUILD files are the same as
-    ;; Starlark files.  Even if some of them are forbidden in BUILD files, they
-    ;; should be highlighted.  See
+    ;; Keywords for BUILD files are the same as Starlark files.  Even if some of
+    ;; them are forbidden in BUILD files, they should be highlighted.  See
     ;; https://github.com/bazelbuild/starlark/blob/master/spec.md.  “load” is
     ;; already included in level 1.
     (,(rx symbol-start
@@ -301,13 +301,14 @@ mentioned in the Buildifier source code at URL
     ;; Constants
     (,(rx symbol-start (or "True" "False" "None") symbol-end)
      . 'font-lock-constant-face))
-  "Value of ‘font-lock-keywords’ in ‘bazel-mode’ at font lock level 2.")
+  "Value of ‘font-lock-keywords’ in ‘bazel-mode’ at font lock level 2.
+Includes keywords and constants.
+See Info node ‘(elisp) Levels of Font Lock’.")
 
 (defconst bazel-font-lock-keywords-3
   `(,@bazel-font-lock-keywords-2
-    ;; Include builtin functions.  Some Starlark functions are exposed to BUILD
-    ;; files as builtins.  For details see
-    ;; https://bazel.build/reference/be/functions.
+    ;; Some Starlark functions are exposed to BUILD files as builtins.  For
+    ;; details see https://bazel.build/reference/be/functions.
     (,(rx line-start (or "package" "package_group" "exports_files") symbol-end)
      . 'font-lock-builtin-face)
     (,(rx symbol-start (group (or "glob" "select" "subpackages")) (* blank) ?\()
@@ -316,7 +317,9 @@ mentioned in the Buildifier source code at URL
     (bazel--find-target-name 2 'font-lock-variable-name-face prepend)
     ;; Magic comments
     (bazel--find-magic-comment 0 'font-lock-preprocessor-face prepend))
-  "Value of ‘font-lock-keywords’ in ‘bazel-mode’ at font lock level 3.")
+  "Value of ‘font-lock-keywords’ in ‘bazel-mode’ at font lock level 3.
+Includes builtin functions.
+See Info node ‘(elisp) Levels of Font Lock’.")
 
 (defconst bazel-font-lock-keywords bazel-font-lock-keywords-1
   "Default value of ‘font-lock-keywords’ in ‘bazel-mode’.")
