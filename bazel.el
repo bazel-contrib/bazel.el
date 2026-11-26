@@ -2101,6 +2101,7 @@ Return nil if no .bazelignore file exists."
     (let ((coding-system-for-read 'utf-8)
           (format-alist nil)
           (after-insert-file-functions nil)
+          (inhibit-modification-hooks t)
           (bazelignore-file (expand-file-name ".bazelignore" repository-root))
           (patterns ()))
       ;; It’s not a critical error if the .bazelignore file doesn’t exist or we
