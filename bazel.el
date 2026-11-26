@@ -347,7 +347,6 @@ mentioned in the Buildifier source code at URL
   "Syntax table for `bazel-mode'.")
 
 (defvar-keymap bazel-mode-map
-  :doc "Keymap for ‘bazel-mode’."
   "C-c C-b" #'bazel-build
   "C-c C-t" #'bazel-test
   "C-c C-c" #'bazel-coverage
